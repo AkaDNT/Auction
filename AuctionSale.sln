@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{EFBDA7B7-7EC3-49C4-A20C-DAC3ED683A92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuctionAPI", "src\AuctionAPI\AuctionAPI.csproj", "{FEFF4573-99C9-4543-9894-93B1061A7819}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{34A3875E-13CD-4E94-88D0-DD87480233DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34A3875E-13CD-4E94-88D0-DD87480233DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34A3875E-13CD-4E94-88D0-DD87480233DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34A3875E-13CD-4E94-88D0-DD87480233DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEFF4573-99C9-4543-9894-93B1061A7819}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEFF4573-99C9-4543-9894-93B1061A7819}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEFF4573-99C9-4543-9894-93B1061A7819}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEFF4573-99C9-4543-9894-93B1061A7819}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FEFF4573-99C9-4543-9894-93B1061A7819} = {EFBDA7B7-7EC3-49C4-A20C-DAC3ED683A92}
+	EndGlobalSection
+EndGlobal
