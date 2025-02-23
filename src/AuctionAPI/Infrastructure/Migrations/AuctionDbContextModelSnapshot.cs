@@ -93,7 +93,7 @@ namespace AuctionAPI.Infrastructure.Migrations
                     b.HasIndex("AuctionId")
                         .IsUnique();
 
-                    b.ToTable("Item");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("AuctionAPI.Entities.Item", b =>
