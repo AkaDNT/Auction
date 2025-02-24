@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using AuctionAPI.Enums;
 
 namespace AuctionAPI.Entities

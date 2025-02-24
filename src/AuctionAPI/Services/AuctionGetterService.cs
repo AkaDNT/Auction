@@ -26,5 +26,11 @@ namespace AuctionAPI.Services
             List<AuctionResponse> auctionResponses = _mapper.Map<List<AuctionResponse>>(auctions);
             return auctionResponses;
         }
+
+        public async Task<AuctionResponse> GetAuctionByID(Guid ID)
+        {
+            Auction auction = await _repo.GetAuctionByID(ID);
+            return _mapper.Map<AuctionResponse>(auction);
+        }
     }
 }

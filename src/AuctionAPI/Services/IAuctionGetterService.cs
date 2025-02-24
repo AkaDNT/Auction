@@ -10,5 +10,6 @@ namespace AuctionAPI.Services
     public interface IAuctionGetterService
     {
         Task<List<AuctionResponse>> GetAllAuctions();
+        Task<AuctionResponse> GetAuctionByID(Guid ID);
     }
 }
