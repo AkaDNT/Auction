@@ -1,5 +1,6 @@
 using AuctionAPI.Infrastructure;
 using AuctionAPI.Repositories;
+using AuctionAPI.ServiceContracts;
 using AuctionAPI.Services;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,6 +1,6 @@
 using AuctionAPI.DTOs;
 
-namespace AuctionAPI.Services
+namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionUpdaterService
     {

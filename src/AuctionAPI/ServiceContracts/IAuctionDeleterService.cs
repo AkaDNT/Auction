@@ -1,6 +1,4 @@
-
-
-namespace AuctionAPI.Services
+namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionDeleterService
     {

@@ -1,5 +1,6 @@
 
 using AuctionAPI.Repositories;
+using AuctionAPI.ServiceContracts;
 
 namespace AuctionAPI.Services
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AuctionAPI.DTOs;
 using AuctionAPI.Entities;
 
-namespace AuctionAPI.Services
+namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionGetterService
     {

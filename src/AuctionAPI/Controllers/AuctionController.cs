@@ -1,7 +1,7 @@
 
 using AuctionAPI.DTOs;
 using AuctionAPI.Entities;
-using AuctionAPI.Services;
+using AuctionAPI.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionAPI.Controllers

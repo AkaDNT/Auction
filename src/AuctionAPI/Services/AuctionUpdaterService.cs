@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AuctionAPI.DTOs;
 using AuctionAPI.Entities;
 using AuctionAPI.Repositories;
+using AuctionAPI.ServiceContracts;
 using AutoMapper;
 
 namespace AuctionAPI.Services
