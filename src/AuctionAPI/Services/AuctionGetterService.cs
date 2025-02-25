@@ -30,6 +30,7 @@ namespace AuctionAPI.Services
         public async Task<AuctionResponse> GetAuctionByID(Guid ID)
         {
             Auction auction = await _repo.GetAuctionByID(ID);
+            if (auction == null) return null;
             return _mapper.Map<AuctionResponse>(auction);
         }
     }

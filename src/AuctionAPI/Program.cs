@@ -12,6 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
 builder.Services.AddScoped<IAuctionGetterService, AuctionGetterService>();
 builder.Services.AddScoped<IAuctionAdderService, AuctionAdderService>();
+builder.Services.AddScoped<IAuctionUpdaterService, AuctionUpdaterService>();
+builder.Services.AddScoped<IAuctionDeleterService, AuctionDeleterService>();
 
 // Add DbContext
 builder.Services.AddDbContext<AuctionDbContext>(opt =>

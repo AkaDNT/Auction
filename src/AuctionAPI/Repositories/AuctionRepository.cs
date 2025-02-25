@@ -24,6 +24,14 @@ namespace AuctionAPI.Repositories
             return auction;
         }
 
+        public async Task<int> DeleteAuction(Guid ID)
+        {
+            Auction auction = await GetAuctionByID(ID);
+            _db.Remove(auction);
+            int deleted = await _db.SaveChangesAsync();
+            return deleted;
+        }
+
         public async Task<List<Auction>> GetAllAuctions()
         {
             return await _db.Auctions.Include(x => x.Item).OrderBy(x => x.Item.Make).ToListAsync();
@@ -32,6 +40,14 @@ namespace AuctionAPI.Repositories
         public async Task<Auction> GetAuctionByID(Guid ID)
         {
             return await _db.Auctions.Include(x => x.Item).FirstOrDefaultAsync(x => x.Id == ID);
+        }
+
+        public async Task<Auction> UpdateAuction(Guid ID, Auction auctionUpdated)
+        {
+            Auction auction = await GetAuctionByID(ID);
+            auction = auctionUpdated;
+            await _db.SaveChangesAsync();
+            return auction;
         }
     }
 }
