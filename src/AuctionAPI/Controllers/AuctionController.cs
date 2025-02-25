@@ -1,6 +1,5 @@
 
 using AuctionAPI.DTOs;
-using AuctionAPI.Entities;
 using AuctionAPI.ServiceContracts;
 using Microsoft.AspNetCore.Mvc;
 
