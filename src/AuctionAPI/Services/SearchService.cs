@@ -18,7 +18,7 @@ namespace AuctionAPI.Services
             _mapper = mapper;
         }
 
-        public List<AuctionResponse> SearchAllAuctions(string searchTerm)
+        public List<AuctionResponse> SearchAllAuctions(string searchTerm, int sort)
         {
             var auctions = _repo.GetAll();
             var searchTerms = searchTerm.Split([' '], StringSplitOptions.RemoveEmptyEntries);
@@ -31,11 +31,33 @@ namespace AuctionAPI.Services
                                                || x.Item.Color.ToLower().Contains(searchTermCleaned));
 
             }
-            auctions = auctions.OrderBy(x => x.Item.Make);
+            switch (sort)
+            {
+                case 1:
+                    {
+                        auctions = auctions.OrderBy(x => x.Item.Year);
+                        break;
+                    }
+                case 2:
+                    {
+                        auctions = auctions.OrderBy(x => x.AuctionEnd);
+                        break;
+                    }
+                case 3:
+                    {
+                        auctions = auctions.OrderByDescending(x => x.UpdatedAt);
+                        break;
+                    }
+                default:
+                    {
+                        auctions = auctions.OrderBy(x => x.Item.Make);
+                        break;
+                    }
+            }
             return _mapper.Map<List<AuctionResponse>>(auctions);
         }
 
-        public async Task<List<AuctionResponse>> Search(string searchTerm, int pageNumber = 1, int pageSize = 8)
+        public async Task<List<AuctionResponse>> Search(string searchTerm, int pageNumber, int pageSize, int sort)
         {
             var auctions = _repo.GetAll();
 
@@ -54,8 +76,31 @@ namespace AuctionAPI.Services
                 }
 
             }
+            switch (sort)
+            {
+                case 1:
+                    {
+                        auctions = auctions.OrderBy(x => x.Item.Year);
+                        break;
+                    }
+                case 2:
+                    {
+                        auctions = auctions.OrderBy(x => x.AuctionEnd);
+                        break;
+                    }
+                case 3:
+                    {
+                        auctions = auctions.OrderByDescending(x => x.UpdatedAt);
+                        break;
+                    }
+                default:
+                    {
+                        auctions = auctions.OrderBy(x => x.Item.Make);
+                        break;
+                    }
+            }
 
-            auctions = auctions.OrderBy(x => x.Item.Make).Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            auctions = auctions.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             var auctionResponses = _mapper.Map<List<AuctionResponse>>(await auctions.ToListAsync());
             return auctionResponses;
         }
