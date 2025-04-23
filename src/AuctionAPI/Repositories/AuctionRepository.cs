@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AuctionAPI.Entities;
 using AuctionAPI.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +44,10 @@ namespace AuctionAPI.Repositories
             auction = auctionUpdated;
             await _db.SaveChangesAsync();
             return auction;
+        }
+        public IQueryable<Auction> GetAll()
+        {
+            return _db.Auctions.Include(x => x.Item).AsQueryable();
         }
     }
 }

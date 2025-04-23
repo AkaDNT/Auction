@@ -4,6 +4,7 @@ namespace AuctionAPI.Repositories
 {
     public interface IAuctionRepository
     {
+        IQueryable<Auction> GetAll();
         Task<List<Auction>> GetAllAuctions();
         Task<Auction> GetAuctionByID(Guid Id);
         Task<Auction> CreateNewAuction(Auction auction);

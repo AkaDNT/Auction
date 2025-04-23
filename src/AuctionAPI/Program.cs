@@ -15,6 +15,7 @@ builder.Services.AddScoped<IAuctionGetterService, AuctionGetterService>();
 builder.Services.AddScoped<IAuctionAdderService, AuctionAdderService>();
 builder.Services.AddScoped<IAuctionUpdaterService, AuctionUpdaterService>();
 builder.Services.AddScoped<IAuctionDeleterService, AuctionDeleterService>();
+builder.Services.AddScoped<ISearchService, SearchService>();
 
 // Add DbContext
 builder.Services.AddDbContext<AuctionDbContext>(opt =>
