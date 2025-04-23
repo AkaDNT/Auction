@@ -15,11 +15,13 @@ export default function AppPagination({
 
   return (
     <div className="flex overflow-x-auto sm:justify-center">
-      <Pagination
-        currentPage={currentPage}
-        totalPages={pageCount}
-        onPageChange={onPageChange}
-      />
+      {pageCount >= 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={pageCount}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   );
 }

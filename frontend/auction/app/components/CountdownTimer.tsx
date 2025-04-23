@@ -37,7 +37,6 @@ const renderer: CountdownRendererFn = ({
 };
 
 export function CountdownTimer({ targetDate }: CountdownTimerProps) {
-  console.log(targetDate);
   return (
     <div>
       <Countdown date={targetDate} renderer={renderer} />

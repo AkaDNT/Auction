@@ -12,16 +12,17 @@ export default function Listing() {
   const [pageCount, setPageCount] = useState(0);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") ?? "";
+  const sortTerm = searchParams.get("o") ?? 0;
   const query = `pageNumber=${currentPage}&searchTerm=${encodeURIComponent(
     searchTerm
-  )}`;
+  )}&sort=${encodeURIComponent(sortTerm)}`;
 
   useEffect(() => {
     getData(query).then((data) => {
       setAuctions(data.results);
       setPageCount(data.pageCount);
     });
-  }, [pageCount, query]);
+  }, [query]);
 
   return (
     <div className="grid-rows-3">
