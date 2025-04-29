@@ -13,9 +13,12 @@ export default function Listing() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get("search") ?? "";
   const sortTerm = searchParams.get("o") ?? 0;
+  const filterTerm = searchParams.get("f") ?? 0;
   const query = `pageNumber=${currentPage}&searchTerm=${encodeURIComponent(
     searchTerm
-  )}&sort=${encodeURIComponent(sortTerm)}`;
+  )}&sort=${encodeURIComponent(sortTerm)}&filter=${encodeURIComponent(
+    filterTerm
+  )}`;
 
   useEffect(() => {
     getData(query).then((data) => {
