@@ -16,10 +16,10 @@ namespace AuctionAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<AuctionResponse>>> GetAllItem([FromQuery] int sort, string searchTerm = " ", int pageNumber = 1, int pageSize = 8)
+        public async Task<ActionResult<List<AuctionResponse>>> GetAllItem([FromQuery] int sort, int filter, string searchTerm = " ", int pageNumber = 1, int pageSize = 8)
         {
-            var auctionResponses = await _searchService.Search(searchTerm, pageNumber, pageSize, sort);
-            var allAuctions = _searchService.SearchAllAuctions(searchTerm, sort);
+            var auctionResponses = await _searchService.Search(searchTerm, pageNumber, pageSize, sort, filter);
+            var allAuctions = _searchService.SearchAllAuctions(searchTerm, filter);
             int count = allAuctions.Count();
             return Ok(new
             {

@@ -18,7 +18,7 @@ namespace AuctionAPI.Services
             _mapper = mapper;
         }
 
-        public List<AuctionResponse> SearchAllAuctions(string searchTerm, int sort)
+        public List<AuctionResponse> SearchAllAuctions(string searchTerm, int filter)
         {
             var auctions = _repo.GetAll();
             var searchTerms = searchTerm.Split([' '], StringSplitOptions.RemoveEmptyEntries);
@@ -31,33 +31,28 @@ namespace AuctionAPI.Services
                                                || x.Item.Color.ToLower().Contains(searchTermCleaned));
 
             }
-            switch (sort)
+            switch (filter)
             {
                 case 1:
                     {
-                        auctions = auctions.OrderBy(x => x.Item.Year);
+                        auctions = auctions.Where(auction => auction.AuctionEnd > DateTime.Now).AsQueryable();
                         break;
                     }
                 case 2:
                     {
-                        auctions = auctions.OrderBy(x => x.AuctionEnd);
-                        break;
-                    }
-                case 3:
-                    {
-                        auctions = auctions.OrderByDescending(x => x.UpdatedAt);
+                        auctions = auctions.Where(auction => auction.AuctionEnd <= DateTime.Now).AsQueryable();
                         break;
                     }
                 default:
                     {
-                        auctions = auctions.OrderBy(x => x.Item.Make);
                         break;
                     }
             }
+
             return _mapper.Map<List<AuctionResponse>>(auctions);
         }
 
-        public async Task<List<AuctionResponse>> Search(string searchTerm, int pageNumber, int pageSize, int sort)
+        public async Task<List<AuctionResponse>> Search(string searchTerm, int pageNumber, int pageSize, int sort, int filter)
         {
             var auctions = _repo.GetAll();
 
@@ -96,6 +91,23 @@ namespace AuctionAPI.Services
                 default:
                     {
                         auctions = auctions.OrderBy(x => x.Item.Make);
+                        break;
+                    }
+            }
+            switch (filter)
+            {
+                case 1:
+                    {
+                        auctions = auctions.Where(auction => auction.AuctionEnd > DateTime.Now).AsQueryable();
+                        break;
+                    }
+                case 2:
+                    {
+                        auctions = auctions.Where(auction => auction.AuctionEnd <= DateTime.Now).AsQueryable();
+                        break;
+                    }
+                default:
+                    {
                         break;
                     }
             }
