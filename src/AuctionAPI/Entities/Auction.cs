@@ -1,13 +1,18 @@
+using System.ComponentModel.DataAnnotations;
 using AuctionAPI.Enums;
 
 namespace AuctionAPI.Entities
 {
     public class Auction
     {
+        [Required]
         public Guid Id { get; set; }
+        [Required]
         public int ReservePrice { get; set; } = 0;
+        [Required]
         public string Seller { get; set; }
         public string Winner { get; set; }
+        [Required]
         public int? SoldAmount { get; set; }
         public int? CurrentHighBid { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
