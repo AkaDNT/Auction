@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AuctionAPI.Infrastructure.Migrations
+namespace AuctionAPI.Migrations
 {
     [DbContext(typeof(AuctionDbContext))]
-    [Migration("20250223052130_InitialFK")]
-    partial class InitialFK
+    [Migration("20250505045708_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,9 +44,11 @@ namespace AuctionAPI.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Seller")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SoldAmount")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Status")

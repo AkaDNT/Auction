@@ -11,10 +11,10 @@ namespace AuctionAPI.Entities
         public int ReservePrice { get; set; } = 0;
         [Required]
         public string Seller { get; set; }
-        public string Winner { get; set; }
+        public string Winner { get; set; } = "";
         [Required]
-        public int? SoldAmount { get; set; }
-        public int? CurrentHighBid { get; set; }
+        public int? SoldAmount { get; set; } = 0;
+        public int? CurrentHighBid { get; set; } = 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public DateTime AuctionEnd { get; set; }

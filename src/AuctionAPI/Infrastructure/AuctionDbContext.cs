@@ -25,7 +25,7 @@ namespace AuctionAPI.Infrastructure
             //     .WithOne(p => p.Item)
             //     .HasForeignKey<Item>(c => c.AuctionId);  // Khóa ngoại AuctionId trong Item
 
-            // base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);
         }
 
     }

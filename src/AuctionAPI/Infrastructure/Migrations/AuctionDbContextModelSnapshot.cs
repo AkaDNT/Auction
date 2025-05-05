@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AuctionAPI.Infrastructure.Migrations
+namespace AuctionAPI.Migrations
 {
     [DbContext(typeof(AuctionDbContext))]
     partial class AuctionDbContextModelSnapshot : ModelSnapshot
@@ -41,9 +41,11 @@ namespace AuctionAPI.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Seller")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("SoldAmount")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
