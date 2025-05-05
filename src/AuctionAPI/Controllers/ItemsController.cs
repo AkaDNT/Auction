@@ -1,5 +1,6 @@
 using AuctionAPI.DTOs;
 using AuctionAPI.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionAPI.Controllers
@@ -16,6 +17,7 @@ namespace AuctionAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<AuctionResponse>>> GetAllItem([FromQuery] int sort, int filter, string searchTerm = " ", int pageNumber = 1, int pageSize = 8)
         {
             var auctionResponses = await _searchService.Search(searchTerm, pageNumber, pageSize, sort, filter);

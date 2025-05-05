@@ -1,10 +1,12 @@
 using AuctionAPI.Entities;
 using AuctionAPI.Enums;
+using AuctionAPI.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuctionAPI.Infrastructure
 {
-    public class AuctionDbContext : DbContext
+    public class AuctionDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
         public AuctionDbContext(DbContextOptions options) : base(options)
         {
