@@ -36,6 +36,11 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUser>(opt =>
     opt.User.RequireUniqueEmail = true;
 }).AddRoles<ApplicationRole>().AddEntityFrameworkStores<AuctionDbContext>();
 
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
 
 // Add AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

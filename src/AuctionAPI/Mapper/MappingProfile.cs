@@ -1,5 +1,6 @@
 using AuctionAPI.DTOs;
 using AuctionAPI.Entities;
+using AuctionAPI.Identity;
 using AutoMapper;
 
 namespace AuctionAPI.Mapper
@@ -20,6 +21,7 @@ namespace AuctionAPI.Mapper
         Year = s.Year,
         ImageUrl = s.ImageUrl
     }));
+            CreateMap<UserRegister, ApplicationUser>().ForMember(d => d.UserName, o => o.MapFrom(s => s.Email));
         }
     }
 }
