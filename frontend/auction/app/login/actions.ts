@@ -11,7 +11,6 @@ export async function loginUser(prevState: unknown, formData: FormData) {
       password: formData.get("password"),
     }),
   });
-  console.log(res);
 
   if (!res.ok) {
     return { success: false, message: "Invalid credentials" };
@@ -19,11 +18,20 @@ export async function loginUser(prevState: unknown, formData: FormData) {
 
   const { accessToken, refreshToken } = await res.json();
 
-  (await cookies()).set("accessToken", accessToken, { httpOnly: false });
-  (await cookies()).set("refreshToken", refreshToken, {
+  const cookieStore = cookies();
+
+  (await cookieStore).set("accessToken", accessToken, {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
+    maxAge: 60 * 60 * 1, // 1 giờ (tùy chọn)
+  });
+
+  (await cookieStore).set("refreshToken", refreshToken, {
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7, // 7 ngày (tùy chọn)
   });
 
   return { success: true };
