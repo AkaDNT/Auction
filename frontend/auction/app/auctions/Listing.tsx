@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import AuctionCard from "./AuctionCard";
 import { Auction } from "../models/Auction";
 import AppPagination from "../components/AppPagination";
-import { getData } from "../actions/auctionAction";
-import { useSearchParams } from "next/navigation";
+import { getData, getMyAuctions } from "../actions/auctionAction";
+import { usePathname, useSearchParams } from "next/navigation";
 
 export default function Listing() {
   const [auctions, setAuctions] = useState<Auction[]>([]);
@@ -14,18 +14,28 @@ export default function Listing() {
   const searchTerm = searchParams.get("search") ?? "";
   const sortTerm = searchParams.get("o") ?? 0;
   const filterTerm = searchParams.get("f") ?? 0;
+  const pathname = usePathname();
+  const route = pathname.split("/")[1];
   const query = `pageNumber=${currentPage}&searchTerm=${encodeURIComponent(
     searchTerm
   )}&sort=${encodeURIComponent(sortTerm)}&filter=${encodeURIComponent(
     filterTerm
   )}`;
 
+  console.log(route == "my-auctions");
+
   useEffect(() => {
-    getData(query).then((data) => {
-      setAuctions(data.results);
-      setPageCount(data.pageCount);
-    });
-  }, [query]);
+    if (route == "my-auctions") {
+      getMyAuctions(query).then((data) => {
+        setAuctions(data.results);
+        setPageCount(data.pageCount);
+      });
+    } else
+      getData(query).then((data) => {
+        setAuctions(data.results);
+        setPageCount(data.pageCount);
+      });
+  }, [query, route]);
 
   return (
     <div className="grid-rows-3">
