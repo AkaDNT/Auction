@@ -1,6 +1,8 @@
 
+using System.Security.Claims;
 using AuctionAPI.DTOs;
 using AuctionAPI.ServiceContracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuctionAPI.Controllers
@@ -22,11 +24,13 @@ namespace AuctionAPI.Controllers
             _auctionDeleterService = auctionDeleterService;
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<AuctionResponse>>> GetAllAuctions()
         {
             return await _auctionGetterService.GetAllAuctions();
         }
         [HttpGet("{ID}")]
+        [AllowAnonymous]
         public async Task<ActionResult<AuctionResponse>> GetAuctionByID(Guid ID)
         {
             AuctionResponse auctionResponse = await _auctionGetterService.GetAuctionByID(ID);
@@ -36,7 +40,8 @@ namespace AuctionAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<AuctionResponse>> CreateNewAuction(AuctionCreateRequest auctionCreateRequest)
         {
-            AuctionResponse auctionResponse = await _auctionAdderService.CreateNewAuction(auctionCreateRequest);
+            var sellerEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            AuctionResponse auctionResponse = await _auctionAdderService.CreateNewAuction(sellerEmail, auctionCreateRequest);
             return CreatedAtAction(nameof(GetAuctionByID), new { auctionResponse.Id }, auctionResponse);
         }
         [HttpPut("{ID}")]

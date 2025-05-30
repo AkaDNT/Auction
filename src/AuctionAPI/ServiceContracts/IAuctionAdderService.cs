@@ -4,6 +4,6 @@ namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionAdderService
     {
-        Task<AuctionResponse> CreateNewAuction(AuctionCreateRequest auctionCreateRequest);
+        Task<AuctionResponse> CreateNewAuction(String sellerEmail, AuctionCreateRequest auctionCreateRequest);
     }
 }
