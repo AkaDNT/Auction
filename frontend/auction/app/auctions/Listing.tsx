@@ -22,8 +22,6 @@ export default function Listing() {
     filterTerm
   )}`;
 
-  console.log(route == "my-auctions");
-
   useEffect(() => {
     if (route == "my-auctions") {
       getMyAuctions(query).then((data) => {

@@ -2,6 +2,8 @@
 
 import { cookies } from "next/headers";
 import { Auction, PageResult } from "../models/Auction";
+import { FieldValues } from "react-hook-form";
+import { fetchWrapper } from "@/lib/fetchWrapper";
 
 export const getData = async (query: string): Promise<PageResult<Auction>> => {
   const auctions = await fetch(
@@ -28,4 +30,12 @@ export const getMyAuctions = async (
   );
   if (!auctions) throw new Error("Can't fetch data");
   return auctions.json();
+};
+
+export const createAuction = async (data: FieldValues) => {
+  return await fetchWrapper.post("/auctions", data);
+};
+
+export const getDetailedAuction = async (id: string) => {
+  return await fetchWrapper.get(`/auctions/${id}`);
 };
