@@ -11,11 +11,14 @@ namespace AuctionAPI.DTOs
         [Required]
         public string Color { get; set; }
         [Required]
-        public int Mileage { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Mileage can't be negative")]
+        public int Mileage { get; set; } = 0;
         [Required]
+        [Range(1900, 2025, ErrorMessage = "Year must be between 1900 and 2025")]
         public int Year { get; set; }
         [Required]
-        public int ReservePrice { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Reserve price can't be negative")]
+        public int ReservePrice { get; set; } = 0;
         [Required]
         public string ImageUrl { get; set; }
         [Required]
