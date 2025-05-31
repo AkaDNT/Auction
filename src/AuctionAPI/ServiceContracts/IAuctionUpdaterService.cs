@@ -4,6 +4,6 @@ namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionUpdaterService
     {
-        Task<AuctionResponse> UpdateAuction(Guid ID, AuctionUpdateRequest auctionUpdateRequest);
+        Task<AuctionResponse> UpdateAuction(Guid ID, AuctionUpdateRequest auctionUpdateRequest, string sellerEmail);
     }
 }

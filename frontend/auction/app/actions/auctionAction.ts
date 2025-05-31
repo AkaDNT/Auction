@@ -36,6 +36,17 @@ export const createAuction = async (data: FieldValues) => {
   return await fetchWrapper.post("/auctions", data);
 };
 
-export const getDetailedAuction = async (id: string) => {
+export const getDetailedAuction = async (id: string): Promise<Auction> => {
   return await fetchWrapper.get(`/auctions/${id}`);
+};
+
+export const updateAuction = async (
+  id: string,
+  data: FieldValues
+): Promise<Auction> => {
+  return await fetchWrapper.put(`/auctions/${id}`, data);
+};
+
+export const deleteAuction = async (id: string) => {
+  return await fetchWrapper.del(`/auctions/${id}`);
 };

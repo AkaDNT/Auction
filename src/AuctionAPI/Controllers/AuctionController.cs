@@ -47,13 +47,22 @@ namespace AuctionAPI.Controllers
         [HttpPut("{ID}")]
         public async Task<ActionResult<AuctionResponse>> UpdateAuction(Guid ID, AuctionUpdateRequest auctionUpdateRequest)
         {
-            AuctionResponse auctionResponse = await _auctionUpdaterService.UpdateAuction(ID, auctionUpdateRequest);
-            return Ok(auctionResponse);
+            try
+            {
+                var sellerEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                AuctionResponse auctionResponse = await _auctionUpdaterService.UpdateAuction(ID, auctionUpdateRequest, sellerEmail);
+                return Ok(auctionResponse);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid("Only auction owner is allowed to update their auction");
+            }
         }
         [HttpDelete("{ID}")]
         public async Task<ActionResult> DeleteAuction(Guid ID)
         {
-            var deleted = await _auctionDeleterService.DeleteAuction(ID);
+            string sellerEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var deleted = await _auctionDeleterService.DeleteAuction(ID, sellerEmail);
             if (deleted <= 0) return BadRequest();
             return Ok();
         }

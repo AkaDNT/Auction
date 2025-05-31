@@ -2,6 +2,6 @@ namespace AuctionAPI.ServiceContracts
 {
     public interface IAuctionDeleterService
     {
-        Task<int> DeleteAuction(Guid ID);
+        Task<int> DeleteAuction(Guid ID, string sellerEmail);
     }
 }

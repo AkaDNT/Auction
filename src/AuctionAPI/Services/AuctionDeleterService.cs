@@ -13,8 +13,10 @@ namespace AuctionAPI.Services
             _repo = repo;
         }
 
-        public async Task<int> DeleteAuction(Guid ID)
+        public async Task<int> DeleteAuction(Guid ID, string sellerEmail)
         {
+            var auction = await _repo.GetAuctionByID(ID);
+            if (!auction.Seller.Equals(sellerEmail)) return -1;
             return await _repo.DeleteAuction(ID);
         }
     }

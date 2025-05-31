@@ -1,3 +1,4 @@
+"use client";
 import Countdown, { CountdownRendererFn } from "react-countdown";
 
 type CountdownTimerProps = {
@@ -16,7 +17,7 @@ const renderer: CountdownRendererFn = ({
   const zeroPad = (n: number) => String(n).padStart(2, "0");
   return (
     <div
-      className={`text-xl font-medium text-white border-2 rounded-full text-center border-gray-800 ${
+      className={`text-xl font-medium text-white border-2 rounded-full text-center border-gray-800 pr-2 pl-2 ${
         completed
           ? "bg-red-600"
           : days < 1 && hours < 10

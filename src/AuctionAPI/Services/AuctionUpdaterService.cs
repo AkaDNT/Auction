@@ -17,9 +17,14 @@ namespace AuctionAPI.Services
             _mapper = mapper;
         }
 
-        public async Task<AuctionResponse> UpdateAuction(Guid ID, AuctionUpdateRequest auctionUpdateRequest)
+        public async Task<AuctionResponse> UpdateAuction(Guid ID, AuctionUpdateRequest auctionUpdateRequest, string sellerEmail)
         {
             Auction auction = await _repo.GetAuctionByID(ID);
+            if (!auction.Seller.Equals(sellerEmail))
+            {
+                throw new UnauthorizedAccessException("Only the auction owner is allowed to update this auction.");
+            }
+
             auction.Item.Make = auctionUpdateRequest.Make ?? auction.Item.Make;
             auction.Item.Model = auctionUpdateRequest.Model ?? auction.Item.Model;
             auction.Item.Color = auctionUpdateRequest.Color ?? auction.Item.Color;
