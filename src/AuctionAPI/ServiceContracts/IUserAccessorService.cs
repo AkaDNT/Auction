@@ -5,7 +5,7 @@ namespace AuctionAPI.ServiceContracts
 {
     public interface IUserAccessorService
     {
-        Task<ApplicationUser> GetApplicationUserAsync();
-        string GetApplicationUserId();
+        Task<ApplicationUser> GetApplicationUserAsync(Guid userId);
+
     }
 }

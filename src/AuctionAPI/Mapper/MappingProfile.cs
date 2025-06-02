@@ -22,6 +22,9 @@ namespace AuctionAPI.Mapper
         ImageUrl = s.ImageUrl
     }));
             CreateMap<UserRegister, ApplicationUser>().ForMember(d => d.UserName, o => o.MapFrom(s => s.Email));
+            CreateMap<Bid, BidResponse>()
+            .ForMember(d => d.DisplayName, o => o.MapFrom(s => s.User.DisplayName))
+            .ForMember(d => d.UserId, o => o.MapFrom(d => d.User.Id));
         }
     }
 }

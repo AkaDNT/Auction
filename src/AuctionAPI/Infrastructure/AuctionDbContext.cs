@@ -13,6 +13,7 @@ namespace AuctionAPI.Infrastructure
         }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<Bid> Bids { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Auction>()

@@ -20,5 +20,6 @@ namespace AuctionAPI.Entities
         public DateTime AuctionEnd { get; set; }
         public Status Status { get; set; } = Status.Live;
         public Item Item { get; set; }
+        public ICollection<Bid> Bids { get; set; } = [];
     }
 }
