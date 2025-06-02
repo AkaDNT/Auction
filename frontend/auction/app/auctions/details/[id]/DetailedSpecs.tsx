@@ -42,9 +42,9 @@ export default function DetailedSpecs({ auction }: Props) {
         </TableRow>
         <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
           <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-            Has reserve price?
+            Reserve price
           </TableCell>
-          <TableCell>{auction.reservePrice > 0 ? "Yes" : "No"}</TableCell>
+          <TableCell>{auction.reservePrice}</TableCell>
         </TableRow>
       </TableBody>
     </Table>

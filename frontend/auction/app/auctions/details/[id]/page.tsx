@@ -7,6 +7,7 @@ import DetailedSpecs from "./DetailedSpecs";
 import UpdateButton from "./UpdateButton";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import DeleteButton from "./DeleteButton";
+import BidSection from "@/app/auctions/details/[id]/BidSection";
 
 export default async function Deatails({
   params,
@@ -47,7 +48,10 @@ export default async function Deatails({
           </div>
         </div>
         <div className="border-2 rounded-lg p-2 bg-gray-200">
-          <Heading title="Bids"></Heading>
+          <div className="pl-2">
+            <Heading title="Bids"></Heading>
+          </div>
+          <BidSection user={currentUser} auction={data}></BidSection>
         </div>
       </div>
       <div className="mt-3 grid grid-cols-1 rounded-lg">

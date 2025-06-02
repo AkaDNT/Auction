@@ -6,6 +6,7 @@ export interface CurrentUser {
   displayName: string;
   email: string;
   imageUrl: string;
+  id: string;
 }
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -27,5 +28,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     displayName: data.displayName,
     email: data.email,
     imageUrl: data.imageUrl,
+    id: data.id,
   };
 }

@@ -3,6 +3,7 @@ import { Auction } from "../models/Auction";
 import Image from "next/image";
 import { CountdownTimer } from "../components/CountdownTimer";
 import Link from "next/link";
+import CurrentBid from "./CurrentBid";
 
 interface Props {
   auction: Auction;
@@ -19,6 +20,9 @@ export default function AuctionCard({ auction }: Props) {
           loading="lazy"
           className="rounded-lg"
         ></Image>
+        <div className="absolute top-2 right-2">
+          <CurrentBid amount={auction.currentHighBid}></CurrentBid>
+        </div>
       </div>
       <div className="flex justify-between items-center ">
         <h3>
