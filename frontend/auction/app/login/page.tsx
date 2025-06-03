@@ -9,7 +9,14 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (state?.success) router.push("/");
+    if (state?.success) {
+      router.back();
+      setTimeout(() => {
+        if (window.location.pathname === "/login") {
+          router.replace("/");
+        }
+      }, 2000);
+    }
   }, [state, router]);
 
   return (

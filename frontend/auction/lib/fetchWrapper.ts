@@ -40,7 +40,7 @@ async function del(url: string) {
   return handleResponse(response);
 }
 
-async function handleResponse(response: Response) {
+export async function handleResponse(response: Response) {
   const text = await response.text();
   let data;
 

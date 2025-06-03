@@ -13,7 +13,7 @@ export default async function NavBar() {
         className="flex items-center gap-2 text-3xl font-semibold text-red-500"
       >
         <span className="text-3xl">🚗</span>
-        Carties Auction
+        Cars Auction
       </Link>
 
       <Search />
@@ -65,14 +65,11 @@ export default async function NavBar() {
               >
                 🏆 Auctions won
               </Link>
-              <Link href="/sell" className="block px-4 py-2 hover:bg-gray-100">
-                🚘 Sell my car
-              </Link>
               <Link
-                href="/session"
+                href="/auctions/create"
                 className="block px-4 py-2 hover:bg-gray-100"
               >
-                ⚙️ Session (dev only)
+                🚘 Sell my car
               </Link>
               <form action="/logout" method="post">
                 <button
