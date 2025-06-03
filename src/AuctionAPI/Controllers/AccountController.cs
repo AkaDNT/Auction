@@ -26,8 +26,16 @@ namespace AuctionAPI.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> CreateUser(UserRegister userRegister)
         {
-            await _mediator.Send(new UserRegisterService.Command { userRegister = userRegister });
-            return Ok();
+            try
+            {
+                await _mediator.Send(new UserRegisterService.Command { userRegister = userRegister });
+                return Ok();
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [AllowAnonymous]

@@ -26,7 +26,7 @@ namespace AuctionAPI.Services
 
             public async Task<List<BidResponse>> Handle(Query request, CancellationToken cancellationToken)
             {
-                var bids = await _dbContext.Bids
+                var bids = await _dbContext.Bids.Include(b => b.User)
         .Where(b => b.AuctionId == request.auctionId)
         .OrderByDescending(b => b.BidTime)
         .ToListAsync(cancellationToken);
