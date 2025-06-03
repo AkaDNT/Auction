@@ -1,7 +1,14 @@
 {
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@microsoft/signalr": "^8.0.7",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.511.0",
+    "mobx": "^6.13.7",
+    "mobx-react-lite": "^4.1.0",
     "react-datepicker": "^8.4.0",
     "react-hook-form": "^7.56.4",
-    "react-hot-toast": "^2.5.2"
+    "react-hot-toast": "^2.5.2",
+    "styled-components": "^6.1.18"
   }
 }

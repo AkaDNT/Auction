@@ -8,6 +8,7 @@ import UpdateButton from "./UpdateButton";
 import { getCurrentUser } from "@/app/actions/getCurrentUser";
 import DeleteButton from "./DeleteButton";
 import BidSection from "@/app/auctions/details/[id]/BidSection";
+import ChatWidget from "./ChatWidget";
 
 export default async function Deatails({
   params,
@@ -57,6 +58,7 @@ export default async function Deatails({
       <div className="mt-3 grid grid-cols-1 rounded-lg">
         <DetailedSpecs auction={data}></DetailedSpecs>
       </div>
+      <ChatWidget></ChatWidget>
     </>
   );
 }
