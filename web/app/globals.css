@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f2e6;
+  --background-alt: #efe3c8;
+  --foreground: #1f170a;
+  --muted: #6d5d43;
+  --border: rgba(96, 74, 24, 0.16);
+  --surface: rgba(255, 255, 255, 0.78);
+  --surface-strong: #fffaf0;
+  --primary: #b8870b;
+  --primary-strong: #d4af37;
+  --primary-soft: rgba(212, 175, 55, 0.12);
+  --primary-foreground: #130f07;
+  --glow: rgba(212, 175, 55, 0.16);
+  --shadow: 0 28px 80px rgba(72, 52, 0, 0.08);
+}
+
+html {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #090807;
+  --background-alt: #12110f;
+  --foreground: #f5f0e1;
+  --muted: #b8b0a1;
+  --border: rgba(255, 255, 255, 0.1);
+  --surface: rgba(17, 16, 13, 0.78);
+  --surface-strong: #11100d;
+  --primary: #f2c94c;
+  --primary-strong: #ffd866;
+  --primary-soft: rgba(212, 175, 55, 0.1);
+  --primary-foreground: #090807;
+  --glow: rgba(212, 175, 55, 0.2);
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+.theme-page {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, var(--glow), transparent 34%),
+    linear-gradient(180deg, var(--background) 0%, var(--background-alt) 100%);
+  color: var(--foreground);
+}
+
+.theme-hero {
+  background:
+    radial-gradient(circle at top left, var(--glow), transparent 34%),
+    radial-gradient(
+      circle at top right,
+      color-mix(in srgb, var(--primary) 22%, transparent),
+      transparent 28%
+    ),
+    linear-gradient(180deg, var(--background-alt) 0%, var(--background) 100%);
+}
+
+.theme-surface {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(24px);
+}
+
+.theme-surface-strong {
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.theme-card {
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.theme-callout {
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
+  background: linear-gradient(
+    135deg,
+    var(--primary-soft),
+    var(--surface-strong)
+  );
+  box-shadow: var(--shadow);
+}
+
+.theme-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 26%, transparent);
+  background: var(--primary-soft);
+  padding: 0.25rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--primary-strong);
+}
+
+.theme-heading {
+  color: var(--foreground);
+}
+
+.theme-muted {
+  color: var(--muted);
+}
+
+.theme-primary {
+  color: var(--primary-strong);
+}
+
+.theme-button-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.theme-button-primary:hover {
+  background: var(--primary-strong);
+}
+
+.theme-button-secondary {
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.theme-button-secondary:hover {
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
+  color: var(--primary-strong);
+}
+
+section {
+  scroll-margin-top: 6rem;
+}
