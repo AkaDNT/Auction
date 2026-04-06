@@ -1,0 +1,73 @@
+$kind: http-request
+name: Login
+url: "{{local}}/auth/register"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"email\": \"admin@gmail.com\",\r
+
+    \    \"password\": \"Admin1234@\"\r
+
+    \    // \"email\": \"test1@gmail.com\",\r
+
+    \    // \"password\": \"test1234\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "// Expect response JSON: { data: { accessToken: \"...\" }, traceId:
+      \"...\" }\r
+
+      // hoặc { accessToken: \"...\" } tùy bạn đang wrap success response\r
+
+      let json;\r
+
+      try {\r
+
+      \  json = pm.response.json();\r
+
+      } catch (e) {\r
+
+      \  pm.test(\"Response is JSON\", function () {\r
+
+      \    pm.expect.fail(\"Response is not JSON\");\r
+
+      \  });\r
+
+      }\r
+
+      \r
+
+      // hỗ trợ cả 2 kiểu: wrapped và không wrapped\r
+
+      const token =\r
+
+      \  json?.data?.accessToken ||\r
+
+      \  json?.accessToken ||\r
+
+      \  json?.data?.token ||\r
+
+      \  json?.token;\r
+
+      \r
+
+      pm.test(\"accessToken exists\", function () {\r
+
+      \  pm.expect(token).to.be.a(\"string\").and.not.empty;\r
+
+      });\r
+
+      \r
+
+      pm.environment.set(\"jwt\", token);\r
+
+      \r
+
+      // (optional) log ra console Postman\r
+
+      console.log(\"Set env jwt =\", token);"
+    language: text/javascript
+order: 2285
