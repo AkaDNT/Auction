@@ -5,8 +5,8 @@ import { AuthShell } from "@/shared/components/layout/auth-shell";
 export default function RegisterPage() {
   return (
     <AuthShell
-      title="Create your account"
-      description="Join the marketplace as a buyer, seller, or operator"
+      title="Tạo tài khoản"
+      description="Tham gia sàn với vai trò người mua, người bán hoặc nhân sự vận hành"
     >
       <form className="space-y-5">
         <div className="grid gap-5 sm:grid-cols-2">
@@ -15,7 +15,7 @@ export default function RegisterPage() {
               className="mb-2 block text-sm font-medium theme-heading"
               htmlFor="firstName"
             >
-              First name
+              Tên
             </label>
             <input
               id="firstName"
@@ -27,7 +27,7 @@ export default function RegisterPage() {
               className="mb-2 block text-sm font-medium theme-heading"
               htmlFor="lastName"
             >
-              Last name
+              Họ
             </label>
             <input
               id="lastName"
@@ -40,7 +40,7 @@ export default function RegisterPage() {
             className="mb-2 block text-sm font-medium theme-heading"
             htmlFor="registerEmail"
           >
-            Email
+            Thư điện tử
           </label>
           <input
             id="registerEmail"
@@ -53,7 +53,7 @@ export default function RegisterPage() {
             className="mb-2 block text-sm font-medium theme-heading"
             htmlFor="registerPassword"
           >
-            Password
+            Mật khẩu
           </label>
           <input
             id="registerPassword"
@@ -65,12 +65,12 @@ export default function RegisterPage() {
           type="submit"
           className="theme-button-primary inline-flex w-full justify-center rounded-full px-5 py-3 text-sm font-semibold transition"
         >
-          Create account
+          Tạo tài khoản
         </button>
         <p className="text-center text-sm theme-muted">
-          Already registered?{" "}
+          Đã có tài khoản?{" "}
           <Link href="/login" className="theme-primary">
-            Sign in
+            Đăng nhập
           </Link>
         </p>
       </form>

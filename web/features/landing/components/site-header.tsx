@@ -8,7 +8,7 @@ export function SiteHeader() {
     <header className="theme-surface sticky top-0 z-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
         <Link
-          href="#home"
+          href="/"
           className="flex items-center gap-3 self-start text-[color:var(--foreground)]"
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--primary-soft)] text-sm font-bold tracking-[0.3em] text-[color:var(--primary-strong)]">
@@ -16,9 +16,11 @@ export function SiteHeader() {
           </span>
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.35em] theme-primary">
-              Auction House
+              Sàn Đấu Giá
             </p>
-            <p className="text-xs theme-muted">Enterprise marketplace</p>
+            <p className="text-xs theme-muted">
+              Nền tảng giao dịch doanh nghiệp
+            </p>
           </div>
         </Link>
 
@@ -37,16 +39,10 @@ export function SiteHeader() {
         <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-[auto,1fr] md:flex md:w-auto md:flex-shrink-0 md:items-center md:justify-end md:gap-3">
           <ThemeToggle className="w-full justify-center md:w-auto" />
           <Link
-            href="#pricing"
-            className="theme-button-secondary hidden rounded-full px-4 py-2 text-sm font-medium transition lg:inline-flex"
-          >
-            View pricing
-          </Link>
-          <Link
-            href="#cta"
+            href="/auctions"
             className="theme-button-primary inline-flex w-full min-w-0 justify-center rounded-full px-4 py-2 text-sm font-semibold transition md:w-auto"
           >
-            Start bidding
+            Bắt đầu đấu giá
           </Link>
         </div>
       </div>

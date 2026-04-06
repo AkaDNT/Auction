@@ -1,7 +1,19 @@
+import Image from "next/image";
+
+import { mockImages } from "@/shared/lib/mock-images";
+
 const users = [
-  { name: "Ava Nguyen", role: "Marketplace Director", status: "Active" },
-  { name: "Daniel Park", role: "Product Strategy", status: "Active" },
-  { name: "Sophia Reed", role: "Operations Lead", status: "Pending" },
+  {
+    name: "Ava Nguyen",
+    role: "Giám đốc sàn đấu giá",
+    status: "Đang hoạt động",
+  },
+  {
+    name: "Daniel Park",
+    role: "Chiến lược sản phẩm",
+    status: "Đang hoạt động",
+  },
+  { name: "Sophia Reed", role: "Trưởng bộ phận vận hành", status: "Chờ xử lý" },
 ];
 
 export default function UsersPage() {
@@ -9,15 +21,24 @@ export default function UsersPage() {
     <div className="space-y-6">
       <section className="theme-callout rounded-[1.75rem] p-6">
         <p className="text-sm uppercase tracking-[0.35em] theme-primary">
-          Users
+          Người dùng
         </p>
         <h2 className="mt-4 text-2xl font-semibold theme-heading">
-          Access and identity management
+          Quản lý truy cập và định danh
         </h2>
         <p className="mt-3 text-sm leading-7 theme-muted">
-          Keep internal operators, sellers, and buyers organized with clean role
-          visibility.
+          Quản lý gọn gàng đội vận hành nội bộ, người bán và người mua với phân
+          vai rõ ràng.
         </p>
+        <div className="relative mt-5 h-44 overflow-hidden rounded-2xl border border-[color:var(--border)] sm:h-52">
+          <Image
+            src={mockImages.usersBoard}
+            alt="Quản lý người dùng"
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
       </section>
 
       <section className="theme-card rounded-[1.75rem] p-6">

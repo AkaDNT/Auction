@@ -3,8 +3,8 @@ import { AuthShell } from "@/shared/components/layout/auth-shell";
 export default function ResetPasswordPage() {
   return (
     <AuthShell
-      title="Set a new password"
-      description="Choose a secure password and return to the marketplace"
+      title="Đặt mật khẩu mới"
+      description="Chọn một mật khẩu an toàn và quay lại sàn đấu giá"
     >
       <form className="space-y-5">
         <div>
@@ -12,7 +12,7 @@ export default function ResetPasswordPage() {
             className="mb-2 block text-sm font-medium theme-heading"
             htmlFor="newPassword"
           >
-            New password
+            Mật khẩu mới
           </label>
           <input
             id="newPassword"
@@ -25,7 +25,7 @@ export default function ResetPasswordPage() {
             className="mb-2 block text-sm font-medium theme-heading"
             htmlFor="confirmPassword"
           >
-            Confirm password
+            Xác nhận mật khẩu
           </label>
           <input
             id="confirmPassword"
@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
           type="submit"
           className="theme-button-primary inline-flex w-full justify-center rounded-full px-5 py-3 text-sm font-semibold transition"
         >
-          Update password
+          Cập nhật mật khẩu
         </button>
       </form>
     </AuthShell>

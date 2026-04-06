@@ -14,6 +14,8 @@
   --primary-foreground: #130f07;
   --glow: rgba(212, 175, 55, 0.16);
   --shadow: 0 28px 80px rgba(72, 52, 0, 0.08);
+  --panel: rgba(255, 255, 255, 0.6);
+  --panel-foreground: inherit;
 }
 
 html {
@@ -35,6 +37,8 @@ html[data-theme="dark"] {
   --primary-foreground: #090807;
   --glow: rgba(212, 175, 55, 0.2);
   --shadow: 0 28px 80px rgba(0, 0, 0, 0.35);
+  --panel: rgba(50, 45, 35, 0.7);
+  --panel-foreground: #f5f0e1;
 }
 
 html[data-theme="light"] {
@@ -44,8 +48,8 @@ html[data-theme="light"] {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-be-vietnam-pro);
+  --font-mono: var(--font-noto-sans-mono);
 }
 
 html {
@@ -56,7 +60,7 @@ body {
   min-height: 100%;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-be-vietnam-pro), Arial, Helvetica, sans-serif;
 }
 
 .theme-page {
@@ -65,6 +69,43 @@ body {
     radial-gradient(circle at top, var(--glow), transparent 34%),
     linear-gradient(180deg, var(--background) 0%, var(--background-alt) 100%);
   color: var(--foreground);
+}
+
+.theme-bg {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.text-theme-body {
+  color: var(--foreground);
+}
+
+.text-theme-muted {
+  color: var(--muted);
+}
+
+.text-theme-heading {
+  color: var(--foreground);
+}
+
+.text-theme-brand {
+  color: var(--primary-strong);
+}
+
+.border-theme-line {
+  border-color: var(--border);
+}
+
+.border-theme-brand {
+  border-color: var(--primary);
+}
+
+.bg-theme-brand {
+  background-color: var(--primary);
+}
+
+.bg-theme-bg {
+  background-color: var(--background);
 }
 
 .theme-hero {
@@ -151,6 +192,58 @@ body {
 .theme-button-secondary:hover {
   border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
   color: var(--primary-strong);
+}
+
+.bg-theme-brand {
+  background-color: var(--primary);
+}
+
+.text-theme-brand-foreground {
+  color: var(--primary-foreground);
+}
+
+/* Form Elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+  background-color: color-mix(in srgb, var(--panel) 100%, transparent);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+select option {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+select option:checked {
+  background: linear-gradient(var(--primary), var(--primary));
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+html[data-theme="dark"] select option {
+  background-color: #1a1815;
+  color: #f5f0e1;
+}
+
+html[data-theme="dark"] select option:checked {
+  background: linear-gradient(var(--primary), var(--primary));
+  background-color: var(--primary) !important;
+  color: #090807 !important;
 }
 
 section {

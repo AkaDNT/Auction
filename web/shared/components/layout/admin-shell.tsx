@@ -1,15 +1,17 @@
 import type { ReactNode } from "react";
 
 import Link from "next/link";
+import Image from "next/image";
 
 import { ThemeToggle } from "@/shared/components/theme/theme-toggle";
+import { mockImages } from "@/shared/lib/mock-images";
 
 const navigation = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Analytics", href: "/dashboard/analytics" },
-  { label: "Lots", href: "/lots" },
-  { label: "Users", href: "/users" },
-  { label: "Settings", href: "/settings" },
+  { label: "Tổng quan", href: "/dashboard" },
+  { label: "Phân tích", href: "/dashboard/analytics" },
+  { label: "Lô hàng", href: "/lots" },
+  { label: "Người dùng", href: "/users" },
+  { label: "Cài đặt", href: "/settings" },
 ];
 
 type AdminShellProps = {
@@ -23,9 +25,11 @@ export function AdminShell({ children }: AdminShellProps) {
         <aside className="theme-surface flex flex-col rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6">
           <div className="border-b border-[color:var(--border)] pb-5">
             <p className="text-sm font-semibold uppercase tracking-[0.35em] theme-primary">
-              Auction House
+              Sàn Đấu Giá
             </p>
-            <p className="mt-2 text-sm theme-muted">Admin control center</p>
+            <p className="mt-2 text-sm theme-muted">
+              Trung tâm điều hành quản trị
+            </p>
           </div>
 
           <nav className="mt-6 flex gap-2 overflow-x-auto pb-2 lg:block lg:space-y-2 lg:overflow-visible lg:pb-0">
@@ -37,11 +41,27 @@ export function AdminShell({ children }: AdminShellProps) {
               >
                 <span>{item.label}</span>
                 <span className="hidden text-xs uppercase tracking-[0.3em] theme-primary sm:inline">
-                  Open
+                  Mở
                 </span>
               </Link>
             ))}
           </nav>
+
+          <div className="mt-6 hidden rounded-2xl border border-[color:var(--border)] p-3 lg:block">
+            <div className="relative h-32 overflow-hidden rounded-xl border border-[color:var(--border)]">
+              <Image
+                src={mockImages.adminPanel}
+                alt="Bảng điều khiển quản trị"
+                fill
+                className="object-cover"
+                sizes="260px"
+              />
+            </div>
+            <p className="mt-3 text-xs leading-5 theme-muted">
+              Hình ảnh mock từ nguồn public. Khi có backend, thay URL bằng ảnh
+              AWS S3 tại tầng dữ liệu.
+            </p>
+          </div>
 
           <div className="mt-auto hidden border-t border-[color:var(--border)] pt-5 lg:block">
             <ThemeToggle />
@@ -52,10 +72,10 @@ export function AdminShell({ children }: AdminShellProps) {
           <header className="theme-surface flex flex-col gap-4 rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.35em] theme-primary">
-                Enterprise admin
+                Quản trị doanh nghiệp
               </p>
               <h1 className="mt-2 text-xl font-semibold theme-heading sm:text-2xl">
-                Operational dashboard
+                Bảng điều khiển vận hành
               </h1>
             </div>
             <div className="lg:hidden">

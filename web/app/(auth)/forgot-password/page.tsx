@@ -5,8 +5,8 @@ import { AuthShell } from "@/shared/components/layout/auth-shell";
 export default function ForgotPasswordPage() {
   return (
     <AuthShell
-      title="Recover your password"
-      description="Reset access without losing continuity"
+      title="Khôi phục mật khẩu"
+      description="Đặt lại quyền truy cập mà không làm gián đoạn công việc"
     >
       <form className="space-y-5">
         <div>
@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
             className="mb-2 block text-sm font-medium theme-heading"
             htmlFor="recoverEmail"
           >
-            Email
+            Thư điện tử
           </label>
           <input
             id="recoverEmail"
@@ -26,12 +26,12 @@ export default function ForgotPasswordPage() {
           type="submit"
           className="theme-button-primary inline-flex w-full justify-center rounded-full px-5 py-3 text-sm font-semibold transition"
         >
-          Send recovery link
+          Gửi liên kết khôi phục
         </button>
         <p className="text-center text-sm theme-muted">
-          Remembered it?{" "}
+          Nhớ ra rồi?{" "}
           <Link href="/login" className="theme-primary">
-            Go back to sign in
+            Quay lại đăng nhập
           </Link>
         </p>
       </form>

@@ -5,9 +5,9 @@ export function PricingSection() {
   return (
     <SectionShell
       id="pricing"
-      eyebrow="Pricing"
-      title="Flexible pricing that supports platform fees, commissions, and memberships"
-      description="The pricing block stays intentionally simple while signaling an enterprise-grade commercial model."
+      eyebrow="Bảng giá"
+      title="Cấu trúc giá linh hoạt cho phí nền tảng, hoa hồng và gói thành viên"
+      description="Khối bảng giá được giữ gọn để dễ hiểu nhưng vẫn thể hiện một mô hình thương mại ở cấp độ doanh nghiệp."
       align="center"
     >
       <div className="grid gap-5 lg:grid-cols-3">
@@ -29,7 +29,7 @@ export function PricingSection() {
               </div>
               {plan.featured ? (
                 <span className="theme-eyebrow px-3 py-1 text-[0.65rem] tracking-[0.28em]">
-                  Popular
+                  Phổ biến
                 </span>
               ) : null}
             </div>

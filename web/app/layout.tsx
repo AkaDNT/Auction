@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Be_Vietnam_Pro, Noto_Sans_Mono } from "next/font/google";
 import { ThemeProvider } from "@/shared/components/theme/theme-provider";
 import { ThemeScript } from "@/shared/components/theme/theme-script";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: "--font-be-vietnam-pro",
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSansMono = Noto_Sans_Mono({
+  variable: "--font-noto-sans-mono",
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Auction House | Enterprise Auction Marketplace",
+  title: "Sàn Đấu Giá | Nền tảng đấu giá doanh nghiệp",
   description:
-    "Premium Next.js frontend for an enterprise auction marketplace.",
+    "Giao diện Next.js cao cấp cho một sàn đấu giá quy mô doanh nghiệp.",
 };
 
 export default function RootLayout({
@@ -27,9 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="vi"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${beVietnamPro.variable} ${notoSansMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
         <ThemeScript />

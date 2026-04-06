@@ -5,9 +5,9 @@ export function TeamSection() {
   return (
     <SectionShell
       id="team"
-      eyebrow="Team"
-      title="The team behind marketplace operations and product rigor"
-      description="A senior operating model is reflected visually through high-confidence people cards and crisp hierarchy."
+      eyebrow="Đội ngũ"
+      title="Đội ngũ đứng sau vận hành sàn và kỷ luật sản phẩm"
+      description="Mô hình vận hành cấp cao được thể hiện qua các thẻ nhân sự rõ ràng, tự tin và có thứ bậc mạch lạc."
     >
       <div className="grid gap-5 lg:grid-cols-3">
         {teamMembers.map((member) => (

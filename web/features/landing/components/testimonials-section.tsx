@@ -5,9 +5,9 @@ export function TestimonialsSection() {
   return (
     <SectionShell
       id="testimonials"
-      eyebrow="Testimonials"
-      title="Proof that the experience feels premium for both buyers and sellers"
-      description="These cards give social proof while keeping the visual language formal and enterprise-ready."
+      eyebrow="Nhận xét"
+      title="Bằng chứng cho trải nghiệm cao cấp của cả người mua lẫn người bán"
+      description="Các thẻ này cung cấp bằng chứng xã hội nhưng vẫn giữ ngôn ngữ thị giác trang trọng và phù hợp doanh nghiệp."
     >
       <div className="grid gap-5 lg:grid-cols-3">
         {testimonialItems.map((testimonial) => (

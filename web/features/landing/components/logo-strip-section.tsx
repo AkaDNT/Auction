@@ -5,9 +5,9 @@ export function LogoStripSection() {
   return (
     <SectionShell
       id="logos"
-      eyebrow="Trusted by"
-      title="Partner logos that suggest a serious operating network"
-      description="This band breaks up the page rhythm while reinforcing trust and ecosystem strength."
+      eyebrow="Đối tác tin cậy"
+      title="Dải logo đối tác thể hiện một mạng lưới vận hành nghiêm túc"
+      description="Khối này tạo nhịp nghỉ cho trang đồng thời củng cố niềm tin và sức mạnh của hệ sinh thái."
       align="center"
     >
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

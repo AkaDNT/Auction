@@ -5,9 +5,9 @@ export function FeaturesSection() {
   return (
     <SectionShell
       id="features"
-      eyebrow="Features"
-      title="Core capabilities tuned for live auction operations"
-      description="The platform focuses on three things that matter in enterprise marketplaces: speed, control, and confidence."
+      eyebrow="Tính năng"
+      title="Các năng lực cốt lõi dành cho vận hành phiên đấu giá trực tiếp"
+      description="Nền tảng tập trung vào ba yếu tố quan trọng nhất của một sàn doanh nghiệp: tốc độ, kiểm soát và độ tin cậy."
     >
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {featureItems.map((item) => (
@@ -17,9 +17,6 @@ export function FeaturesSection() {
           >
             <div className="flex items-center justify-between gap-4">
               <span className="theme-eyebrow px-3 py-1 text-[0.65rem] tracking-[0.28em]">
-                {item.badge}
-              </span>
-              <span className="text-xs uppercase tracking-[0.35em] theme-muted">
                 {item.badge}
               </span>
             </div>

@@ -1,9 +1,19 @@
+import Image from "next/image";
+
+import { mockImages } from "@/shared/lib/mock-images";
+
 const settingsSections = [
-  { title: "Branding", description: "Logo, colors, and marketplace identity" },
-  { title: "Security", description: "Roles, sessions, and MFA policies" },
   {
-    title: "Notifications",
-    description: "Email and platform event preferences",
+    title: "Thương hiệu",
+    description: "Logo, màu sắc và nhận diện của sàn đấu giá",
+  },
+  {
+    title: "Bảo mật",
+    description: "Vai trò, phiên đăng nhập và chính sách MFA",
+  },
+  {
+    title: "Thông báo",
+    description: "Tùy chọn email và sự kiện trên nền tảng",
   },
 ];
 
@@ -12,15 +22,24 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <section className="theme-callout rounded-[1.75rem] p-6">
         <p className="text-sm uppercase tracking-[0.35em] theme-primary">
-          Settings
+          Cài đặt
         </p>
         <h2 className="mt-4 text-2xl font-semibold theme-heading">
-          Platform configuration
+          Cấu hình nền tảng
         </h2>
         <p className="mt-3 text-sm leading-7 theme-muted">
-          These controls are presented as a simple operations console for future
-          configuration work.
+          Các điều khiển này được trình bày như một bảng điều hành đơn giản để
+          phục vụ công việc cấu hình về sau.
         </p>
+        <div className="relative mt-5 h-44 overflow-hidden rounded-2xl border border-[color:var(--border)] sm:h-52">
+          <Image
+            src={mockImages.settingsBoard}
+            alt="Cấu hình nền tảng"
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
+        </div>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">

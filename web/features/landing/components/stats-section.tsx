@@ -5,9 +5,9 @@ export function StatsSection() {
   return (
     <SectionShell
       id="stats"
-      eyebrow="Stats"
-      title="Operational numbers that communicate scale at a glance"
-      description="These metrics position the marketplace as active, trusted, and commercially mature."
+      eyebrow="Số liệu"
+      title="Những chỉ số vận hành cho thấy quy mô chỉ trong một cái nhìn"
+      description="Các con số này thể hiện sàn đang hoạt động mạnh, có độ tin cậy cao và đã đạt độ chín thương mại."
       align="center"
     >
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">

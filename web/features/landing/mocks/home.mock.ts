@@ -12,144 +12,151 @@ import type {
 } from "../types/home";
 
 export const navLinks: NavLink[] = [
-  { label: "Home", href: "#home" },
-  { label: "Features", href: "#features" },
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Contact", href: "#footer" },
+  { label: "Trang chủ", href: "#home" },
+  { label: "Đấu giá", href: "/auctions" },
+  { label: "Tính năng", href: "#features" },
+  { label: "Quy trình", href: "#how-it-works" },
+  { label: "Gói dịch vụ", href: "#pricing" },
+  { label: "Liên hệ", href: "#footer" },
 ];
 
 export const heroMetrics: HeroMetric[] = [
   {
     value: "2.4K",
-    label: "Active auctions",
-    description: "Live inventory across premium and fast-moving categories.",
+    label: "Phiên đang mở",
+    description:
+      "Danh mục hàng hóa giá trị cao và luân chuyển nhanh đang được đấu giá theo thời gian thực.",
   },
   {
     value: "97%",
-    label: "Sell-through rate",
-    description: "Optimized bidding workflows that keep auctions competitive.",
+    label: "Tỷ lệ chốt thành công",
+    description:
+      "Luồng đấu giá được tối ưu để duy trì tính cạnh tranh và nâng xác suất chốt phiên.",
   },
   {
     value: "24/7",
-    label: "Marketplace coverage",
-    description: "A platform designed for continuous demand and trust.",
+    label: "Phủ sóng 24/7",
+    description:
+      "Nền tảng vận hành liên tục, đáp ứng nhu cầu mua bán và kiểm soát tin cậy mọi thời điểm.",
   },
 ];
 
 export const featureItems: FeatureItem[] = [
   {
-    title: "Real-time bidding engine",
+    title: "Cơ chế đặt giá thời gian thực",
     description:
-      "Pushes live updates instantly so buyers and sellers stay aligned during every auction window.",
-    badge: "Live",
+      "Đồng bộ thay đổi tức thời để người mua, người bán và đội vận hành luôn theo sát từng nhịp đấu giá.",
+    badge: "Trực tiếp",
   },
   {
-    title: "Verified transaction flows",
+    title: "Luồng giao dịch đã xác thực",
     description:
-      "Structured checks for deposits, approvals, and settlement reduce risk across the platform.",
-    badge: "Secure",
+      "Các bước đặt cọc, phê duyệt và thanh toán được chuẩn hóa nhằm giảm thiểu rủi ro toàn hệ thống.",
+    badge: "An toàn",
   },
   {
-    title: "Category orchestration",
+    title: "Điều phối danh mục hàng hóa",
     description:
-      "Manage diverse inventory, premium lots, and timed releases from a single operating layer.",
-    badge: "Scale",
+      "Quản lý nhiều nhóm hàng, lô đấu giá cao cấp và lịch mở bán từ một lớp điều hành thống nhất.",
+    badge: "Mở rộng",
   },
   {
-    title: "Seller-first tooling",
+    title: "Công cụ tối ưu cho người bán",
     description:
-      "Operational dashboards help teams publish lots, monitor bids, and close faster.",
-    badge: "Ops",
+      "Bảng điều khiển vận hành giúp đội ngũ đăng lô, theo dõi giá và kết thúc phiên nhanh hơn.",
+    badge: "Vận hành",
   },
 ];
 
 export const benefitItems: BenefitItem[] = [
   {
-    title: "Trust built into every step",
+    title: "Niềm tin được tích hợp ở từng bước",
     description:
-      "Clear verification, bidding history, and transparent lot states make the marketplace feel safe.",
+      "Xác thực rõ ràng, lịch sử đặt giá minh bạch và trạng thái lô hàng công khai giúp sàn tạo cảm giác an toàn.",
   },
   {
-    title: "Designed for speed",
+    title: "Thiết kế cho tốc độ",
     description:
-      "The experience minimizes friction so buyers can bid quickly and sellers can move inventory.",
+      "Trải nghiệm được tinh gọn để người mua đặt giá nhanh, người bán xoay vòng hàng hiệu quả.",
   },
   {
-    title: "Flexible for multiple business models",
+    title: "Linh hoạt cho nhiều mô hình kinh doanh",
     description:
-      "Support platform fees, commission-based revenue, premium memberships, and partner programs.",
+      "Hỗ trợ phí nền tảng, hoa hồng giao dịch, gói thành viên cao cấp và chương trình đối tác.",
   },
 ];
 
 export const stepItems: StepItem[] = [
   {
     step: "01",
-    title: "Register and verify",
+    title: "Đăng ký và xác thực",
     description:
-      "Users create an account and complete onboarding to enter the ecosystem with confidence.",
+      "Người dùng tạo tài khoản và hoàn tất xác thực để tham gia hệ sinh thái một cách an toàn.",
   },
   {
     step: "02",
-    title: "Explore live lots",
+    title: "Khám phá lô đấu giá đang mở",
     description:
-      "Browse featured auctions, monitor current bids, and shortlist opportunities worth tracking.",
+      "Xem các phiên nổi bật, theo dõi giá hiện tại và đánh dấu những cơ hội đáng quan tâm.",
   },
   {
     step: "03",
-    title: "Bid or list inventory",
+    title: "Đặt giá hoặc đăng lô hàng",
     description:
-      "Buyers place bids while sellers publish lots with pricing, timing, and business rules.",
+      "Người mua đặt giá, người bán đăng lô kèm giá khởi điểm, thời gian và quy tắc giao dịch.",
   },
   {
     step: "04",
-    title: "Close and settle",
+    title: "Kết thúc và thanh toán",
     description:
-      "Automated completion steps guide both sides through payment, handoff, and reporting.",
+      "Các bước hoàn tất tự động dẫn dắt hai bên qua thanh toán, bàn giao và báo cáo.",
   },
 ];
 
 export const statItems: StatItem[] = [
   {
     value: "$18.4M",
-    label: "Total bid volume",
-    description: "Momentum across high-value categories and repeat buyers.",
+    label: "Tổng giá trị đặt giá",
+    description:
+      "Động lực giao dịch mạnh ở các nhóm hàng giá trị cao và tệp khách hàng quay lại.",
   },
   {
     value: "12 min",
-    label: "Average conversion cycle",
-    description: "A tighter funnel from interest to confirmed lot ownership.",
+    label: "Chu kỳ chuyển đổi trung bình",
+    description:
+      "Phễu chuyển đổi được rút ngắn từ quan tâm ban đầu đến xác nhận sở hữu lô.",
   },
   {
     value: "180+",
-    label: "Trusted sellers",
-    description: "Curated partners spanning inventory, logistics, and service.",
+    label: "Đối tác bán hàng tin cậy",
+    description:
+      "Mạng lưới đối tác được sàng lọc gồm hàng hóa, logistics và dịch vụ hỗ trợ.",
   },
   {
     value: "4.9/5",
-    label: "Buyer satisfaction",
+    label: "Mức hài lòng người mua",
     description:
-      "Measured confidence from a clean and reliable marketplace UX.",
+      "Mức tin cậy được phản ánh qua trải nghiệm thị trường sạch, rõ ràng và ổn định.",
   },
 ];
 
 export const teamMembers: TeamMember[] = [
   {
     name: "Ava Nguyen",
-    role: "Marketplace Director",
-    bio: "Owns seller acquisition, auction governance, and the operating model behind premium listings.",
+    role: "Giám đốc sàn đấu giá",
+    bio: "Phụ trách thu hút người bán, quản trị phiên đấu giá và mô hình vận hành cho các lô cao cấp.",
     initials: "AN",
   },
   {
     name: "Daniel Park",
-    role: "Product Strategy",
-    bio: "Shapes the buyer journey, pricing logic, and the systems that keep the platform trustworthy.",
+    role: "Chiến lược sản phẩm",
+    bio: "Định hình hành trình người mua, logic giá và các hệ thống giúp nền tảng duy trì độ tin cậy.",
     initials: "DP",
   },
   {
     name: "Sophia Reed",
-    role: "Operations Lead",
-    bio: "Coordinates fulfillment, compliance workflows, and cross-team execution for every lot.",
+    role: "Trưởng bộ phận vận hành",
+    bio: "Điều phối xử lý, luồng tuân thủ và phối hợp đa phòng ban cho từng lô hàng.",
     initials: "SR",
   },
 ];
@@ -164,52 +171,53 @@ export const logoItems: LogoItem[] = [
 export const testimonialItems: TestimonialItem[] = [
   {
     name: "Linh Tran",
-    role: "Power buyer",
+    role: "Khách mua chủ lực",
     quote:
-      "The bidding flow feels immediate and premium. We can evaluate lots, move fast, and still trust the process.",
+      "Luồng đặt giá rất nhanh và cao cấp. Chúng tôi có thể đánh giá lô hàng, ra quyết định nhanh mà vẫn giữ được độ tin cậy.",
   },
   {
     name: "Mark Ellis",
-    role: "Enterprise seller",
+    role: "Người bán doanh nghiệp",
     quote:
-      "The platform gave our team a structured way to list inventory, handle approvals, and close with clarity.",
+      "Nền tảng cung cấp cho đội ngũ chúng tôi một cách làm bài bản để đăng hàng, xử lý phê duyệt và chốt phiên rõ ràng.",
   },
   {
     name: "Priya Shah",
-    role: "Marketplace operator",
+    role: "Vận hành sàn",
     quote:
-      "Everything is built for scale. The UI communicates confidence without sacrificing speed or detail.",
+      "Mọi thứ đều được thiết kế để mở rộng quy mô. Giao diện truyền tải sự tin cậy mà không làm mất tốc độ hay độ chi tiết.",
   },
 ];
 
 export const pricingPlans: PricingPlan[] = [
   {
-    name: "Starter",
-    price: "Free",
-    description: "For new sellers and buyers validating the workflow.",
+    name: "Khởi đầu",
+    price: "Miễn phí",
+    description:
+      "Dành cho người bán và người mua mới đang kiểm chứng quy trình.",
     features: [
-      "Basic lot publishing",
-      "Standard bidding access",
-      "Email support",
+      "Đăng lô cơ bản",
+      "Quyền tham gia đặt giá tiêu chuẩn",
+      "Hỗ trợ qua email",
     ],
   },
   {
-    name: "Growth",
+    name: "Tăng trưởng",
     price: "$49/mo",
     description:
-      "For active teams that need stronger control and better visibility.",
-    features: ["Commission tools", "Seller dashboard", "Priority support"],
+      "Dành cho đội ngũ vận hành thường xuyên cần kiểm soát chặt hơn và quan sát tốt hơn.",
+    features: [
+      "Công cụ tính hoa hồng",
+      "Bảng điều khiển người bán",
+      "Hỗ trợ ưu tiên",
+    ],
     featured: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
+    name: "Doanh nghiệp",
+    price: "Tùy chỉnh",
     description:
-      "For large operations that require governance and integrations.",
-    features: [
-      "Dedicated onboarding",
-      "Advanced permissions",
-      "SLA-backed support",
-    ],
+      "Dành cho quy mô lớn cần quản trị chặt chẽ và tích hợp hệ thống.",
+    features: ["Onboarding riêng", "Phân quyền nâng cao", "Hỗ trợ theo SLA"],
   },
 ];
