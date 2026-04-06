@@ -30,13 +30,6 @@ export function AuctionsNavbar() {
           >
             Danh mục
           </Link>
-          <span className="text-theme-line">/</span>
-          <Link
-            href="/login"
-            className="transition-colors hover:text-theme-heading"
-          >
-            Đăng nhập
-          </Link>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -46,6 +39,12 @@ export function AuctionsNavbar() {
             className="rounded-full border border-theme-brand/60 bg-theme-brand/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-theme-brand transition-colors hover:bg-theme-brand hover:text-theme-brand-foreground sm:text-sm"
           >
             Đăng ký
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-full border border-theme-brand/60 bg-theme-brand/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-theme-brand transition-colors hover:bg-theme-brand hover:text-theme-brand-foreground sm:text-sm"
+          >
+            Đăng nhập
           </Link>
         </div>
       </div>
