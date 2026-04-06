@@ -1,0 +1,100 @@
+
+
+model AuctionCategory {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  label       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  auctions    Auction[]
+}
+
+model Auction {
+  id              String           @id @default(cuid())
+  code            String           @unique
+  title           String
+  slug            String           @unique
+  description     String?
+  startingPrice   Decimal          @db.Decimal(18, 3)
+  reservePrice    Decimal?         @db.Decimal(18, 3)
+  currentPrice    Decimal?         @db.Decimal(18, 3)
+  buyNowPrice     Decimal?         @db.Decimal(18, 3)
+
+  startAt         DateTime?
+  endAt           DateTime
+  status          AuctionStatus    @default(DRAFT)
+
+  sellerId        String
+  categoryId      String
+
+  thumbnailUrl    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  seller          User             @relation("AuctionSeller", fields: [sellerId], references: [id])
+  category        AuctionCategory  @relation(fields: [categoryId], references: [id])
+  bids            Bid[]
+  images          AuctionImage[]
+
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([status])
+  @@index([endAt])
+  @@index([startAt, endAt])
+}
+
+model AuctionImage {
+  id          String    @id @default(cuid())
+  auctionId   String
+  imageUrl    String
+  altText     String?
+  sortOrder   Int       @default(0)
+  isPrimary   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  auction     Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@index([auctionId, sortOrder])
+}
+
+model Bid {
+  id          String     @id @default(cuid())
+  auctionId   String
+  bidderId    String
+  amount      Decimal    @db.Decimal(18, 3)
+  status      BidStatus  @default(VALID)
+  createdAt   DateTime   @default(now())
+
+  auction     Auction    @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidder      User       @relation(fields: [bidderId], references: [id])
+
+  @@index([auctionId, createdAt])
+  @@index([auctionId, amount])
+  @@index([bidderId])
+}
+
+model AuctionFeature {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sortOrder])
+}
+
+model AuctionFaq {
+  id          String    @id @default(cuid())
+  question    String
+  answer      String
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([sortOrder])
+}

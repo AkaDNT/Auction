@@ -1,0 +1,13 @@
+model User{
+  id String @id @default(cuid())
+  email String @unique
+  passwordHash String
+  status UserStatus @default(ACTIVE)
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+  auctions    Auction[] @relation("AuctionSeller")
+  bids        Bid[]
+}

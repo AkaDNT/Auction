@@ -1,0 +1,13 @@
+enum AuctionStatus {
+  DRAFT
+  UPCOMING
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum BidStatus {
+  VALID
+  REJECTED
+  CANCELLED
+}
