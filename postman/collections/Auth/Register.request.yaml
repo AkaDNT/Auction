@@ -1,6 +1,6 @@
 $kind: http-request
 name: Register
-url: "{{local}}/auth/login"
+url: "{{local}}/auth/register"
 method: POST
 body:
   type: json
@@ -8,11 +8,9 @@ body:
 
     \    \"email\": \"admin@gmail.com\",\r
 
-    \    \"password\": \"Admin1234@\"\r
+    \    \"password\": \"Admin1234@\",\r
 
-    \    // \"email\": \"test1@gmail.com\",\r
-
-    \    // \"password\": \"test1234\"\r
+    \    \"confirmPassword\": \"Admin1234@\"\r
 
     }"
 scripts:

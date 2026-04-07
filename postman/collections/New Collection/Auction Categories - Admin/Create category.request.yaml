@@ -1,0 +1,18 @@
+$kind: http-request
+name: Create category
+url: "{{local}}/admin/auction-categories"
+method: POST
+headers:
+  Authorization: Bearer {{jwt}}
+body:
+  type: json
+  content: "{\r
+
+    \  \"label\": \"Vehicles\",\r
+
+    \  \"slug\": \"vehicles\",\r
+
+    \  \"description\": \"Auction category for vehicles\"\r
+
+    }"
+order: 1775551809409

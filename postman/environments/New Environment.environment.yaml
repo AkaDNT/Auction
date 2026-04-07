@@ -1,0 +1,14 @@
+name: New Environment
+values:
+  - key: local
+    value: ''
+    enabled: true
+  - key: jwt
+    value: ''
+    enabled: true
+  - key: categorySlug
+    value: ''
+    enabled: true
+  - key: categoryId
+    value: ''
+    enabled: true

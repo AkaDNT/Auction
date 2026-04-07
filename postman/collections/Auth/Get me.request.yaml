@@ -3,4 +3,4 @@ url: "{{local}}/auth/me"
 method: GET
 headers:
   Authorization: Bearer {{jwt}}
-order: 6000
+order: 7000

@@ -9,6 +9,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { getTraceId } from '@repo/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
     }),
     AuthModule,
     PrismaModule,
+    AuctionCategoryModule,
   ],
   controllers: [AppController],
   providers: [

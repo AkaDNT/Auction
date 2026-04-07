@@ -1,6 +1,6 @@
 $kind: http-request
 name: Login
-url: "{{local}}/auth/register"
+url: "{{local}}/auth/login"
 method: POST
 body:
   type: json
@@ -70,4 +70,4 @@ scripts:
 
       console.log(\"Set env jwt =\", token);"
     language: text/javascript
-order: 2285
+order: 2000

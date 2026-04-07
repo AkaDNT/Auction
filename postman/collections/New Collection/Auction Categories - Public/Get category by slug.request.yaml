@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get category by slug
+url: "{{local}}/auction-categories/{{categorySlug}}"
+method: GET
+order: 4096404978447360

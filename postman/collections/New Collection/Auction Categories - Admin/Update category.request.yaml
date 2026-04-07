@@ -1,0 +1,16 @@
+$kind: http-request
+name: Update category
+url: "{{local}}/admin/auction-categories/{{categoryId}}"
+method: PATCH
+headers:
+  Authorization: Bearer {{jwt}}
+body:
+  type: json
+  content: "{\r
+
+    \  \"label\": \"Vehicles Updated\",\r
+
+    \  \"description\": \"Updated description\"\r
+
+    }"
+order: 689371605389882
