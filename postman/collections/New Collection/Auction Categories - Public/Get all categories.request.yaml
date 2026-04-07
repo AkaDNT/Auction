@@ -1,5 +1,0 @@
-$kind: http-request
-name: Get all categories
-url: "{{local}}/auction-categories"
-method: GET
-order: 1775551488057

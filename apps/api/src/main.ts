@@ -2,11 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
-import { traceIdMiddleware } from './common/trace/trace.middleware';
+import { traceIdMiddleware } from './common/middleware/trace.middleware';
 import { HttpStatus, ValidationError, ValidationPipe } from '@nestjs/common';
 import { AppException } from './common/errors/app.exception';
 import { Logger } from 'nestjs-pino';
-import * as express from 'express';
 import { ERROR_CODES } from '@repo/shared';
 
 async function bootstrap() {

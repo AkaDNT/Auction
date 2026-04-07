@@ -13,21 +13,31 @@ import { ERROR_CODES } from '@repo/shared';
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
-  canActivate(ctx: ExecutionContext) {
-    const roles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      ctx.getHandler(),
-      ctx.getClass(),
-    ]);
-    if (!roles || roles.length === 0) return true;
+  canActivate(ctx: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [ctx.getHandler(), ctx.getClass()],
+    );
+
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
 
     const req = ctx.switchToHttp().getRequest();
-    const user = req.user;
-    if (!user || !roles.includes(user.role)) {
+    const user = req.user as { id: string; roles?: string[] } | undefined;
+
+    const hasRole =
+      !!user &&
+      Array.isArray(user.roles) &&
+      user.roles.some((role) => requiredRoles.includes(role));
+
+    if (!hasRole) {
       throw new AppException(
         { code: ERROR_CODES.AUTH_FORBIDDEN, message: 'Forbidden' },
         HttpStatus.FORBIDDEN,
       );
     }
-    return user && roles.includes(user.role);
+
+    return true;
   }
 }

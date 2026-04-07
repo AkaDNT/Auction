@@ -1,14 +1,24 @@
-model User{
-  id String @id @default(cuid())
-  name String
-  email String @unique
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
   passwordHash String
-  status UserStatus @default(ACTIVE)
-  role Role @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  status       UserStatus     @default(ACTIVE)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
+  userRoles     UserRole[]
   refreshTokens RefreshToken[]
-  auctions    Auction[] @relation("AuctionSeller")
-  bids        Bid[]
+  auctions      Auction[]     @relation("AuctionSeller")
+  bids          Bid[]
+}
+
+model UserRole {
+  userId String
+  role   Role
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, role])
+  @@index([role])
 }

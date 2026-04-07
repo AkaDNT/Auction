@@ -46,14 +46,8 @@ export class AuthController {
   @UseGuards(JwtAccessGuard, RolesGuard)
   @Roles('ADMIN')
   @Post('create-user')
-  async createUser(
-    @Body() body: { email: string; password: string; role: Role },
-  ) {
-    const user = await this.usersService.createUser(
-      body.email,
-      body.password,
-      body.role,
-    );
+  async createUser(@Body() body: { email: string; password: string }) {
+    const user = await this.usersService.createUser(body.email, body.password);
     return { user };
   }
 

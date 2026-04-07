@@ -11,14 +11,16 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async createUser(email: string, password: string, role: Role = Role.USER) {
+  async createUser(email: string, password: string) {
     const passwordHash = await bcrypt.hash(password, 10);
     return this.prisma.user.create({
       data: {
         email,
         name: email.substring(0, email.indexOf('@')),
         passwordHash,
-        role,
+        userRoles: {
+          create: [{ role: Role.USER }],
+        },
       },
     });
   }

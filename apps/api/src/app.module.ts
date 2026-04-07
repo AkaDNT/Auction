@@ -10,6 +10,7 @@ import { getTraceId } from '@repo/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
+import { AuctionModule } from './modules/auction/auction.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AuctionCategoryModule } from './modules/auction-category/auction-catego
     AuthModule,
     PrismaModule,
     AuctionCategoryModule,
+    AuctionModule,
   ],
   controllers: [AppController],
   providers: [

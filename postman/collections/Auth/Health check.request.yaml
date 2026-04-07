@@ -1,7 +1,0 @@
-$kind: http-request
-name: Health check
-url: "{{local}}/health"
-method: GET
-headers:
-  Authorization: Bearer {{jwt}}
-order: 5000

@@ -15,6 +15,6 @@ import { AdminAuctionCategoryController } from './admin-auction-category.control
       useExisting: AuctionCategoryPrismaRepository,
     },
   ],
-  exports: [AuctionCategoryService],
+  exports: [AuctionCategoryService, AUCTION_CATEGORY_REPOSITORY],
 })
 export class AuctionCategoryModule {}

@@ -1,0 +1,387 @@
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { AuctionStatus, Role } from '@prisma/client';
+import slugify from 'slugify';
+import * as auctionRepository from './auction.repository';
+import * as auctionCategoryRepository from '../auction-category/auction-category.repository';
+import { ERROR_CODES } from '@repo/shared';
+import { AppException } from 'src/common/errors/app.exception';
+import { CreateAuctionDto } from './dto/create-auction.dto';
+import { ListAuctionDto } from './dto/list-auction.dto';
+import { UpdateAuctionDto } from './dto/update-auction.dto';
+
+@Injectable()
+export class AuctionService {
+  constructor(
+    @Inject(auctionRepository.AUCTION_REPOSITORY)
+    private readonly auctionRepo: auctionRepository.IAuctionRepository,
+    @Inject(auctionCategoryRepository.AUCTION_CATEGORY_REPOSITORY)
+    private readonly categoryRepo: auctionCategoryRepository.IAuctionCategoryRepository,
+  ) {}
+
+  async create(dto: CreateAuctionDto, sellerId: string) {
+    const category = await this.categoryRepo.findById(dto.categoryId);
+    if (!category) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
+          message: 'Auction category not found',
+          details: { categoryId: dto.categoryId },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    this.validateTimeRange(dto.startAt, dto.endAt);
+    this.validatePrices(dto.startingPrice, dto.buyNowPrice);
+
+    const code = await this.generateAuctionCode();
+    const slug = await this.generateUniqueSlug(dto.title);
+
+    return this.auctionRepo.create({
+      code,
+      title: dto.title,
+      slug,
+      description: dto.description,
+      startingPrice: dto.startingPrice,
+      currentPrice: dto.startingPrice,
+      buyNowPrice: dto.buyNowPrice,
+      startAt: dto.startAt ? new Date(dto.startAt) : null,
+      endAt: new Date(dto.endAt),
+      status: AuctionStatus.DRAFT,
+      thumbnailUrl: dto.thumbnailUrl,
+      seller: {
+        connect: { id: sellerId },
+      },
+      category: {
+        connect: { id: dto.categoryId },
+      },
+    });
+  }
+
+  async findAll(query: ListAuctionDto) {
+    const [items, total] = await Promise.all([
+      this.auctionRepo.findMany(query),
+      this.auctionRepo.count(query),
+    ]);
+
+    return {
+      items,
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total,
+      },
+    };
+  }
+
+  async findOne(id: string) {
+    const auction = await this.auctionRepo.findById(id);
+    if (!auction) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return auction;
+  }
+
+  async findOneBySlug(slug: string) {
+    const auction = await this.auctionRepo.findBySlug(slug);
+    if (!auction) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { slug },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return auction;
+  }
+
+  async update(id: string, sellerId: string, dto: UpdateAuctionDto) {
+    const current = await this.auctionRepo.findById(id);
+
+    if (!current || current.sellerId !== sellerId) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (current.status !== AuctionStatus.DRAFT) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_UPDATE_NOT_ALLOWED,
+          message: 'Only draft auction can be updated',
+          details: { id, status: current.status },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (dto.categoryId) {
+      const category = await this.categoryRepo.findById(dto.categoryId);
+      if (!category) {
+        throw new AppException(
+          {
+            code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
+            message: 'Auction category not found',
+            details: { categoryId: dto.categoryId },
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    }
+
+    this.validateTimeRange(
+      dto.startAt ?? current.startAt?.toISOString(),
+      dto.endAt ?? current.endAt.toISOString(),
+    );
+
+    this.validatePrices(
+      dto.startingPrice ?? Number(current.startingPrice),
+      dto.buyNowPrice ??
+        (current.buyNowPrice ? Number(current.buyNowPrice) : undefined),
+    );
+
+    let nextSlug: string | undefined;
+
+    nextSlug = await this.generateUniqueSlug(dto.title!, current.id);
+
+    return this.auctionRepo.update(id, {
+      title: dto.title,
+      slug: nextSlug,
+      description: dto.description,
+      startingPrice: dto.startingPrice,
+      buyNowPrice: dto.buyNowPrice,
+      startAt: dto.startAt ? new Date(dto.startAt) : undefined,
+      endAt: dto.endAt ? new Date(dto.endAt) : undefined,
+      thumbnailUrl: dto.thumbnailUrl,
+      ...(dto.categoryId
+        ? {
+            category: {
+              connect: { id: dto.categoryId },
+            },
+          }
+        : {}),
+    });
+  }
+
+  async publish(id: string, sellerId: string) {
+    const auction = await this.findOne(id);
+
+    if (auction.sellerId !== sellerId) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const now = new Date();
+    if (auction.endAt <= now) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_ALREADY_ENDED,
+          message: 'Cannot publish auction that already ended',
+          details: { id, endAt: auction.endAt },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const status =
+      !auction.startAt || auction.startAt <= now
+        ? AuctionStatus.LIVE
+        : AuctionStatus.UPCOMING;
+
+    return this.auctionRepo.update(id, { status });
+  }
+
+  async cancel(id: string, sellerId: string, role: string) {
+    const current = await this.findOne(id);
+
+    if (current.sellerId !== sellerId && role !== Role.ADMIN) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.auctionRepo.update(id, {
+      status: AuctionStatus.CANCELLED,
+    });
+  }
+
+  async remove(id: string, sellerId: string) {
+    const auction = await this.findOne(id);
+
+    if (auction.sellerId !== sellerId) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Auction not found',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (auction.status !== AuctionStatus.DRAFT) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_DELETE_NOT_ALLOWED,
+          message: 'Only draft auction can be deleted',
+          details: { id, status: auction.status },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.auctionRepo.delete(id);
+  }
+
+  private async generateAuctionCode() {
+    for (let i = 0; i < 10; i++) {
+      const now = new Date();
+      const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(
+        now.getDate(),
+      ).padStart(2, '0')}`;
+      const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const code = `AUC-${datePart}-${randomPart}`;
+
+      const existed = await this.auctionRepo.findByCode(code);
+      if (!existed) return code;
+    }
+
+    throw new AppException(
+      {
+        code: ERROR_CODES.AUCTION_CODE_ALREADY_EXISTS,
+        message: 'Failed to generate unique auction code',
+      },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
+
+  private async generateUniqueSlug(input: string, excludeId?: string) {
+    const baseSlug = this.toSlug(input);
+
+    for (let i = 0; i < 50; i++) {
+      const candidate = i === 0 ? baseSlug : `${baseSlug}-${i + 1}`;
+      const existed = await this.auctionRepo.findBySlug(candidate);
+
+      if (!existed || existed.id === excludeId) {
+        return candidate;
+      }
+    }
+
+    throw new AppException(
+      {
+        code: ERROR_CODES.AUCTION_SLUG_ALREADY_EXISTS,
+        message: 'Failed to generate unique auction slug',
+        details: { input },
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  private toSlug(value: string) {
+    const slug = slugify(value, {
+      lower: true,
+      strict: true,
+      trim: true,
+    });
+
+    if (!slug) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_SLUG,
+          message: 'Invalid slug source',
+          details: { value },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return slug;
+  }
+
+  private validateTimeRange(startAt?: string | null, endAt?: string | null) {
+    if (!endAt) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
+          message: 'endAt is required',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const end = new Date(endAt);
+    if (Number.isNaN(end.getTime())) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
+          message: 'Invalid endAt',
+          details: { endAt },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (startAt) {
+      const start = new Date(startAt);
+      if (Number.isNaN(start.getTime()) || start >= end) {
+        throw new AppException(
+          {
+            code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
+            message: 'startAt must be before endAt',
+            details: { startAt, endAt },
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  }
+
+  private validatePrices(startingPrice: number, buyNowPrice?: number) {
+    if (startingPrice < 0) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_PRICE,
+          message: 'startingPrice must be greater than or equal to 0',
+          details: { startingPrice },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (buyNowPrice !== undefined && buyNowPrice < startingPrice) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_PRICE,
+          message: 'buyNowPrice must be greater than or equal to startingPrice',
+          details: { startingPrice, buyNowPrice },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+}
