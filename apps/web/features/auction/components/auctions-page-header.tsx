@@ -1,13 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 
 import { auctionCategories, sortOptions } from "../mocks/auctions.mock";
 import { mockImages } from "@/shared/lib/mock-images";
+import { AuthUserMenu } from "@/features/auth/components/auth-user-menu";
+import { useAuthUser } from "@/features/auth/services/auth-user.store";
 
 export function AuctionsPageHeader() {
+  const user = useAuthUser();
+
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10">
-      <div className="overflow-hidden rounded-[2rem] border border-theme-line bg-theme-panel">
+      <div className="overflow-hidden rounded-4xl border border-theme-line bg-theme-panel">
         <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-8">
           <div className="space-y-5">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-theme-brand">
@@ -64,12 +70,18 @@ export function AuctionsPageHeader() {
             </div>
 
             <div className="flex flex-wrap gap-3 pt-1">
-              <Link href="/register" className="btn-primary">
-                Bắt đầu đấu giá
-              </Link>
-              <Link href="/login" className="btn-secondary">
-                Đăng nhập tài khoản
-              </Link>
+              {user ? (
+                <AuthUserMenu />
+              ) : (
+                <>
+                  <Link href="/register" className="btn-primary">
+                    Bắt đầu đấu giá
+                  </Link>
+                  <Link href="/login" className="btn-secondary">
+                    Đăng nhập tài khoản
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -82,7 +94,7 @@ export function AuctionsPageHeader() {
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 42vw"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/25 to-transparent" />
               <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/20 bg-black/35 p-3 backdrop-blur">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/80">
                   Luồng nổi bật hôm nay

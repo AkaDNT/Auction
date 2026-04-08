@@ -12,9 +12,8 @@ import type {
 } from "../types/home";
 
 export const navLinks: NavLink[] = [
-  { label: "Trang chủ", href: "#home" },
-  { label: "Đấu giá", href: "/auctions" },
   { label: "Tính năng", href: "#features" },
+  { label: "Lợi ích", href: "#benefits" },
   { label: "Quy trình", href: "#how-it-works" },
   { label: "Gói dịch vụ", href: "#pricing" },
   { label: "Liên hệ", href: "#footer" },

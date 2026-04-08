@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import Image from "next/image";
 
 import { ThemeToggle } from "@/shared/components/theme/theme-toggle";
@@ -21,7 +22,15 @@ export function AuthShell({ children, title, description }: AuthShellProps) {
             </p>
             <p className="mt-2 text-sm theme-muted">{description}</p>
           </div>
-          <ThemeToggle />
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-full border border-(--border) bg-(--surface) px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] theme-muted transition hover:border-(--primary) hover:text-(--primary-strong) sm:text-sm"
+            >
+              Về trang chủ
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-center lg:gap-8">
@@ -36,7 +45,7 @@ export function AuthShell({ children, title, description }: AuthShellProps) {
               hành nội bộ.
             </p>
 
-            <div className="relative mt-6 h-48 overflow-hidden rounded-[1.5rem] border border-[color:var(--border)] sm:h-56">
+            <div className="relative mt-6 h-48 overflow-hidden rounded-3xl border border-(--border) sm:h-56">
               <Image
                 src={mockImages.authHero}
                 alt="Không gian vận hành xác thực"
@@ -47,7 +56,7 @@ export function AuthShell({ children, title, description }: AuthShellProps) {
             </div>
           </div>
 
-          <div className="theme-surface rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 lg:p-8">
+          <div className="theme-surface rounded-3xl p-4 sm:rounded-4xl sm:p-6 lg:p-8">
             {children}
           </div>
         </div>

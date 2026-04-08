@@ -1,17 +1,23 @@
+"use client";
+
 import Link from "next/link";
 
 import { navLinks } from "../mocks/home.mock";
+import { AuthUserMenu } from "@/features/auth/components/auth-user-menu";
+import { useAuthUser } from "@/features/auth/services/auth-user.store";
 import { ThemeToggle } from "@/shared/components/theme/theme-toggle";
 
 export function SiteHeader() {
+  const user = useAuthUser();
+
   return (
     <header className="theme-surface sticky top-0 z-50">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3 self-start text-[color:var(--foreground)]"
+          className="flex items-center gap-3 self-start text-foreground"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[color:var(--primary-soft)] text-sm font-bold tracking-[0.3em] text-[color:var(--primary-strong)]">
+          <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-(--border) bg-(--primary-soft) text-sm font-bold tracking-[0.3em] text-(--primary-strong)">
             AH
           </span>
           <div>
@@ -29,15 +35,16 @@ export function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium theme-muted transition hover:text-[color:var(--primary-strong)]"
+              className="text-sm font-medium theme-muted transition hover:text-(--primary-strong)"
             >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-[auto,1fr] md:flex md:w-auto md:flex-shrink-0 md:items-center md:justify-end md:gap-3">
+        <div className="grid w-full grid-cols-2 gap-2 sm:grid-cols-[auto,1fr] md:flex md:w-auto md:shrink-0 md:items-center md:justify-end md:gap-3">
           <ThemeToggle className="w-full justify-center md:w-auto" />
+          {user ? <AuthUserMenu /> : null}
           <Link
             href="/auctions"
             className="theme-button-primary inline-flex w-full min-w-0 justify-center rounded-full px-4 py-2 text-sm font-semibold transition md:w-auto"

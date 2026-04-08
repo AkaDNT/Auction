@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
+import { AuthUserMenu } from "@/features/auth/components/auth-user-menu";
 import { ThemeToggle } from "@/shared/components/theme/theme-toggle";
 import { mockImages } from "@/shared/lib/mock-images";
 
@@ -22,8 +23,8 @@ export function AdminShell({ children }: AdminShellProps) {
   return (
     <div className="theme-page min-h-screen">
       <div className="mx-auto grid min-h-screen max-w-7xl gap-4 px-3 py-3 sm:px-4 sm:py-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6 lg:px-6">
-        <aside className="theme-surface flex flex-col rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6">
-          <div className="border-b border-[color:var(--border)] pb-5">
+        <aside className="theme-surface flex flex-col rounded-3xl p-4 sm:rounded-4xl sm:p-6">
+          <div className="border-b border-(--border) pb-5">
             <p className="text-sm font-semibold uppercase tracking-[0.35em] theme-primary">
               Sàn Đấu Giá
             </p>
@@ -37,7 +38,7 @@ export function AdminShell({ children }: AdminShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex min-w-max items-center justify-between rounded-2xl border border-transparent px-4 py-3 text-sm font-medium theme-muted transition hover:border-[color:var(--border)] hover:bg-[color:var(--primary-soft)] hover:text-[color:var(--foreground)] lg:w-full"
+                className="flex min-w-max items-center justify-between rounded-2xl border border-transparent px-4 py-3 text-sm font-medium theme-muted transition hover:border-(--border) hover:bg-(--primary-soft) hover:text-foreground lg:w-full"
               >
                 <span>{item.label}</span>
                 <span className="hidden text-xs uppercase tracking-[0.3em] theme-primary sm:inline">
@@ -47,8 +48,8 @@ export function AdminShell({ children }: AdminShellProps) {
             ))}
           </nav>
 
-          <div className="mt-6 hidden rounded-2xl border border-[color:var(--border)] p-3 lg:block">
-            <div className="relative h-32 overflow-hidden rounded-xl border border-[color:var(--border)]">
+          <div className="mt-6 hidden rounded-2xl border border-(--border) p-3 lg:block">
+            <div className="relative h-32 overflow-hidden rounded-xl border border-(--border)">
               <Image
                 src={mockImages.adminPanel}
                 alt="Bảng điều khiển quản trị"
@@ -63,13 +64,13 @@ export function AdminShell({ children }: AdminShellProps) {
             </p>
           </div>
 
-          <div className="mt-auto hidden border-t border-[color:var(--border)] pt-5 lg:block">
+          <div className="mt-auto hidden border-t border-(--border) pt-5 lg:block">
             <ThemeToggle />
           </div>
         </aside>
 
         <main className="flex min-w-0 flex-col gap-6">
-          <header className="theme-surface flex flex-col gap-4 rounded-[1.5rem] p-4 sm:rounded-[2rem] sm:p-6 sm:flex-row sm:items-center sm:justify-between">
+          <header className="theme-surface flex flex-col gap-4 rounded-3xl p-4 sm:rounded-4xl sm:p-6 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.35em] theme-primary">
                 Quản trị doanh nghiệp
@@ -78,6 +79,7 @@ export function AdminShell({ children }: AdminShellProps) {
                 Bảng điều khiển vận hành
               </h1>
             </div>
+            <AuthUserMenu />
             <div className="lg:hidden">
               <ThemeToggle />
             </div>
