@@ -16,7 +16,7 @@ export function mapPrismaError(e: unknown): null | {
       return {
         status: HttpStatus.CONFLICT,
         code: ERROR_CODES.DB_UNIQUE_CONSTRAINT,
-        message: 'Unique constraint violated',
+        message: 'Dữ liệu bị trùng và vi phạm ràng buộc duy nhất',
         details: { target: (e.meta as any)?.target ?? null },
       };
 
@@ -24,14 +24,14 @@ export function mapPrismaError(e: unknown): null | {
       return {
         status: HttpStatus.NOT_FOUND,
         code: ERROR_CODES.DB_NOT_FOUND,
-        message: 'Record not found',
+        message: 'Không tìm thấy bản ghi',
       };
 
     default:
       return {
         status: HttpStatus.BAD_REQUEST,
         code: ERROR_CODES.DB_CONSTRAINT,
-        message: 'Database request error',
+        message: 'Yêu cầu đến cơ sở dữ liệu không hợp lệ',
         details: { prismaCode: e.code },
       };
   }

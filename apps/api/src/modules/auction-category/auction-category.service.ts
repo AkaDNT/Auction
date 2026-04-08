@@ -19,7 +19,7 @@ export class AuctionCategoryService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_SLUG_ALREADY_EXISTS,
-          message: 'Category slug already exists',
+          message: 'Slug danh mục đã tồn tại',
           details: { slug: dto.slug },
         },
         HttpStatus.BAD_REQUEST,
@@ -44,7 +44,7 @@ export class AuctionCategoryService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
-          message: 'Auction category not found',
+          message: 'Không tìm thấy danh mục đấu giá',
           details: { slug },
         },
         HttpStatus.NOT_FOUND,
@@ -61,7 +61,7 @@ export class AuctionCategoryService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
-          message: 'Auction category not found',
+          message: 'Không tìm thấy danh mục đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -75,7 +75,7 @@ export class AuctionCategoryService {
         throw new AppException(
           {
             code: ERROR_CODES.AUCTION_CATEGORY_SLUG_ALREADY_EXISTS,
-            message: 'Category slug already exists',
+            message: 'Slug danh mục đã tồn tại',
             details: { slug: dto.slug },
           },
           HttpStatus.BAD_REQUEST,
@@ -97,7 +97,7 @@ export class AuctionCategoryService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
-          message: 'Auction category not found',
+          message: 'Không tìm thấy danh mục đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -110,7 +110,7 @@ export class AuctionCategoryService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_IN_USE,
-          message: 'Cannot delete category because auctions are using it',
+          message: 'Không thể xóa danh mục vì đang có phiên đấu giá sử dụng',
           details: { id, auctionsCount },
         },
         HttpStatus.BAD_REQUEST,

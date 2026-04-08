@@ -81,7 +81,7 @@ export class AuthController {
       throw new AppException(
         {
           code: ERROR_CODES.AUTH_REFRESH_MISSING,
-          message: 'Missing refresh token',
+          message: 'Thiếu refresh token',
         },
         HttpStatus.UNAUTHORIZED,
       );

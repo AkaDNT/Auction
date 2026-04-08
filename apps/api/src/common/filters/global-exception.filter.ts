@@ -54,7 +54,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const message =
         typeof response?.message === 'string'
           ? response.message
-          : 'Request error';
+          : 'Lỗi yêu cầu';
       const details = Array.isArray(response?.message)
         ? response.message
         : null;
@@ -103,7 +103,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: {
         code: ERROR_CODES.INTERNAL_ERROR,
-        message: 'Internal server error',
+        message: 'Lỗi máy chủ nội bộ',
         details: null,
       },
       traceId,

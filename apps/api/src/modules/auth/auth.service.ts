@@ -44,7 +44,23 @@ export class AuthService {
       throw new AppException(
         {
           code: ERROR_CODES.PASSWORD_MISMATCH,
-          message: 'Confirmation password does not match',
+          message: 'Mật khẩu xác nhận không khớp',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const existed = await this.prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+    if (existed) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.USER_EMAIL_ALREADY_EXISTS,
+          message:
+            'Email này đã được sử dụng. Vui lòng dùng email khác hoặc đăng nhập.',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -53,7 +69,7 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: {
         email,
-        name: email.substring(0, email.indexOf('@')),
+        name: data.name,
         passwordHash: await bcrypt.hash(password, 10),
         userRoles: {
           create: [{ role: Role.USER }],
@@ -108,7 +124,7 @@ export class AuthService {
       throw new AppException(
         {
           code: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
-          message: 'Invalid credentials',
+          message: 'Thông tin đăng nhập không hợp lệ',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -118,7 +134,7 @@ export class AuthService {
       throw new AppException(
         {
           code: ERROR_CODES.AUTH_FORBIDDEN,
-          message: 'User disabled',
+          message: 'Tài khoản hiện không hoạt động',
         },
         HttpStatus.FORBIDDEN,
       );
@@ -129,7 +145,7 @@ export class AuthService {
       throw new AppException(
         {
           code: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
-          message: 'Invalid credentials',
+          message: 'Thông tin đăng nhập không hợp lệ',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -178,7 +194,7 @@ export class AuthService {
       throw new AppException(
         {
           code: ERROR_CODES.AUTH_REFRESH_INVALID,
-          message: 'Invalid refresh token',
+          message: 'Refresh token không hợp lệ',
         },
         HttpStatus.UNAUTHORIZED,
       );
@@ -200,16 +216,16 @@ export class AuthService {
     });
 
     if (!tokenRow) {
-      throw new UnauthorizedException('Refresh token revoked');
+      throw new UnauthorizedException('Refresh token đã bị thu hồi');
     }
 
     const ok = await bcrypt.compare(refreshToken, tokenRow.tokenHash);
     if (!ok) {
-      throw new UnauthorizedException('Refresh token mismatch');
+      throw new UnauthorizedException('Refresh token không khớp');
     }
 
     if (tokenRow.expiresAt.getTime() < Date.now()) {
-      throw new UnauthorizedException('Refresh token expired');
+      throw new UnauthorizedException('Refresh token đã hết hạn');
     }
 
     await this.prisma.refreshToken.update({

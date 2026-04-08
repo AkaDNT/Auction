@@ -33,7 +33,10 @@ export class RolesGuard implements CanActivate {
 
     if (!hasRole) {
       throw new AppException(
-        { code: ERROR_CODES.AUTH_FORBIDDEN, message: 'Forbidden' },
+        {
+          code: ERROR_CODES.AUTH_FORBIDDEN,
+          message: 'Không có quyền truy cập',
+        },
         HttpStatus.FORBIDDEN,
       );
     }

@@ -35,7 +35,7 @@ async function bootstrap() {
         throw new AppException(
           {
             code: ERROR_CODES.VALIDATION_ERROR,
-            message: 'Validation failed',
+            message: 'Dữ liệu không hợp lệ',
             details: formatValidation(errors),
           },
           HttpStatus.BAD_REQUEST,

@@ -24,7 +24,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
-          message: 'Auction category not found',
+          message: 'Không tìm thấy danh mục đấu giá',
           details: { categoryId: dto.categoryId },
         },
         HttpStatus.NOT_FOUND,
@@ -80,7 +80,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -95,7 +95,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { slug },
         },
         HttpStatus.NOT_FOUND,
@@ -111,7 +111,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -122,7 +122,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_UPDATE_NOT_ALLOWED,
-          message: 'Only draft auction can be updated',
+          message: 'Chỉ có thể cập nhật phiên đấu giá ở trạng thái nháp',
           details: { id, status: current.status },
         },
         HttpStatus.BAD_REQUEST,
@@ -135,7 +135,7 @@ export class AuctionService {
         throw new AppException(
           {
             code: ERROR_CODES.AUCTION_CATEGORY_NOT_FOUND,
-            message: 'Auction category not found',
+            message: 'Không tìm thấy danh mục đấu giá',
             details: { categoryId: dto.categoryId },
           },
           HttpStatus.NOT_FOUND,
@@ -184,7 +184,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -196,7 +196,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_ALREADY_ENDED,
-          message: 'Cannot publish auction that already ended',
+          message: 'Không thể phát hành phiên đấu giá đã kết thúc',
           details: { id, endAt: auction.endAt },
         },
         HttpStatus.BAD_REQUEST,
@@ -218,7 +218,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -237,7 +237,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Auction not found',
+          message: 'Không tìm thấy phiên đấu giá',
           details: { id },
         },
         HttpStatus.NOT_FOUND,
@@ -248,7 +248,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_DELETE_NOT_ALLOWED,
-          message: 'Only draft auction can be deleted',
+          message: 'Chỉ có thể xóa phiên đấu giá ở trạng thái nháp',
           details: { id, status: auction.status },
         },
         HttpStatus.BAD_REQUEST,
@@ -274,7 +274,7 @@ export class AuctionService {
     throw new AppException(
       {
         code: ERROR_CODES.AUCTION_CODE_ALREADY_EXISTS,
-        message: 'Failed to generate unique auction code',
+        message: 'Không thể tạo mã phiên đấu giá duy nhất. Vui lòng thử lại',
       },
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
@@ -295,7 +295,7 @@ export class AuctionService {
     throw new AppException(
       {
         code: ERROR_CODES.AUCTION_SLUG_ALREADY_EXISTS,
-        message: 'Failed to generate unique auction slug',
+        message: 'Không thể tạo đường dẫn phiên đấu giá duy nhất',
         details: { input },
       },
       HttpStatus.BAD_REQUEST,
@@ -313,7 +313,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_INVALID_SLUG,
-          message: 'Invalid slug source',
+          message: 'Tiêu đề không hợp lệ để tạo đường dẫn',
           details: { value },
         },
         HttpStatus.BAD_REQUEST,
@@ -328,7 +328,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
-          message: 'endAt is required',
+          message: 'Thời gian kết thúc là bắt buộc (endAt)',
         },
         HttpStatus.BAD_REQUEST,
       );
@@ -339,7 +339,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
-          message: 'Invalid endAt',
+          message: 'Thời gian kết thúc không hợp lệ (endAt)',
           details: { endAt },
         },
         HttpStatus.BAD_REQUEST,
@@ -352,7 +352,7 @@ export class AuctionService {
         throw new AppException(
           {
             code: ERROR_CODES.AUCTION_INVALID_TIME_RANGE,
-            message: 'startAt must be before endAt',
+            message: 'Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc',
             details: { startAt, endAt },
           },
           HttpStatus.BAD_REQUEST,
@@ -366,7 +366,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_INVALID_PRICE,
-          message: 'startingPrice must be greater than or equal to 0',
+          message: 'Giá khởi điểm phải lớn hơn hoặc bằng 0',
           details: { startingPrice },
         },
         HttpStatus.BAD_REQUEST,
@@ -377,7 +377,7 @@ export class AuctionService {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_INVALID_PRICE,
-          message: 'buyNowPrice must be greater than or equal to startingPrice',
+          message: 'Giá mua ngay phải lớn hơn hoặc bằng giá khởi điểm',
           details: { startingPrice, buyNowPrice },
         },
         HttpStatus.BAD_REQUEST,
