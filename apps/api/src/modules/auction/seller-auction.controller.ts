@@ -43,7 +43,7 @@ export class SellerAuctionController {
 
   @Post(':id/cancel')
   cancel(@Param('id') id: string, @Req() req: any) {
-    return this.auctionService.cancel(id, req.user.id, req.role);
+    return this.auctionService.cancel(id, req.user.id, req.user.roles);
   }
 
   @Delete(':id')

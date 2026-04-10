@@ -214,7 +214,7 @@ export class AuctionService {
   async cancel(id: string, sellerId: string, role: string) {
     const current = await this.findOne(id);
 
-    if (current.sellerId !== sellerId && role !== Role.ADMIN) {
+    if (current.sellerId !== sellerId && !role.includes(Role.ADMIN)) {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,

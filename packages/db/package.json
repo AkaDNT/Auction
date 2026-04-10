@@ -13,10 +13,13 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "prisma": "^6.19.3"
   },
   "devDependencies": {
+    "@types/node": "^22.19.17",
     "prisma-import": "^1.0.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

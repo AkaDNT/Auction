@@ -103,7 +103,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: {
         code: ERROR_CODES.INTERNAL_ERROR,
-        message: 'Lỗi máy chủ nội bộ',
+        message: 'Lỗi máy chủ',
         details: null,
       },
       traceId,

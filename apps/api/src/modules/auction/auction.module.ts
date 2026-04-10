@@ -22,6 +22,6 @@ import { AuctionCategoryModule } from '../auction-category/auction-category.modu
       useExisting: AuctionPrismaRepository,
     },
   ],
-  exports: [AuctionService],
+  exports: [AuctionService, AUCTION_REPOSITORY],
 })
 export class AuctionModule {}

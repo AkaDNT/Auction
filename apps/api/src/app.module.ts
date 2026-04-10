@@ -11,6 +11,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
 import { AuctionModule } from './modules/auction/auction.module';
+import { AuctionImageModule } from './modules/auction-image/auction-image.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AuctionModule } from './modules/auction/auction.module';
     PrismaModule,
     AuctionCategoryModule,
     AuctionModule,
+    AuctionImageModule,
   ],
   controllers: [AppController],
   providers: [
