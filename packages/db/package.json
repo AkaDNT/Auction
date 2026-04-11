@@ -9,7 +9,8 @@
     "build": "tsc -p tsconfig.json",
     "prisma:migrate": "npx prisma migrate dev --schema prisma",
     "prisma:generate": "npx prisma generate --schema prisma",
-    "prisma:studio": "npx prisma studio --schema prisma"
+    "prisma:studio": "npx prisma studio --schema prisma",
+    "prisma:seed": "npx prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
