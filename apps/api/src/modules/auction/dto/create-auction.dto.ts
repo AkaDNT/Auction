@@ -18,6 +18,11 @@ export class CreateAuctionDto {
   buyNowPrice?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(1001)
+  minBidIncrement?: number;
+
+  @IsOptional()
   @IsString()
   startAt?: string;
 

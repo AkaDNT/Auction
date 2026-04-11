@@ -12,6 +12,8 @@ import { GlobalExceptionFilter } from './common/filters/global-exception.filter'
 import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
 import { AuctionModule } from './modules/auction/auction.module';
 import { AuctionImageModule } from './modules/auction-image/auction-image.module';
+import { BidModule } from './modules/bid/bid.module';
+import { AuctionContentModule } from './modules/auction-content/auction-content.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { AuctionImageModule } from './modules/auction-image/auction-image.module
     AuctionCategoryModule,
     AuctionModule,
     AuctionImageModule,
+    BidModule,
+    AuctionContentModule,
   ],
   controllers: [AppController],
   providers: [

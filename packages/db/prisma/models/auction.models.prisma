@@ -21,6 +21,7 @@ model Auction {
   reservePrice    Decimal?         @db.Decimal(18, 3)
   currentPrice    Decimal?         @db.Decimal(18, 3)
   buyNowPrice     Decimal?         @db.Decimal(18, 3)
+  minBidIncrement Decimal @default(1000) @db.Decimal(18, 3)
 
   startAt         DateTime?
   endAt           DateTime
