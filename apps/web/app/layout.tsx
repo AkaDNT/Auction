@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Noto_Sans_Mono } from "next/font/google";
+import { QueryProvider } from "@/shared/components/query/query-provider";
 import { ThemeProvider } from "@/shared/components/theme/theme-provider";
 import { ThemeScript } from "@/shared/components/theme/theme-script";
 import "./globals.css";
@@ -35,7 +36,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
         <ThemeScript />
-        <ThemeProvider>{children}</ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

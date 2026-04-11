@@ -12,14 +12,32 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
   "http://localhost:3999";
 
+async function clearRefreshTokenCookie(): Promise<void> {
+  try {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    // Ignore cleanup failure because auth flow can still continue as logged-out.
+  }
+}
+
 async function refreshAccessToken(): Promise<string | null> {
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
-  });
+  }).catch(() => null);
+
+  if (!response) {
+    clearAuthAccessToken();
+    await clearRefreshTokenCookie();
+    return null;
+  }
 
   if (!response.ok) {
     clearAuthAccessToken();
+    await clearRefreshTokenCookie();
     return null;
   }
 
@@ -34,6 +52,7 @@ async function refreshAccessToken(): Promise<string | null> {
   }
 
   clearAuthAccessToken();
+  await clearRefreshTokenCookie();
   return null;
 }
 
