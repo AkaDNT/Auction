@@ -1,4 +1,9 @@
 import { Auction, AuctionStatus, Prisma } from '@prisma/client';
+import {
+  AuctionEndTimeFilter,
+  AuctionPriceRangeFilter,
+  AuctionSortBy,
+} from './dto/list-auction.dto';
 
 export const AUCTION_REPOSITORY = Symbol('AUCTION_REPOSITORY');
 
@@ -8,7 +13,6 @@ export interface IAuctionRepository {
   findById(id: string): Promise<Auction | null>;
   findBySlug(slug: string): Promise<Auction | null>;
   findByCode(code: string): Promise<Auction | null>;
-  delete(id: string): Promise<Auction>;
 
   findMany(params: {
     page: number;
@@ -16,13 +20,21 @@ export interface IAuctionRepository {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
-    sellerId?: string;
+    sellerSlug?: string;
+    endTimeFilter?: AuctionEndTimeFilter;
+    priceRangeFilter?: AuctionPriceRangeFilter;
+    sortBy?: AuctionSortBy;
   }): Promise<any[]>;
 
   count(params: {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
-    sellerId?: string;
+    sellerSlug?: string;
+    endTimeFilter?: AuctionEndTimeFilter;
+    priceRangeFilter?: AuctionPriceRangeFilter;
   }): Promise<number>;
+
+  findFeaturedLiveAuctions(limit: number): Promise<any[]>;
+  delete(id: string): Promise<Auction>;
 }

@@ -6,11 +6,13 @@ model User {
   status       UserStatus     @default(ACTIVE)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  slug         String         @unique 
 
   userRoles     UserRole[]
   refreshTokens RefreshToken[]
   auctions      Auction[]     @relation("AuctionSeller")
   bids          Bid[]
+  @@index([slug])
 }
 
 model UserRole {

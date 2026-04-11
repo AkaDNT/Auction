@@ -10,8 +10,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Response } from 'express';
-import { UsersService } from './users.service';
-import { Role } from '@repo/db';
 
 import { RegisterDto } from './dto/register.dto';
 import { JwtAccessGuard } from 'src/common/guards/jwt-access.guard';
@@ -23,10 +21,7 @@ import { ERROR_CODES } from '@repo/shared';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
   private setRefreshCookie(res: Response, token: string) {
     const days = Number(process.env.JWT_REFRESH_TTL_DAYS || 7);
     const secure = (process.env.COOKIE_SECURE ?? 'false') === 'true';
@@ -41,14 +36,6 @@ export class AuthController {
       maxAge: days * 24 * 3600 * 1000,
       path: '/auth',
     });
-  }
-
-  @UseGuards(JwtAccessGuard, RolesGuard)
-  @Roles('ADMIN')
-  @Post('create-user')
-  async createUser(@Body() body: { email: string; password: string }) {
-    const user = await this.usersService.createUser(body.email, body.password);
-    return { user };
   }
 
   @Post('/login')

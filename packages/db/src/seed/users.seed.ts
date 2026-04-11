@@ -10,6 +10,7 @@ export async function seedUsers(prisma: PrismaClient) {
     return {
       name: `Demo User ${String(no).padStart(2, "0")}`,
       email: `demo.user${String(no).padStart(2, "0")}@example.com`,
+      slug: `demo.user${String(no).padStart(2, "0")}`,
       passwordHash,
       status: UserStatus.ACTIVE,
       roles: [Role.USER, Role.SELLER],
@@ -33,6 +34,7 @@ export async function seedUsers(prisma: PrismaClient) {
         email: item.email,
         passwordHash: item.passwordHash,
         status: item.status,
+        slug: item.slug,
         userRoles: {
           create: item.roles.map((role) => ({ role })),
         },

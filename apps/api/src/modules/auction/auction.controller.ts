@@ -16,6 +16,11 @@ export class AuctionController {
     return this.auctionService.findOneBySlug(slug);
   }
 
+  @Get('featured')
+  findFeatured() {
+    return this.auctionService.findFeatured();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.auctionService.findOne(id);

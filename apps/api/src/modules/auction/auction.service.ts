@@ -105,6 +105,17 @@ export class AuctionService {
     return auction;
   }
 
+  async findFeatured() {
+    const items = await this.auctionRepo.findFeaturedLiveAuctions(2);
+
+    return {
+      items,
+      meta: {
+        total: items.length,
+      },
+    };
+  }
+
   async update(id: string, sellerId: string, dto: UpdateAuctionDto) {
     const current = await this.auctionRepo.findById(id);
 

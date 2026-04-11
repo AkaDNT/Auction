@@ -7,6 +7,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ERROR_CODES } from '@repo/shared';
 import { RegisterDto } from './dto/register.dto';
 import { Role } from '@repo/db';
+import slugify from 'slugify';
+import { nanoid } from 'nanoid';
 
 @Injectable()
 export class AuthService {
@@ -35,6 +37,17 @@ export class AuthService {
         expiresIn: `${days}d`,
       },
     );
+  }
+
+  private async generateUserSlug(name: string): Promise<string> {
+    const baseSlug = slugify(name, { lower: true, strict: true, locale: 'vi' });
+
+    const existedBase = await this.prisma.user.findUnique({
+      where: { slug: baseSlug },
+    });
+    if (!existedBase) return baseSlug;
+
+    return `${baseSlug}-${nanoid(4)}`;
   }
 
   async register(data: RegisterDto) {
@@ -71,6 +84,7 @@ export class AuthService {
         email,
         name: data.name,
         passwordHash: await bcrypt.hash(password, 10),
+        slug: await this.generateUserSlug(data.name),
         userRoles: {
           create: [{ role: Role.USER }],
         },
@@ -108,6 +122,7 @@ export class AuthService {
         id: user.id,
         email: user.email,
         name: user.name,
+        slug: user.slug,
         roles,
       },
     };
