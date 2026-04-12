@@ -9,7 +9,11 @@ function getDisplayStatus(
   status: AuctionApiStatus,
   endAt: string,
 ): AuctionSummary["status"] {
-  if (status === "ENDED" || status === "CANCELLED") {
+  if (status === "CANCELLED") {
+    return "Đã hủy";
+  }
+
+  if (status === "ENDED") {
     return "Đã kết thúc";
   }
 
@@ -41,14 +45,30 @@ function toCurrencyLabel(value: string | number | null | undefined) {
   }).format(numericValue)} VND`;
 }
 
+function getPreferredAuctionImage(
+  images: AuctionApiItem["images"],
+): string | undefined {
+  if (!images.length) {
+    return undefined;
+  }
+
+  const sortedImages = [...images].sort((left, right) => {
+    if (left.isPrimary !== right.isPrimary) {
+      return left.isPrimary ? -1 : 1;
+    }
+
+    return left.sortOrder - right.sortOrder;
+  });
+
+  return sortedImages[0]?.imageUrl;
+}
+
 export function mapAuctionApiItemToSummary(
   auction: AuctionApiItem,
 ): AuctionSummary {
-  const imageFromList = auction.images.find(
-    (image) => image.isPrimary,
-  )?.imageUrl;
+  const imageFromList = getPreferredAuctionImage(auction.images);
   const imageUrl =
-    auction.thumbnailUrl ?? imageFromList ?? getAuctionImage(auction.id);
+    imageFromList ?? auction.thumbnailUrl ?? getAuctionImage(auction.id);
 
   return {
     id: auction.id,

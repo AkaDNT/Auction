@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CountdownText } from "./countdown-text";
-import { useDeferredValue, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useAuctions } from "@/features/auction/hooks/use-auctions";
 import { useAuctionCategories } from "@/features/auction/hooks/use-auction-categories";
 import { useFeaturedAuctions } from "@/features/auction/hooks/use-featured-auctions";
@@ -50,6 +50,13 @@ const priceRangeOptions: Array<{
 
 const AUCTIONS_PER_PAGE = 12;
 
+type NavigatorConnection = {
+  effectiveType?: string;
+  saveData?: boolean;
+  addEventListener?: (type: "change", listener: () => void) => void;
+  removeEventListener?: (type: "change", listener: () => void) => void;
+};
+
 export function AuctionsMarketFlow() {
   const listSectionRef = useRef<HTMLElement | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,6 +69,39 @@ export function AuctionsMarketFlow() {
     useState<AuctionEndTimeFilter>("ALL");
   const [sortBy, setSortBy] = useState<AuctionSortBy>("NEWEST");
   const [sellerSlugInput, setSellerSlugInput] = useState("");
+  const [imageQuality, setImageQuality] = useState(70);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined") {
+      return;
+    }
+
+    const connection = (
+      navigator as Navigator & { connection?: NavigatorConnection }
+    ).connection;
+
+    if (!connection) {
+      return;
+    }
+
+    const updateImageQualityByNetwork = () => {
+      const networkType = connection.effectiveType ?? "";
+      const isLowBandwidth =
+        connection.saveData === true ||
+        networkType === "slow-2g" ||
+        networkType === "2g";
+
+      setImageQuality(isLowBandwidth ? 45 : 70);
+    };
+
+    updateImageQualityByNetwork();
+
+    connection.addEventListener?.("change", updateImageQualityByNetwork);
+
+    return () => {
+      connection.removeEventListener?.("change", updateImageQualityByNetwork);
+    };
+  }, []);
 
   const deferredSearchInput = useDeferredValue(searchInput.trim());
   const deferredSellerSlugInput = useDeferredValue(sellerSlugInput.trim());
@@ -389,19 +429,26 @@ export function AuctionsMarketFlow() {
                       key={auction.id}
                       className="theme-card overflow-hidden rounded-2xl"
                     >
-                      <div className="relative h-40 sm:h-44">
+                      <Link
+                        href={`/auctions/${auction.id}`}
+                        className="relative block h-40 sm:h-44"
+                        aria-label={`Xem chi tiết ${auction.title}`}
+                      >
                         <Image
                           src={auction.imageUrl}
                           alt={auction.title}
                           fill
                           className="object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          quality={imageQuality}
                           sizes="(max-width: 1024px) 100vw, 50vw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                         <p className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/35 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur">
                           {auction.status}
                         </p>
-                      </div>
+                      </Link>
                       <div className="space-y-3 p-4">
                         <h3 className="text-xl font-semibold text-theme-heading">
                           {auction.title}
@@ -510,15 +557,22 @@ export function AuctionsMarketFlow() {
                       key={auction.id}
                       className="group rounded-2xl border border-theme-line bg-theme-panel/95 p-4 transition-transform hover:-translate-y-1 hover:shadow-[0_18px_38px_color-mix(in_srgb,var(--primary)_16%,transparent)]"
                     >
-                      <div className="relative mb-3 h-44 overflow-hidden rounded-xl border border-theme-line">
+                      <Link
+                        href={`/auctions/${auction.id}`}
+                        className="relative mb-3 block h-44 overflow-hidden rounded-xl border border-theme-line"
+                        aria-label={`Xem chi tiết ${auction.title}`}
+                      >
                         <Image
                           src={auction.imageUrl}
                           alt={auction.title}
                           fill
                           className="object-cover transition duration-500 group-hover:scale-105"
+                          loading="lazy"
+                          decoding="async"
+                          quality={imageQuality}
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
-                      </div>
+                      </Link>
 
                       <h3 className="line-clamp-2 text-lg font-semibold text-theme-heading">
                         {auction.title}

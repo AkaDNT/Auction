@@ -50,14 +50,19 @@ type AuctionApiSeller = {
 type AuctionApiImage = {
   imageUrl: string;
   isPrimary: boolean;
+  sortOrder: number;
 };
 
 export type AuctionApiItem = {
   id: string;
   title: string;
+  slug: string;
+  description: string | null;
   endAt: string;
   status: AuctionApiStatus;
   startingPrice: string | number;
+  buyNowPrice: string | number | null;
+  minBidIncrement: string | number;
   currentPrice: string | number | null;
   thumbnailUrl: string | null;
   category: AuctionApiCategory;

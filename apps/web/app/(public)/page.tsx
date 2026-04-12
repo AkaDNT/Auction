@@ -13,22 +13,19 @@ import { TestimonialsSection } from "@/features/landing/components/testimonials-
 
 export default function HomePage() {
   return (
-    <main className="theme-page relative isolate min-h-screen overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--glow),_transparent_38%)]" />
-      <div className="relative">
-        <SiteHeader />
-        <HeroSection />
-        <FeaturesSection />
-        <BenefitsSection />
-        <HowItWorksSection />
-        <StatsSection />
-        <TeamSection />
-        <LogoStripSection />
-        <TestimonialsSection />
-        <PricingSection />
-        <CtaSection />
-        <SiteFooter />
-      </div>
-    </main>
+    <>
+      <SiteHeader />
+      <HeroSection />
+      <FeaturesSection />
+      <BenefitsSection />
+      <HowItWorksSection />
+      <StatsSection />
+      <TeamSection />
+      <LogoStripSection />
+      <TestimonialsSection />
+      <PricingSection />
+      <CtaSection />
+      <SiteFooter />
+    </>
   );
 }

@@ -6,7 +6,7 @@ export type AuctionSummary = {
   startingPrice: string;
   timeEnd: string;
   bidCount: number;
-  status: "Đang diễn ra" | "Sắp tới" | "Sắp hết" | "Đã kết thúc";
+  status: "Đang diễn ra" | "Sắp tới" | "Sắp hết" | "Đã kết thúc" | "Đã hủy";
   seller: string;
   imageUrl: string;
 };

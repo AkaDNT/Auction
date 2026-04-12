@@ -23,7 +23,7 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
   }
 
   return (
-    <main className="theme-bg min-h-screen text-theme-body">
+    <main className="min-h-screen text-theme-body">
       <AuctionsNavbar />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">

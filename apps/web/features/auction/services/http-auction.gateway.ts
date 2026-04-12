@@ -1,6 +1,7 @@
 import type { AuctionGateway } from "@/features/auction/services/auction-gateway";
 import { auctionHttpFetch } from "@/features/auction/services/auction-http.client";
 import type {
+  AuctionApiItem,
   AuctionApiCategory,
   AuctionListParams,
   AuctionListResponse,
@@ -34,6 +35,22 @@ export class HttpAuctionGateway implements AuctionGateway {
     }
 
     return (await response.json()) as AuctionListResponse;
+  }
+
+  async getAuctionById(id: string): Promise<AuctionApiItem | null> {
+    const response = await auctionHttpFetch(
+      `/auctions/${encodeURIComponent(id)}`,
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error("Không thể tải chi tiết đấu giá");
+    }
+
+    return (await response.json()) as AuctionApiItem;
   }
 
   async listFeaturedAuctions(): Promise<AuctionListResponse> {

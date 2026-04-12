@@ -1,121 +1,196 @@
-import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { AuctionImageGallery } from "@/features/auction/components/auction-image-gallery";
 import { AuctionsNavbar } from "@/features/auction/components/auctions-navbar";
 import { CountdownText } from "@/features/auction/components/countdown-text";
-import { getAuctionById } from "@/features/auction/mocks/auctions.mock";
+import { mapAuctionApiItemToSummary } from "@/features/auction/services/auction.mapper";
+import { getAuctionById } from "@/features/auction/services/list-auctions";
 import { SiteFooter } from "@/features/landing/components/site-footer";
+import Link from "next/link";
 
 type AuctionDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
+function toCurrencyLabel(value: string | number | null | undefined) {
+  if (value === null || value === undefined) {
+    return "Chưa thiết lập";
+  }
+
+  const amount = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(amount)) {
+    return "Chưa thiết lập";
+  }
+
+  return `${new Intl.NumberFormat("vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(amount)} VND`;
+}
+
 export default async function AuctionDetailPage({
   params,
 }: AuctionDetailPageProps) {
   const { id } = await params;
-  const auction = getAuctionById(id);
+  const auctionItem = await getAuctionById(id);
 
-  if (!auction) {
+  if (!auctionItem) {
     notFound();
   }
 
+  const auction = mapAuctionApiItemToSummary(auctionItem);
+  const orderedAuctionImages = [...auctionItem.images].sort((left, right) => {
+    if (left.isPrimary !== right.isPrimary) {
+      return left.isPrimary ? -1 : 1;
+    }
+
+    return left.sortOrder - right.sortOrder;
+  });
+  const galleryImages = [
+    ...(auctionItem.thumbnailUrl ? [auctionItem.thumbnailUrl] : []),
+    ...orderedAuctionImages.map((image) => image.imageUrl),
+    auction.imageUrl,
+  ];
+  const hasLiveCountdown = auctionItem.status === "LIVE";
+  const statusLabel =
+    auctionItem.status === "CANCELLED"
+      ? "Đã hủy"
+      : auctionItem.status === "ENDED"
+        ? "Đã kết thúc"
+        : "Sắp tới";
+  const description =
+    auctionItem.description?.trim() ||
+    "Lô hàng được kiểm định bởi đội ngũ vận hành, đầy đủ chứng từ và được mở đấu giá theo chuẩn quy trình doanh nghiệp.";
+  const startingPriceLabel = toCurrencyLabel(auctionItem.startingPrice);
+  const buyNowPriceLabel = toCurrencyLabel(auctionItem.buyNowPrice);
+  const minBidIncrementLabel = toCurrencyLabel(auctionItem.minBidIncrement);
+
   return (
-    <main className="theme-bg min-h-screen text-theme-body">
+    <main className="min-h-screen text-theme-body">
       <AuctionsNavbar />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <article className="rounded-3xl border border-theme-line bg-theme-panel p-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-theme-brand">
-              Chi tiết lô đấu giá
-            </p>
-            <h1 className="mt-3 font-display text-3xl font-semibold text-theme-heading sm:text-4xl">
-              {auction.title}
-            </h1>
-
-            <div className="relative mt-5 h-52 overflow-hidden rounded-2xl border border-theme-line sm:h-64">
-              <Image
-                src={auction.imageUrl}
-                alt={auction.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 65vw"
-              />
+        <article className="rounded-3xl border border-theme-line bg-theme-panel p-6 dark:border-[color-mix(in_srgb,var(--primary)_32%,var(--border))] dark:shadow-[0_24px_60px_color-mix(in_srgb,var(--glow)_75%,transparent)]">
+          <div className="flex flex-wrap items-start justify-between gap-4 border-b border-theme-line pb-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-theme-brand">
+                Chi tiết lô đấu giá
+              </p>
+              <h1 className="mt-3 font-display text-3xl font-semibold text-theme-heading sm:text-4xl">
+                {auction.title}
+              </h1>
             </div>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand/55 bg-[color:var(--primary-soft)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand transition hover:border-theme-brand hover:bg-theme-brand/15 hover:text-theme-heading">
+                {hasLiveCountdown ? "Đang diễn ra" : statusLabel}
+              </span>
+            </div>
+          </div>
 
-            <p className="mt-4 text-sm leading-relaxed text-theme-muted sm:text-base">
-              Lô hàng được kiểm định bởi đội ngũ vận hành, đầy đủ chứng từ và
-              được mở đấu giá theo chuẩn quy trình doanh nghiệp.
+          <AuctionImageGallery images={galleryImages} title={auction.title} />
+
+          <section className="mt-6 space-y-3 rounded-2xl border border-theme-line bg-theme-bg p-5 dark:border-[color-mix(in_srgb,var(--primary)_26%,var(--border))] dark:bg-[linear-gradient(180deg,color-mix(in_srgb,var(--glow)_86%,transparent),color-mix(in_srgb,var(--primary-soft)_76%,transparent))]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted dark:text-theme-brand">
+              Mô tả lô hàng
             </p>
+            <p className="text-sm leading-relaxed text-theme-body sm:text-base">
+              {description}
+            </p>
+          </section>
 
-            <dl className="mt-6 grid gap-3 rounded-2xl border border-theme-line bg-theme-bg p-4 text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
-                  Danh mục
-                </dt>
-                <dd className="font-semibold text-theme-heading">
-                  {auction.category}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
-                  Giá hiện tại
-                </dt>
-                <dd className="font-semibold text-theme-heading">
-                  {auction.currentBid}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
-                  Thời gian còn lại
-                </dt>
-                <dd className="font-semibold text-theme-heading">
+          <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-theme-line bg-theme-bg p-4 dark:border-[color-mix(in_srgb,var(--primary)_24%,var(--border))] dark:bg-[color-mix(in_srgb,var(--primary-soft)_72%,transparent)]">
+              <p className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Giá hiện tại
+              </p>
+              <p className="mt-2 text-base font-semibold text-theme-heading">
+                {auction.currentBid}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-theme-line bg-theme-bg p-4 dark:border-[color-mix(in_srgb,var(--primary)_24%,var(--border))] dark:bg-[color-mix(in_srgb,var(--primary-soft)_72%,transparent)]">
+              <p className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Giá khởi điểm
+              </p>
+              <p className="mt-2 text-base font-semibold text-theme-heading">
+                {startingPriceLabel}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-theme-line bg-theme-bg p-4 dark:border-[color-mix(in_srgb,var(--primary)_24%,var(--border))] dark:bg-[color-mix(in_srgb,var(--primary-soft)_72%,transparent)]">
+              <p className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Mua ngay
+              </p>
+              <p className="mt-2 text-base font-semibold text-theme-heading">
+                {buyNowPriceLabel}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-theme-line bg-theme-bg p-4 dark:border-[color-mix(in_srgb,var(--primary)_24%,var(--border))] dark:bg-[color-mix(in_srgb,var(--primary-soft)_72%,transparent)]">
+              <p className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Bước giá tối thiểu
+              </p>
+              <p className="mt-2 text-base font-semibold text-theme-heading">
+                {minBidIncrementLabel}
+              </p>
+            </div>
+          </section>
+
+          <dl className="mt-6 grid gap-3 gap-x-45 rounded-2xl border border-theme-line bg-theme-bg p-4 text-sm sm:grid-cols-2 lg:grid-cols-3 dark:border-[color-mix(in_srgb,var(--primary)_24%,var(--border))] dark:bg-[color-mix(in_srgb,var(--primary-soft)_62%,transparent)]">
+            <div>
+              <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Danh mục
+              </dt>
+              <dd className="font-semibold text-theme-heading">
+                {auction.category}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Slug
+              </dt>
+              <dd className="font-semibold text-theme-heading">
+                <span className="rounded-md border border-theme-line bg-theme-panel px-2 py-0.5 text-xs tracking-wide text-theme-muted">
+                  {auctionItem.slug}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                {hasLiveCountdown ? "Thời gian còn lại" : "Trạng thái"}
+              </dt>
+              <dd className="font-semibold text-theme-heading">
+                {hasLiveCountdown ? (
                   <CountdownText timeEnd={auction.timeEnd} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
-                  Người bán
-                </dt>
-                <dd className="font-semibold text-theme-heading">
-                  {auction.seller}
-                </dd>
-              </div>
-            </dl>
-          </article>
-
-          <aside className="rounded-3xl border border-theme-line bg-theme-panel p-6">
-            <h2 className="text-xl font-semibold text-theme-heading">
-              Thao tác nhanh
-            </h2>
-            <p className="mt-2 text-sm text-theme-muted">
-              Đăng nhập để đặt lệnh hoặc vào phòng live để theo dõi biến động
-              theo giây.
-            </p>
-            <div className="mt-5 space-y-3">
-              <Link
-                href={`/auctions/${auction.id}/live`}
-                className="btn-primary w-full justify-center"
-              >
-                Vào phòng live
-              </Link>
-              <Link
-                href="/login"
-                className="btn-secondary w-full justify-center"
-              >
-                Đăng nhập để đặt lệnh
-              </Link>
-              <Link
-                href="/auctions"
-                className="btn-secondary w-full justify-center"
-              >
-                Quay lại danh sách
-              </Link>
+                ) : (
+                  statusLabel
+                )}
+              </dd>
             </div>
-          </aside>
-        </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Người bán
+              </dt>
+              <dd className="font-semibold text-theme-heading">
+                {auction.seller}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs uppercase tracking-[0.14em] text-theme-muted">
+                Tổng lượt đặt giá
+              </dt>
+              <dd className="font-semibold text-theme-heading">
+                {auction.bidCount}
+              </dd>
+            </div>
+            <div>
+              {hasLiveCountdown ? (
+                <Link
+                  href={`/auctions/${auction.id}/live`}
+                  className="inline-flex items-center justify-center rounded-xl border border-theme-brand bg-theme-brand px-4 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand-foreground shadow-[0_10px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-(--primary-strong) hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
+                >
+                  Vào phòng live
+                </Link>
+              ) : null}
+            </div>
+          </dl>
+        </article>
       </section>
 
       <SiteFooter />

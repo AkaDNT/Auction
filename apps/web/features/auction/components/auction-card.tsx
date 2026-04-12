@@ -16,10 +16,12 @@ export function AuctionCard({ auction, featured = false }: AuctionCardProps) {
         featured ? "p-6" : "p-5"
       }`}
     >
-      <div
-        className={`relative mb-4 overflow-hidden rounded-xl border border-theme-line ${
+      <Link
+        href={`/auctions/${auction.id}`}
+        className={`relative mb-4 block overflow-hidden rounded-xl border border-theme-line ${
           featured ? "h-56 sm:h-72" : "h-44"
         }`}
+        aria-label={`Xem chi tiết ${auction.title}`}
       >
         <Image
           src={auction.imageUrl}
@@ -41,7 +43,7 @@ export function AuctionCard({ auction, featured = false }: AuctionCardProps) {
             <CountdownText timeEnd={auction.timeEnd} />
           </span>
         </div>
-      </div>
+      </Link>
 
       <div className="space-y-4">
         <h3
