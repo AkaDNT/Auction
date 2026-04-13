@@ -13,4 +13,11 @@ export class BidController {
   ) {
     return this.bidService.listAuctionBids(auctionId, query);
   }
+
+  @Get('auctions/:auctionId/bids/latest-100-by-amount')
+  listLatest100AuctionBidsSortedByAmount(
+    @Param('auctionId') auctionId: string,
+  ) {
+    return this.bidService.listLatest100AuctionBidsSortedByAmount(auctionId);
+  }
 }

@@ -7,6 +7,7 @@ import { HttpStatus, ValidationError, ValidationPipe } from '@nestjs/common';
 import { AppException } from './common/errors/app.exception';
 import { Logger } from 'nestjs-pino';
 import { ERROR_CODES } from '@repo/shared';
+import { RedisIoAdapter } from './common/websocket/redis-io.adapter';
 
 async function bootstrap() {
   function formatValidation(errors: ValidationError[]) {
@@ -21,9 +22,20 @@ async function bootstrap() {
     bufferLogs: true,
     rawBody: true,
   });
-  app.useLogger(app.get(Logger));
+  const wsAdapter = new RedisIoAdapter(app);
   const config = app.get(ConfigService);
   const port = config.get<string>('PORT') ?? 3999;
+  const shutdown = async () => {
+    await wsAdapter.closeConnections();
+    await app.close();
+    process.exit(0);
+  };
+
+  await wsAdapter.connectToRedis(process.env.REDIS_URL!);
+
+  app.useLogger(app.get(Logger));
+  app.useWebSocketAdapter(wsAdapter);
+
   app.use(traceIdMiddleware);
   app.use(cookieParser());
   app.useGlobalPipes(
@@ -48,5 +60,8 @@ async function bootstrap() {
     credentials: true,
   });
   await app.listen(port);
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 }
 bootstrap();

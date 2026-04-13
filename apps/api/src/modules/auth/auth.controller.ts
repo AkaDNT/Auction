@@ -86,7 +86,6 @@ export class AuthController {
     return { ok: true };
   }
 
-  @UseGuards(JwtAccessGuard)
   @Get('/me')
   me(@Req() req: any) {
     return { user: req.user };

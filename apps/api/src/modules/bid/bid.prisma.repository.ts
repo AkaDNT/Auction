@@ -31,6 +31,24 @@ export class BidPrismaRepository implements IBidRepository {
     });
   }
 
+  async findLatest100ByAuctionOrderByAmountAsc(
+    auctionId: string,
+  ): Promise<Bid[]> {
+    const bids = await this.prisma.bid.findMany({
+      where: { auctionId },
+      orderBy: { createdAt: 'desc' }, // lấy 100 bid gần nhất
+      take: 100,
+    });
+
+    return bids.sort((a, b) => {
+      const amountCompare = a.amount.comparedTo(b.amount);
+
+      if (amountCompare !== 0) return amountCompare;
+
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+  }
+
   countByAuction(auctionId: string): Promise<number> {
     return this.prisma.bid.count({
       where: { auctionId },

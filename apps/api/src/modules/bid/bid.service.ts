@@ -6,7 +6,7 @@ import { ERROR_CODES } from '@repo/shared';
 import { AppException } from 'src/common/errors/app.exception';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { ListBidsDto } from './dto/list-bids.dto';
-import { calculateMinimumAllowedBid } from 'src/common/utils/bid.util';
+import * as auctionRealtimePublisher from '../auction-realtime/contracts/auction-realtime.publisher';
 
 @Injectable()
 export class BidService {
@@ -15,6 +15,8 @@ export class BidService {
     private readonly bidRepo: bidRepository.IBidRepository,
     @Inject(auctionRepository.AUCTION_REPOSITORY)
     private readonly auctionRepo: auctionRepository.IAuctionRepository,
+    @Inject(auctionRealtimePublisher.AUCTION_REALTIME_PUBLISHER)
+    private readonly auctionRealtimePublisher: auctionRealtimePublisher.AuctionRealtimePublisher,
   ) {}
 
   async placeBid(auctionId: string, bidderId: string, dto: CreateBidDto) {
@@ -77,36 +79,17 @@ export class BidService {
       );
     }
 
-    const bidRule = calculateMinimumAllowedBid({
-      startingPrice: auction.startingPrice,
-      currentPrice: auction.currentPrice,
-      minBidIncrement: auction.minBidIncrement,
-    });
-
-    if (dto.amount < bidRule.minimumAllowedBid) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.BID_AMOUNT_TOO_LOW,
-          message: bidRule.hasExistingBid
-            ? 'Giá trả phải lớn hơn hoặc bằng giá hiện tại cộng bước giá tối thiểu'
-            : 'Giá trả đầu tiên phải lớn hơn hoặc bằng giá khởi điểm',
-          details: {
-            auctionId,
-            amount: dto.amount,
-            startingPrice: bidRule.startingPrice,
-            currentPrice: bidRule.currentPrice,
-            minBidIncrement: bidRule.minBidIncrement,
-            minimumAllowedBid: bidRule.minimumAllowedBid,
-          },
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     await this.bidRepo.executePlaceBidTransaction({
       auctionId,
       bidderId,
       amount: dto.amount,
+    });
+
+    await this.auctionRealtimePublisher.publishBidPlaced({
+      auctionId,
+      bidderId,
+      amount: dto.amount,
+      placedAt: new Date(),
     });
 
     return {
@@ -114,23 +97,11 @@ export class BidService {
       auctionId,
       bidderId,
       amount: dto.amount,
-      minimumAllowedBid: bidRule.minimumAllowedBid,
     };
   }
 
   async listAuctionBids(auctionId: string, query: ListBidsDto) {
-    const auction = await this.auctionRepo.findById(auctionId);
-
-    if (!auction) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Không tìm thấy phiên đấu giá',
-          details: { auctionId },
-        },
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    await this.ensureAuctionExists(auctionId);
 
     const [items, total] = await Promise.all([
       this.bidRepo.findManyByAuction(auctionId, query.page, query.limit),
@@ -143,6 +114,24 @@ export class BidService {
         page: query.page,
         limit: query.limit,
         total,
+      },
+    };
+  }
+
+  async listLatest100AuctionBidsSortedByAmount(auctionId: string) {
+    await this.ensureAuctionExists(auctionId);
+
+    const items =
+      await this.bidRepo.findLatest100ByAuctionOrderByAmountAsc(auctionId);
+
+    return {
+      items,
+      meta: {
+        total: items.length,
+        limit: 100,
+        sortBy: 'amount',
+        sortOrder: 'asc',
+        sourceWindow: 'latest_100_by_createdAt_desc',
       },
     };
   }
@@ -179,5 +168,22 @@ export class BidService {
     }
 
     return this.bidRepo.updateStatus(id, BidStatus.CANCELLED);
+  }
+
+  private async ensureAuctionExists(auctionId: string) {
+    const auction = await this.auctionRepo.findById(auctionId);
+
+    if (!auction) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Không tìm thấy phiên đấu giá',
+          details: { auctionId },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return auction;
   }
 }

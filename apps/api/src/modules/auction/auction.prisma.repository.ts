@@ -26,12 +26,32 @@ export class AuctionPrismaRepository implements IAuctionRepository {
   findById(id: string): Promise<Auction | null> {
     return this.prisma.auction.findUnique({
       where: { id },
+      include: {
+        category: true,
+        seller: true,
+        images: {
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+        },
+        _count: {
+          select: { bids: true },
+        },
+      },
     });
   }
 
   findBySlug(slug: string): Promise<Auction | null> {
     return this.prisma.auction.findUnique({
       where: { slug },
+      include: {
+        category: true,
+        seller: true,
+        images: {
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+        },
+        _count: {
+          select: { bids: true },
+        },
+      },
     });
   }
 
@@ -92,7 +112,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         category: true,
         seller: true,
         images: {
-          orderBy: { sortOrder: 'asc' },
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
         },
         _count: {
           select: { bids: true },
@@ -113,7 +133,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         category: true,
         seller: true,
         images: {
-          orderBy: { sortOrder: 'asc' },
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
         },
         _count: {
           select: { bids: true },

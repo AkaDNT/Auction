@@ -6,9 +6,10 @@ import { BidService } from './bid.service';
 import { BidPrismaRepository } from './bid.prisma.repository';
 import { BID_REPOSITORY } from './bid.repository';
 import { AuctionModule } from '../auction/auction.module';
+import { AuctionRealtimeModule } from '../auction-realtime/auction-realtime.module';
 
 @Module({
-  imports: [AuctionModule],
+  imports: [AuctionModule, AuctionRealtimeModule],
   controllers: [BidController, UserBidController, AdminBidController],
   providers: [
     BidService,

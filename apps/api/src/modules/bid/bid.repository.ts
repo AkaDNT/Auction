@@ -11,6 +11,8 @@ export interface IBidRepository {
     limit: number,
   ): Promise<any[]>;
 
+  findLatest100ByAuctionOrderByAmountAsc(auctionId: string): Promise<Bid[]>;
+
   countByAuction(auctionId: string): Promise<number>;
 
   executePlaceBidTransaction(params: {
