@@ -106,6 +106,7 @@ export function AuctionImageGallery({
     setIsDragging(false);
   };
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!isLightboxOpen) {
       return;

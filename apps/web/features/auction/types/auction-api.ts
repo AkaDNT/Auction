@@ -55,6 +55,7 @@ type AuctionApiImage = {
 
 export type AuctionApiItem = {
   id: string;
+  code: string;
   title: string;
   slug: string;
   description: string | null;
