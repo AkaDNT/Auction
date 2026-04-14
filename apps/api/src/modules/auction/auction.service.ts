@@ -8,6 +8,7 @@ import { AppException } from 'src/common/errors/app.exception';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { ListAuctionDto } from './dto/list-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { AuctionLifecycleService } from '../auction-lifecycle/auction-lifecycle.service';
 
 @Injectable()
 export class AuctionService {
@@ -16,6 +17,7 @@ export class AuctionService {
     private readonly auctionRepo: auctionRepository.IAuctionRepository,
     @Inject(auctionCategoryRepository.AUCTION_CATEGORY_REPOSITORY)
     private readonly categoryRepo: auctionCategoryRepository.IAuctionCategoryRepository,
+    private readonly auctionLifecycleService: AuctionLifecycleService,
   ) {}
 
   async create(dto: CreateAuctionDto, sellerId: string) {
@@ -170,7 +172,7 @@ export class AuctionService {
 
     nextSlug = await this.generateUniqueSlug(dto.title!, current.id);
 
-    return this.auctionRepo.update(id, {
+    const auctionReturnValue = this.auctionRepo.update(id, {
       title: dto.title,
       slug: nextSlug,
       description: dto.description,
@@ -188,6 +190,8 @@ export class AuctionService {
           }
         : {}),
     });
+
+    return auctionReturnValue;
   }
 
   async publish(id: string, sellerId: string) {
@@ -216,12 +220,22 @@ export class AuctionService {
       );
     }
 
-    const status =
+    const nextStatus =
       !auction.startAt || auction.startAt <= now
         ? AuctionStatus.LIVE
         : AuctionStatus.UPCOMING;
 
-    return this.auctionRepo.update(id, { status });
+    const updatedAuction = await this.auctionRepo.update(id, {
+      status: nextStatus,
+    });
+
+    await this.syncAuctionEndJob({
+      id: updatedAuction.id,
+      endAt: updatedAuction.endAt,
+      status: updatedAuction.status,
+    });
+
+    return updatedAuction;
   }
 
   async cancel(id: string, sellerId: string, role: string) {
@@ -238,9 +252,13 @@ export class AuctionService {
       );
     }
 
-    return this.auctionRepo.update(id, {
+    const updatedAuction = await this.auctionRepo.update(id, {
       status: AuctionStatus.CANCELLED,
     });
+
+    await this.auctionLifecycleService.cancelEndAuction(current.id);
+
+    return updatedAuction;
   }
 
   async remove(id: string, sellerId: string) {
@@ -396,5 +414,19 @@ export class AuctionService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  private async syncAuctionEndJob(auction: {
+    id: string;
+    endAt: Date;
+    status: AuctionStatus;
+  }): Promise<void> {
+    await this.auctionLifecycleService.syncEndAuctionJob({
+      auctionId: auction.id,
+      endAt: auction.endAt,
+      shouldSchedule:
+        auction.status === AuctionStatus.LIVE ||
+        auction.status === AuctionStatus.UPCOMING,
+    });
   }
 }

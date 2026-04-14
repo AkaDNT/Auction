@@ -3,10 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import path from 'path';
 import { LoggerModule } from 'nestjs-pino';
-import { getTraceId } from '@repo/shared';
+import { buildRedisConnection, getTraceId } from '@repo/shared';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
@@ -14,6 +14,8 @@ import { AuctionModule } from './modules/auction/auction.module';
 import { AuctionImageModule } from './modules/auction-image/auction-image.module';
 import { BidModule } from './modules/bid/bid.module';
 import { AuctionContentModule } from './modules/auction-content/auction-content.module';
+import { BullModule } from '@nestjs/bullmq';
+import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-lifecycle.module';
 
 @Module({
   imports: [
@@ -40,6 +42,20 @@ import { AuctionContentModule } from './modules/auction-content/auction-content.
         // messageKey: "message",
       },
     }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: buildRedisConnection({
+          redisUrl: config.get<string>('REDIS_URL'),
+          redisHost: config.get<string>('REDIS_HOST'),
+          redisPort: config.get<number>('REDIS_PORT'),
+          redisDb: config.get<number>('REDIS_DB'),
+          redisUsername: config.get<string>('REDIS_USERNAME'),
+          redisPassword: config.get<string>('REDIS_PASSWORD'),
+        }),
+        prefix: config.get<string>('REDIS_KEY_PREFIX', 'auction:'),
+      }),
+    }),
     AuthModule,
     PrismaModule,
     AuctionCategoryModule,
@@ -47,6 +63,7 @@ import { AuctionContentModule } from './modules/auction-content/auction-content.
     AuctionImageModule,
     BidModule,
     AuctionContentModule,
+    AuctionLifecycleModule,
   ],
   controllers: [AppController],
   providers: [

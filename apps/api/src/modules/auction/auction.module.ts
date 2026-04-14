@@ -6,9 +6,10 @@ import { AuctionService } from './auction.service';
 import { AuctionPrismaRepository } from './auction.prisma.repository';
 import { AUCTION_REPOSITORY } from './auction.repository';
 import { AuctionCategoryModule } from '../auction-category/auction-category.module';
+import { AuctionLifecycleModule } from '../auction-lifecycle/auction-lifecycle.module';
 
 @Module({
-  imports: [AuctionCategoryModule],
+  imports: [AuctionCategoryModule, AuctionLifecycleModule],
   controllers: [
     AuctionController,
     SellerAuctionController,
