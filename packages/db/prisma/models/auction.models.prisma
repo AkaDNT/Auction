@@ -50,6 +50,7 @@ model AuctionImage {
   id          String    @id @default(cuid())
   auctionId   String
   imageUrl    String
+  storageKey  String?
   altText     String?
   sortOrder   Int       @default(0)
   isPrimary   Boolean   @default(false)
