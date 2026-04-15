@@ -1,11 +1,14 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Role } from '@prisma/client';
+import { randomUUID } from 'crypto';
 import * as auctionImageRepository from './auction-image.repository';
 import * as auctionRepository from '../auction/auction.repository';
 import { ERROR_CODES } from '@repo/shared';
 import { AppException } from 'src/common/errors/app.exception';
-import { AddAuctionImageDto } from './dto/add-auction-image.dto';
 import { UpdateAuctionImageDto } from './dto/update-auction-image.dto';
+import { CreateAuctionImageUploadDto } from './dto/create-auction-image-upload.dto';
+import { ConfirmAuctionImageDto } from './dto/confirm-auction-image.dto';
+import * as objectStoragePort from '../storage/contracts/object-storage.port';
 
 @Injectable()
 export class AuctionImageService {
@@ -14,18 +17,54 @@ export class AuctionImageService {
     private readonly imageRepo: auctionImageRepository.IAuctionImageRepository,
     @Inject(auctionRepository.AUCTION_REPOSITORY)
     private readonly auctionRepo: auctionRepository.IAuctionRepository,
+    @Inject(objectStoragePort.OBJECT_STORAGE_PORT)
+    private readonly storage: objectStoragePort.IObjectStoragePort,
   ) {}
 
-  async addImage(
+  async createUploadUrl(
     auctionId: string,
-    dto: AddAuctionImageDto,
+    dto: CreateAuctionImageUploadDto,
     actorId: string,
-    role: string[],
+    roles: string[],
   ) {
     const auction = await this.getAccessibleAuctionOrThrow(
       auctionId,
       actorId,
-      role,
+      roles,
+    );
+
+    const extension = this.extractExtension(dto.fileName, dto.contentType);
+    const storageKey = `auctions/${auction.id}/images/${Date.now()}-${randomUUID()}.${extension}`;
+
+    const result = await this.storage.createPresignedUpload({
+      key: storageKey,
+      contentType: dto.contentType,
+      expiresInSeconds: 300,
+    });
+
+    return {
+      storageKey: result.key,
+      uploadUrl: result.uploadUrl,
+      fileUrl: result.fileUrl,
+      expiresInSeconds: result.expiresInSeconds,
+      metadata: {
+        altText: dto.altText ?? null,
+        sortOrder: dto.sortOrder ?? 0,
+        isPrimary: dto.isPrimary ?? false,
+      },
+    };
+  }
+
+  async confirmUpload(
+    auctionId: string,
+    dto: ConfirmAuctionImageDto,
+    actorId: string,
+    roles: string[],
+  ) {
+    const auction = await this.getAccessibleAuctionOrThrow(
+      auctionId,
+      actorId,
+      roles,
     );
 
     if (dto.isPrimary) {
@@ -34,7 +73,8 @@ export class AuctionImageService {
 
     return this.imageRepo.create({
       auctionId: auction.id,
-      imageUrl: dto.imageUrl,
+      imageUrl: this.storage.getFileUrl(dto.storageKey),
+      storageKey: dto.storageKey,
       altText: dto.altText ?? null,
       sortOrder: dto.sortOrder ?? 0,
       isPrimary: dto.isPrimary ?? false,
@@ -62,29 +102,33 @@ export class AuctionImageService {
     imageId: string,
     dto: UpdateAuctionImageDto,
     actorId: string,
-    role: string[],
+    roles: string[],
   ) {
-    const image = await this.getAccessibleImageOrThrow(imageId, actorId, role);
+    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
 
     if (dto.isPrimary) {
       await this.imageRepo.clearPrimaryByAuctionId(image.auctionId);
     }
 
     return this.imageRepo.update(imageId, {
-      imageUrl: dto.imageUrl,
       altText: dto.altText,
       sortOrder: dto.sortOrder,
       isPrimary: dto.isPrimary,
     });
   }
 
-  async removeImage(imageId: string, actorId: string, role: string[]) {
-    await this.getAccessibleImageOrThrow(imageId, actorId, role);
+  async removeImage(imageId: string, actorId: string, roles: string[]) {
+    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
+
+    if (image.storageKey) {
+      await this.storage.deleteObject(image.storageKey);
+    }
+
     return this.imageRepo.delete(imageId);
   }
 
-  async setPrimary(imageId: string, actorId: string, role: string[]) {
-    const image = await this.getAccessibleImageOrThrow(imageId, actorId, role);
+  async setPrimary(imageId: string, actorId: string, roles: string[]) {
+    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
 
     await this.imageRepo.clearPrimaryByAuctionId(image.auctionId);
 
@@ -94,7 +138,7 @@ export class AuctionImageService {
   private async getAccessibleAuctionOrThrow(
     auctionId: string,
     actorId: string,
-    role: string[],
+    roles: string[],
   ) {
     const auction = await this.auctionRepo.findById(auctionId);
 
@@ -109,7 +153,7 @@ export class AuctionImageService {
       );
     }
 
-    if (!role.includes(Role.ADMIN) && auction.sellerId !== actorId) {
+    if (!roles.includes(Role.ADMIN) && auction.sellerId !== actorId) {
       throw new AppException(
         {
           code: ERROR_CODES.AUCTION_NOT_FOUND,
@@ -126,7 +170,7 @@ export class AuctionImageService {
   private async getAccessibleImageOrThrow(
     imageId: string,
     actorId: string,
-    role: string[],
+    roles: string[],
   ) {
     const image = await this.imageRepo.findById(imageId);
 
@@ -141,8 +185,45 @@ export class AuctionImageService {
       );
     }
 
-    await this.getAccessibleAuctionOrThrow(image.auctionId, actorId, role);
+    await this.getAccessibleAuctionOrThrow(image.auctionId, actorId, roles);
 
     return image;
+  }
+
+  private extractExtension(fileName: string, contentType: string): string {
+    const normalizedFileName = fileName.toLowerCase();
+
+    if (
+      normalizedFileName.endsWith('.jpg') ||
+      normalizedFileName.endsWith('.jpeg')
+    ) {
+      return 'jpg';
+    }
+
+    if (normalizedFileName.endsWith('.png')) {
+      return 'png';
+    }
+
+    if (normalizedFileName.endsWith('.webp')) {
+      return 'webp';
+    }
+
+    switch (contentType) {
+      case 'image/jpeg':
+        return 'jpg';
+      case 'image/png':
+        return 'png';
+      case 'image/webp':
+        return 'webp';
+      default:
+        throw new AppException(
+          {
+            code: ERROR_CODES.VALIDATION_ERROR,
+            message: 'Định dạng ảnh không hợp lệ',
+            details: { fileName, contentType },
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+    }
   }
 }

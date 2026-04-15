@@ -1,16 +1,24 @@
 import {
   IsBoolean,
-  IsNumber,
+  IsIn,
+  IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
+  IsInt,
   Min,
 } from 'class-validator';
 
-export class AddAuctionImageDto {
-  @IsUrl()
-  imageUrl!: string;
+export class CreateAuctionImageUploadDto {
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(255)
+  fileName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['image/jpeg', 'image/png', 'image/webp'])
+  contentType!: string;
 
   @IsOptional()
   @IsString()
@@ -18,7 +26,7 @@ export class AddAuctionImageDto {
   altText?: string;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(0)
   sortOrder?: number;
 

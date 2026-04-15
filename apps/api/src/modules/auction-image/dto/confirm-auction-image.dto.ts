@@ -1,17 +1,22 @@
 import {
   IsBoolean,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   Min,
 } from 'class-validator';
 
-export class UpdateAuctionImageDto {
+export class ConfirmAuctionImageDto {
+  @IsString()
+  @IsNotEmpty()
+  storageKey!: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(255)
-  altText?: string | null;
+  altText?: string;
 
   @IsOptional()
   @IsInt()

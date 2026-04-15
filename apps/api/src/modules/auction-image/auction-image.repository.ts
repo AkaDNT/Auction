@@ -6,6 +6,7 @@ export interface IAuctionImageRepository {
   create(data: {
     auctionId: string;
     imageUrl: string;
+    storageKey?: string | null;
     altText?: string | null;
     sortOrder?: number;
     isPrimary?: boolean;
@@ -18,7 +19,6 @@ export interface IAuctionImageRepository {
   update(
     id: string,
     data: Partial<{
-      imageUrl: string;
       altText: string | null;
       sortOrder: number;
       isPrimary: boolean;

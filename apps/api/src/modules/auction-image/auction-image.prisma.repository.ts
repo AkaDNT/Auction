@@ -10,6 +10,7 @@ export class AuctionImagePrismaRepository implements IAuctionImageRepository {
   create(data: {
     auctionId: string;
     imageUrl: string;
+    storageKey?: string | null;
     altText?: string | null;
     sortOrder?: number;
     isPrimary?: boolean;
@@ -28,14 +29,17 @@ export class AuctionImagePrismaRepository implements IAuctionImageRepository {
   findByAuctionId(auctionId: string): Promise<AuctionImage[]> {
     return this.prisma.auctionImage.findMany({
       where: { auctionId },
-      orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+      orderBy: [
+        { isPrimary: 'desc' },
+        { sortOrder: 'asc' },
+        { createdAt: 'asc' },
+      ],
     });
   }
 
   update(
     id: string,
     data: Partial<{
-      imageUrl: string;
       altText: string | null;
       sortOrder: number;
       isPrimary: boolean;
