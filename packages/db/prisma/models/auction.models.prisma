@@ -44,6 +44,7 @@ model Auction {
   @@index([status])
   @@index([endAt])
   @@index([startAt, endAt])
+  auctionSettlements AuctionSettlement[]
 }
 
 model AuctionImage {
@@ -65,6 +66,7 @@ model Bid {
   id          String     @id @default(cuid())
   auctionId   String
   bidderId    String
+  holdId      String?
   amount      Decimal    @db.Decimal(18, 3)
   status      BidStatus  @default(VALID)
   createdAt   DateTime   @default(now())
@@ -100,3 +102,21 @@ model AuctionFaq {
 
   @@index([sortOrder])
 }
+
+model AuctionSettlement {
+  id                String                  @id @default(cuid())
+  auctionId         String                  @unique
+
+  winnerUserId      String?
+  winningBidId      String?
+
+  finalAmount       Decimal?                @db.Decimal(18, 3)
+  status            AuctionSettlementStatus @default(PENDING)
+
+  processedAt       DateTime?
+  failureReason     String?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+
+  auction           Auction                 @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+}  

@@ -10,4 +10,8 @@ enum BidStatus {
   VALID
   REJECTED
   CANCELLED
+  OUTBID
+  WINNING
+  WON
+  LOST
 }

@@ -1,0 +1,147 @@
+model Wallet {
+  id                String       @id @default(cuid())
+  userId            String       @unique
+  status            WalletStatus @default(ACTIVE)
+
+  balance           Decimal      @default(0) @db.Decimal(18, 3)
+  lockedBalance     Decimal      @default(0) @db.Decimal(18, 3)
+
+  currency          String       @default("VND")
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  ledgerEntries     WalletLedgerEntry[]
+  holds             WalletHold[]
+  depositOrders     DepositOrder[]
+  withdrawalRequests WithdrawalRequest[]
+
+  @@index([status])
+}
+
+model WalletLedgerEntry {
+  id               String                @id @default(cuid())
+  walletId         String
+  userId           String
+
+  direction        WalletLedgerDirection
+  type             WalletLedgerType
+
+  amount           Decimal               @db.Decimal(18, 3)
+
+  balanceAfter     Decimal               @db.Decimal(18, 3)
+  lockedAfter      Decimal               @db.Decimal(18, 3)
+
+  referenceType    String?
+  referenceId      String?
+  idempotencyKey   String?               @unique
+
+  note             String?
+  createdAt        DateTime              @default(now())
+
+  wallet           Wallet                @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user             User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, createdAt])
+  @@index([userId, createdAt])
+  @@index([referenceType, referenceId])
+}
+
+model WalletHold {
+  id               String           @id @default(cuid())
+  walletId         String
+  userId           String
+
+  type             WalletHoldType
+  status           WalletHoldStatus @default(ACTIVE)
+
+  amount           Decimal          @db.Decimal(18, 3)
+
+  referenceType    String
+  referenceId      String
+
+  reason           String?
+  expiresAt        DateTime?
+
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  releasedAt       DateTime?
+  capturedAt       DateTime?
+  cancelledAt      DateTime?
+
+  wallet           Wallet           @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([walletId, status])
+  @@index([userId, status])
+  @@index([referenceType, referenceId])
+  @@index([type, status])
+}
+
+model DepositOrder {
+  id                String          @id @default(cuid())
+  walletId          String
+  userId            String
+
+  provider          DepositProvider
+  status            DepositStatus   @default(PENDING)
+
+  amount            Decimal         @db.Decimal(18, 3)
+  currency          String          @default("VND")
+
+  internalCode      String          @unique
+  providerOrderId   String?         @unique
+  providerTxnId     String?         @unique
+
+  paymentUrl        String?
+  qrContent         String?
+  rawPayload        Json?
+
+  paidAt            DateTime?
+  expiredAt         DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  wallet            Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([walletId, status])
+  @@index([provider, status])
+}
+
+model WithdrawalRequest {
+  id                 String            @id @default(cuid())
+  walletId           String
+  userId             String
+
+  status             WithdrawalStatus  @default(PENDING)
+
+  amount             Decimal           @db.Decimal(18, 3)
+  currency           String            @default("VND")
+
+  bankCode           String?
+  bankName           String?
+  bankAccountNo      String
+  bankAccountName    String
+
+  internalCode       String            @unique
+  externalTransferId String?           @unique
+
+  note               String?
+  rejectReason       String?
+
+  requestedAt        DateTime          @default(now())
+  processedAt        DateTime?
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+
+  wallet             Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([walletId, status])
+}
+
+                             

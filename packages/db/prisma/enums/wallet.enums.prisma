@@ -1,0 +1,65 @@
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum WalletLedgerDirection {
+  CREDIT
+  DEBIT
+}
+
+enum WalletLedgerType {
+  DEPOSIT_SETTLED
+  WITHDRAWAL_REQUEST_CREATED
+  WITHDRAWAL_COMPLETED
+  WITHDRAWAL_REJECTED_REFUND
+  BID_HOLD_CAPTURED
+  BID_HOLD_RELEASED_ADJUSTMENT
+  ADMIN_ADJUSTMENT_CREDIT
+  ADMIN_ADJUSTMENT_DEBIT
+}
+
+enum WalletHoldType {
+  BID
+  WITHDRAWAL
+}
+
+enum WalletHoldStatus {
+  ACTIVE
+  RELEASED
+  CAPTURED
+  CANCELLED
+  EXPIRED
+}
+
+enum DepositProvider {
+  MOMO
+  VNPAY
+  BANK_TRANSFER
+}
+
+enum DepositStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum AuctionSettlementStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}

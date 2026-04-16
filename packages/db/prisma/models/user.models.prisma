@@ -8,6 +8,12 @@ model User {
   updatedAt    DateTime       @updatedAt
   slug         String         @unique 
 
+  wallet        Wallet?
+  walletLedgerEntries WalletLedgerEntry[]
+  walletHolds   WalletHold[]
+  depositOrders DepositOrder[]
+  withdrawalRequests WithdrawalRequest[]
+
   userRoles     UserRole[]
   refreshTokens RefreshToken[]
   auctions      Auction[]     @relation("AuctionSeller")
