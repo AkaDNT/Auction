@@ -202,7 +202,7 @@ export const pricingPlans: PricingPlan[] = [
   },
   {
     name: "Tăng trưởng",
-    price: "$49/mo",
+    price: "49K/tháng",
     description:
       "Dành cho đội ngũ vận hành thường xuyên cần kiểm soát chặt hơn và quan sát tốt hơn.",
     features: [

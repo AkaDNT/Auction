@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Noto_Sans_Mono } from "next/font/google";
+import { AuthSessionBootstrap } from "@/features/auth/components/auth-session-bootstrap";
 import { QueryProvider } from "@/shared/components/query/query-provider";
 import { ThemeProvider } from "@/shared/components/theme/theme-provider";
 import { ThemeScript } from "@/shared/components/theme/theme-script";
@@ -37,7 +38,10 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
         <ThemeScript />
         <QueryProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <AuthSessionBootstrap />
+            {children}
+          </ThemeProvider>
         </QueryProvider>
       </body>
     </html>

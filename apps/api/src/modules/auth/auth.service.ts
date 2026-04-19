@@ -284,6 +284,32 @@ export class AuthService {
     };
   }
 
+  async getMe(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        userRoles: true,
+      },
+    });
+
+    if (!user) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUTH_FORBIDDEN,
+          message: 'Không tìm thấy người dùng',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles: user.userRoles.map((item) => item.role),
+    };
+  }
+
   async logout(refreshToken: string) {
     try {
       const payload = this.jwt.verify(refreshToken, {

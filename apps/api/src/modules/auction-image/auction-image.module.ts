@@ -6,9 +6,10 @@ import { AuctionImageService } from './auction-image.service';
 import { AuctionImagePrismaRepository } from './auction-image.prisma.repository';
 import { AUCTION_IMAGE_REPOSITORY } from './auction-image.repository';
 import { AuctionModule } from '../auction/auction.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
-  imports: [AuctionModule],
+  imports: [AuctionModule, StorageModule],
   controllers: [
     AuctionImageController,
     SellerAuctionImageController,

@@ -13,6 +13,7 @@ import { authHttpFetch } from "@/features/auth/services/auth-http.client";
 type LiveBidHistoryProps = {
   auctionId: string;
   suggestedBidAmount: number;
+  minBidIncrement: number;
 };
 
 type BidApiItem = {
@@ -72,6 +73,28 @@ function toTimeLabel(value: string) {
   });
 }
 
+function toBidDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
+function formatBidInput(value: string) {
+  const digits = toBidDigits(value).replace(/^0+(?=\d)/, "");
+  if (!digits) {
+    return "";
+  }
+
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function parseBidInput(value: string) {
+  const digits = toBidDigits(value);
+  if (!digits) {
+    return Number.NaN;
+  }
+
+  return Number(digits);
+}
+
 function mapBidApiItem(item: BidApiItem): BidViewModel {
   const amountValue = Number(item.amount);
 
@@ -124,6 +147,7 @@ function sortBidsByAmountAscThenCreatedAtDesc(bids: BidViewModel[]) {
 export function LiveBidHistory({
   auctionId,
   suggestedBidAmount,
+  minBidIncrement,
 }: LiveBidHistoryProps) {
   const [bidsDesc, setBidsDesc] = useState<BidViewModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,7 +158,9 @@ export function LiveBidHistory({
     null,
   );
   const [bidAmountInput, setBidAmountInput] = useState(
-    Number.isFinite(suggestedBidAmount) ? String(suggestedBidAmount) : "",
+    Number.isFinite(suggestedBidAmount)
+      ? formatBidInput(String(suggestedBidAmount))
+      : "",
   );
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
@@ -209,7 +235,7 @@ export function LiveBidHistory({
       return;
     }
 
-    setBidAmountInput(String(suggestedBidAmount));
+    setBidAmountInput(formatBidInput(String(suggestedBidAmount)));
   }, [suggestedBidAmount]);
 
   useEffect(() => {
@@ -221,7 +247,7 @@ export function LiveBidHistory({
   }, [isLoading]);
 
   const placeBid = async () => {
-    const parsedAmount = Number(bidAmountInput);
+    const parsedAmount = parseBidInput(bidAmountInput);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       setSubmitError("Vui lòng nhập mức giá hợp lệ.");
       setSubmitMessage(null);
@@ -370,6 +396,25 @@ export function LiveBidHistory({
   }, [isRealtimeConnected, isRoomJoined, realtimeError]);
 
   const bidsAsc = useMemo(() => bidsDesc, [bidsDesc]);
+  const safeMinBidIncrement = useMemo(() => {
+    if (!Number.isFinite(minBidIncrement) || minBidIncrement <= 0) {
+      return 1000;
+    }
+
+    return minBidIncrement;
+  }, [minBidIncrement]);
+  const suggestedAmount = useMemo(() => {
+    const highestBid = bidsAsc.at(-1)?.amountValue;
+    if (Number.isFinite(highestBid) && highestBid > 0) {
+      return highestBid + safeMinBidIncrement;
+    }
+
+    if (Number.isFinite(suggestedBidAmount) && suggestedBidAmount > 0) {
+      return suggestedBidAmount;
+    }
+
+    return safeMinBidIncrement;
+  }, [bidsAsc, safeMinBidIncrement, suggestedBidAmount]);
 
   return (
     <aside className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-theme-line bg-theme-panel p-6 shadow-[0_22px_60px_-34px_var(--glow)]">
@@ -442,41 +487,67 @@ export function LiveBidHistory({
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-theme-line bg-theme-bg/80 p-3 backdrop-blur-sm">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-theme-muted">
-              Đặt giá ngay
-            </p>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                min={1}
-                step={1000}
-                value={bidAmountInput}
-                onChange={(event) => setBidAmountInput(event.target.value)}
-                className="w-full rounded-xl border border-theme-line bg-theme-panel px-3 py-2 text-sm text-theme-heading outline-none focus:border-theme-brand"
-                placeholder="Nhập số tiền bid"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  void placeBid();
-                }}
-                disabled={isSubmittingBid}
-                className="btn-primary whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isSubmittingBid ? "Đang gửi..." : "Đặt bid"}
-              </button>
+          <div className="rounded-3xl border border-theme-line bg-[linear-gradient(180deg,var(--surface-strong),color-mix(in_srgb,var(--surface-strong)_78%,var(--primary-soft)))] p-4 shadow-[0_18px_40px_-30px_var(--glow)] backdrop-blur-sm">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand">
+                  Đặt giá ngay
+                </p>
+                <p className="mt-1 text-sm text-theme-muted">
+                  Mức gợi ý hiện tại: {toAmountLabel(suggestedAmount)}
+                </p>
+              </div>
+              <span className="rounded-full border border-theme-line bg-theme-bg px-3 py-1 text-[11px] font-medium text-theme-muted">
+                Ưu tiên giá hợp lệ
+              </span>
             </div>
-            {submitError ? (
-              <p className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-xs text-red-500">
-                {submitError}
-              </p>
-            ) : null}
-            {submitMessage ? (
-              <p className="mt-2 rounded-lg border border-theme-brand/30 bg-theme-brand/10 px-2 py-1 text-xs text-theme-brand">
-                {submitMessage}
-              </p>
-            ) : null}
+
+            <div className="mt-4 space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-theme-muted">
+                Số tiền bid
+              </label>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9.]*"
+                    min={1}
+                    step={1000}
+                    value={bidAmountInput}
+                    onChange={(event) => {
+                      setBidAmountInput(formatBidInput(event.target.value));
+                    }}
+                    className="h-12 w-full rounded-2xl border border-theme-line bg-theme-panel px-4 pr-20 text-base font-semibold text-theme-heading outline-none transition-colors placeholder:font-normal placeholder:text-theme-muted focus:border-theme-brand focus:ring-2 focus:ring-theme-brand/15"
+                    placeholder="Nhập mức giá"
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-theme-muted">
+                    VND
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void placeBid();
+                  }}
+                  disabled={isSubmittingBid}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-theme-brand px-5 text-sm font-semibold text-theme-brand-foreground shadow-[0_14px_30px_-16px_var(--glow)] transition-all hover:-translate-y-0.5 hover:bg-theme-brand/90 hover:shadow-[0_18px_36px_-18px_var(--glow)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:min-w-36"
+                >
+                  {isSubmittingBid ? "Đang gửi..." : "Xác nhận bid"}
+                </button>
+              </div>
+
+              {submitError ? (
+                <p className="rounded-2xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-500">
+                  {submitError}
+                </p>
+              ) : null}
+              {submitMessage ? (
+                <p className="rounded-2xl border border-theme-brand/25 bg-theme-brand/10 px-3 py-2 text-xs text-theme-brand">
+                  {submitMessage}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
       )}

@@ -8,6 +8,15 @@ type RefreshResponse = {
   accessToken: string;
 };
 
+const AUTH_PATHS_WITHOUT_REFRESH = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+  "/auth/refresh",
+  "/auth/logout",
+];
+
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
   "http://localhost:3999";
@@ -56,11 +65,25 @@ async function refreshAccessToken(): Promise<string | null> {
   return null;
 }
 
+function shouldSkipRefresh(path: string): boolean {
+  return AUTH_PATHS_WITHOUT_REFRESH.some((authPath) =>
+    path.startsWith(authPath),
+  );
+}
+
 export async function authHttpFetch(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  const token = getAuthAccessToken();
+  const skipRefresh = shouldSkipRefresh(path);
+  let token = getAuthAccessToken();
+
+  // After page reload, access token in memory is empty. Refresh first to avoid
+  // an initial 401 on protected endpoints such as /auth/me.
+  if (!token && !skipRefresh) {
+    token = await refreshAccessToken();
+  }
+
   const headers = new Headers(init.headers);
 
   if (token) {
@@ -73,7 +96,7 @@ export async function authHttpFetch(
     credentials: "include",
   });
 
-  if (response.status !== 401) {
+  if (response.status !== 401 || skipRefresh) {
     return response;
   }
 

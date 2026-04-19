@@ -53,9 +53,10 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
     auctionItem.currentPrice ?? auctionItem.startingPrice,
   );
   const minIncrement = Number(auctionItem.minBidIncrement);
+  const normalizedMinIncrement =
+    Number.isFinite(minIncrement) && minIncrement > 0 ? minIncrement : 1000;
   const suggestedBidAmount =
-    (Number.isFinite(basePrice) ? basePrice : 0) +
-    (Number.isFinite(minIncrement) ? minIncrement : 1000);
+    (Number.isFinite(basePrice) ? basePrice : 0) + normalizedMinIncrement;
   const hasLiveCountdown = auctionItem.status === "LIVE";
   const statusLabel = getLiveStatusLabel(auctionItem.status);
   const initialCurrentPriceAmount = Number(
@@ -204,6 +205,7 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
           <LiveBidHistory
             auctionId={auction.id}
             suggestedBidAmount={suggestedBidAmount}
+            minBidIncrement={normalizedMinIncrement}
           />
         </div>
       </section>

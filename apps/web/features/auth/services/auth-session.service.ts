@@ -1,16 +1,19 @@
 import { AuthApiError } from "@/features/auth/services/auth-api.error";
 import { authHttpFetch } from "@/features/auth/services/auth-http.client";
-import { clearAuthUser } from "@/features/auth/services/auth-user.store";
+import {
+  clearAuthUser,
+  setAuthUser,
+} from "@/features/auth/services/auth-user.store";
 import { clearAuthAccessToken } from "@/features/auth/services/auth-token.store";
-import type { ApiErrorShape, CurrentUser } from "@/features/auth/types/auth";
+import type { ApiErrorShape, AuthUser } from "@/features/auth/types/auth";
 
-export async function getCurrentUser(): Promise<CurrentUser> {
+export async function getCurrentUser(): Promise<AuthUser> {
   const response = await authHttpFetch("/auth/me", {
     method: "GET",
   });
 
   const json = (await response.json().catch(() => null)) as
-    | { user?: CurrentUser }
+    | { user?: AuthUser }
     | ApiErrorShape
     | null;
 
@@ -24,6 +27,7 @@ export async function getCurrentUser(): Promise<CurrentUser> {
     );
   }
 
+  setAuthUser(json.user);
   return json.user;
 }
 
