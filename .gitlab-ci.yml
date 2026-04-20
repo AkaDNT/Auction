@@ -102,17 +102,17 @@ deploy_production:
         whoami
         hostname
         pwd
-        ls -la /opt/auction
-        ls -la /opt/auction/scripts
-        test -f /opt/auction/scripts/deploy.sh
-        ls -l /opt/auction/scripts/deploy.sh
+        ls -la /opt/auction/Auction
+        ls -la /opt/auction/Auction/scripts
+        test -f /opt/auction/Auction/scripts/deploy.sh
+        ls -l /opt/auction/Auction/scripts/deploy.sh
 
         export REGISTRY='$CI_REGISTRY'
         export REGISTRY_USER='$CI_REGISTRY_USER'
         export REGISTRY_PASSWORD='$CI_REGISTRY_PASSWORD'
         export IMAGE_TAG='$CI_COMMIT_SHORT_SHA'
 
-        bash /opt/auction/scripts/deploy.sh
+        bash /opt/auction/Auction/scripts/deploy.sh
       "
   environment:
     name: production

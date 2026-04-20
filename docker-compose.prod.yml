@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - /opt/auction/data/postgres:/var/lib/postgresql/data
+      - /opt/auction/Auction/data/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
-      - /opt/auction/data/redis:/data
+      - /opt/auction/Auction/data/redis:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -106,6 +106,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /opt/auction/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - /opt/auction/nginx/certs/cloudflare-origin.crt:/etc/nginx/certs/cloudflare-origin.crt:ro
-      - /opt/auction/nginx/certs/cloudflare-origin.key:/etc/nginx/certs/cloudflare-origin.key:ro
+      - /opt/auction/Auction/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/auction/Auction/nginx/certs/cloudflare-origin.crt:/etc/nginx/certs/cloudflare-origin.crt:ro
+      - /opt/auction/Auction/nginx/certs/cloudflare-origin.key:/etc/nginx/certs/cloudflare-origin.key:ro
