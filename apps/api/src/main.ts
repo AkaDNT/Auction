@@ -55,8 +55,11 @@ async function bootstrap() {
       },
     }),
   );
+  const allowedOrigins =
+    config.get<string>('ALLOWED_ORIGINS')?.split(',') || [];
+
   app.enableCors({
-    origin: [config.get<string>('WEB_ORIGIN') ?? 'http://localhost:3000'],
+    origin: ['http://localhost:3000', ...allowedOrigins],
     credentials: true,
   });
   await app.listen(port);
