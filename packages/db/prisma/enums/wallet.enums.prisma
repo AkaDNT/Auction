@@ -57,9 +57,3 @@ enum WithdrawalStatus {
   CANCELLED
 }
 
-enum AuctionSettlementStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}

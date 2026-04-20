@@ -4,6 +4,7 @@ import { seedAuctionCategories } from "./seed/auction-category.seed";
 import { seedAuctions } from "./seed/auction.seed";
 import { seedAuctionImages } from "./seed/auction-image.seed";
 import { seedBids } from "./seed/bid.seed";
+import { seedAuctionSettlements } from "./seed/auction-settlements.seed";
 
 const prisma = new PrismaClient();
 
@@ -15,6 +16,7 @@ async function main() {
   await seedAuctions(prisma);
   await seedAuctionImages(prisma);
   await seedBids(prisma);
+  await seedAuctionSettlements(prisma);
 
   console.log("🎉 Seed completed successfully.");
 }

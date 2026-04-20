@@ -15,3 +15,10 @@ enum BidStatus {
   WON
   LOST
 }
+
+enum AuctionSettlementStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
