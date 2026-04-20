@@ -1,0 +1,122 @@
+stages:
+  - validate
+  - package
+  - deploy
+
+default:
+  interruptible: true
+
+variables:
+  GIT_DEPTH: "1"
+
+validate_build:
+  stage: validate
+  image: node:20-bookworm-slim
+  script:
+    - npm ci
+    - npm --workspace packages/db run prisma:generate
+    - npm --workspace packages/db run build
+    - npm --workspace packages/shared run build
+    - npm --workspace apps/api run build
+    - npm --workspace apps/worker run build
+    - npm --workspace apps/web run build
+  rules:
+    - if: "$CI_COMMIT_BRANCH"
+
+.buildkit_template:
+  stage: package
+  image:
+    name: moby/buildkit:rootless
+    entrypoint: [""]
+  variables:
+    BUILDKITD_FLAGS: --oci-worker-no-process-sandbox
+  before_script:
+    - mkdir -p ~/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > ~/.docker/config.json
+  needs:
+    - validate_build
+  rules:
+    - if: "$CI_COMMIT_BRANCH"
+
+package_api:
+  extends: .buildkit_template
+  script:
+    - |
+      buildctl-daemonless.sh build \
+        --frontend dockerfile.v0 \
+        --local context=. \
+        --local dockerfile=. \
+        --opt filename=apps/api/Dockerfile \
+        --opt build-arg:DATABASE_URL=$DATABASE_URL \
+        --output type=image,name=$CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA,push=true
+
+package_worker:
+  extends: .buildkit_template
+  script:
+    - |
+      buildctl-daemonless.sh build \
+        --frontend dockerfile.v0 \
+        --local context=. \
+        --local dockerfile=. \
+        --opt filename=apps/worker/Dockerfile \
+        --opt build-arg:DATABASE_URL=$DATABASE_URL \
+        --output type=image,name=$CI_REGISTRY_IMAGE/worker:$CI_COMMIT_SHORT_SHA,push=true
+
+package_web:
+  extends: .buildkit_template
+  script:
+    - test -n "${NEXT_PUBLIC_API_BASE_URL:-}" || (echo "NEXT_PUBLIC_API_BASE_URL missing"; exit 1)
+    - echo "API base length ${#NEXT_PUBLIC_API_BASE_URL}"
+    - |
+      buildctl-daemonless.sh build \
+        --frontend dockerfile.v0 \
+        --local context=. \
+        --local dockerfile=. \
+        --opt filename=apps/web/Dockerfile \
+        --opt no-cache=true \
+        --opt build-arg:NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL" \
+        --output type=image,name=$CI_REGISTRY_IMAGE/web:$CI_COMMIT_SHORT_SHA,push=true
+
+deploy_production:
+  stage: deploy
+  image: alpine:3.20
+  needs:
+    - package_api
+    - package_worker
+    - package_web
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval "$(ssh-agent -s)"
+    - chmod 400 "$SSH_PRIVATE_KEY"
+    - ssh-add "$SSH_PRIVATE_KEY"
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp "$SSH_KNOWN_HOSTS" ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+        set -euo pipefail
+
+        echo '=== debug ==='
+        whoami
+        hostname
+        pwd
+        ls -la /opt/auction
+        ls -la /opt/auction/scripts
+        test -f /opt/auction/scripts/deploy.sh
+        ls -l /opt/auction/scripts/deploy.sh
+
+        export REGISTRY='$CI_REGISTRY'
+        export REGISTRY_USER='$CI_REGISTRY_USER'
+        export REGISTRY_PASSWORD='$CI_REGISTRY_PASSWORD'
+        export IMAGE_TAG='$CI_COMMIT_SHORT_SHA'
+
+        bash /opt/auction/scripts/deploy.sh
+      "
+  environment:
+    name: production
+    url: https://vinabid.store
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: on_success
