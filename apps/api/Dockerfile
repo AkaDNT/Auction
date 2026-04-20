@@ -58,6 +58,8 @@ COPY --from=builder --chown=node:node /app/apps/api/package.json ./apps/api/pack
 COPY --from=builder --chown=node:node /app/packages/db/dist ./packages/db/dist
 COPY --from=builder --chown=node:node /app/packages/db/package.json ./packages/db/package.json
 COPY --from=builder --chown=node:node /app/packages/db/prisma ./packages/db/prisma
+COPY --from=builder --chown=node:node /app/packages/db/prisma.config.ts ./packages/db/prisma.config.ts
+COPY --from=builder --chown=node:node /app/packages/db/src ./packages/db/src
 COPY --from=builder --chown=node:node /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder --chown=node:node /app/packages/shared/package.json ./packages/shared/package.json
 
