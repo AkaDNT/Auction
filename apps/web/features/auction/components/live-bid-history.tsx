@@ -404,7 +404,7 @@ export function LiveBidHistory({
     return minBidIncrement;
   }, [minBidIncrement]);
   const suggestedAmount = useMemo(() => {
-    const highestBid = bidsAsc.at(-1)?.amountValue;
+    const highestBid = bidsAsc.at(-1)?.amountValue ?? Number.NaN;
     if (Number.isFinite(highestBid) && highestBid > 0) {
       return highestBid + safeMinBidIncrement;
     }

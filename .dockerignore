@@ -1,0 +1,59 @@
+data
+backups
+
+# dependencies
+node_modules
+**/node_modules
+
+# build cache
+.turbo
+.next
+dist
+build
+coverage
+**/.next
+**/dist
+**/build
+**/coverage
+
+# git
+.git
+.gitignore
+.github
+.gitlab
+
+# editor / local config
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# local AI / tooling metadata
+.claude
+.gitnexus
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+tmp
+logs
+
+# env files
+.env
+.env.*
+!.env.example
+
+# docs / local instructions not needed at build time
+AGENTS.md
+CLAUDE.md
+
+# optional: test/spec files if image runtime not need
+specs
+**/*.spec.ts
+**/*.test.ts
+
+# optional: docker file itself usually not need copy into image
+.dockerignore
