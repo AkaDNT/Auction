@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { useAuthUser } from "@/features/auth/services/auth-user.store";
+import { useTheme } from "@/shared/components/theme/theme-provider";
 
 const baseItems = [{ label: "Chỉnh sửa hồ sơ cá nhân", href: "/profile" }];
 
@@ -13,8 +14,46 @@ function hasRole(roles: string[], expectedRole: string) {
   return roles.some((role) => role.toLowerCase() === normalizedRole);
 }
 
+function MoonIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"
+      />
+    </svg>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <circle cx="12" cy="12" r="4" strokeWidth={2} />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+      />
+    </svg>
+  );
+}
+
 export function AuthUserMenu() {
   const user = useAuthUser();
+  const { theme, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const items = useMemo(() => {
@@ -23,6 +62,12 @@ export function AuthUserMenu() {
     }
 
     const menuItems = [...baseItems];
+    const canAccessBuyerPage =
+      hasRole(user.roles, "SELLER") || hasRole(user.roles, "ADMIN");
+
+    if (canAccessBuyerPage) {
+      menuItems.push({ label: "Khu vực người mua", href: "/auctions" });
+    }
 
     if (hasRole(user.roles, "SELLER")) {
       menuItems.push({ label: "Khu vực người bán", href: "/seller" });
@@ -78,8 +123,24 @@ export function AuthUserMenu() {
             }}
           >
             <div className="border-b border-(--border) px-4 py-4">
-              <p className="text-sm font-semibold theme-heading">{user.name}</p>
-              <p className="mt-1 text-xs theme-muted">{user.email}</p>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold theme-heading">
+                    {user.name}
+                  </p>
+                  <p className="truncate text-xs theme-muted">{user.email}</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-(--border) bg-(--primary-soft) transition hover:bg-(--primary-soft)"
+                  aria-label={`Chuyển sang chế độ ${theme === "dark" ? "sáng" : "tối"}`}
+                  title={theme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                >
+                  {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+                </button>
+              </div>
             </div>
 
             <div className="p-2">

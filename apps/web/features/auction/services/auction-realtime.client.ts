@@ -31,5 +31,8 @@ export function createAuctionRealtimeSocket(): Socket {
     transports: ["websocket", "polling"],
     tryAllTransports: true,
     reconnection: true,
+    reconnectionAttempts: 8,
+    reconnectionDelay: 500,
+    reconnectionDelayMax: 5000,
   });
 }

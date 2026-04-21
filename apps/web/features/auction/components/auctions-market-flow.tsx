@@ -450,8 +450,13 @@ export function AuctionsMarketFlow() {
                         </p>
                       </Link>
                       <div className="space-y-3 p-4">
-                        <h3 className="text-xl font-semibold text-theme-heading">
-                          {auction.title}
+                        <h3
+                          title={auction.title}
+                          className="flex min-h-[3.5rem] items-center text-xl font-semibold leading-7 text-theme-heading"
+                        >
+                          <span className="line-clamp-2 block w-full">
+                            {auction.title}
+                          </span>
                         </h3>
                         <p className="text-sm text-theme-muted">
                           Người bán: {auction.seller}
@@ -574,8 +579,13 @@ export function AuctionsMarketFlow() {
                         />
                       </Link>
 
-                      <h3 className="line-clamp-2 text-lg font-semibold text-theme-heading">
-                        {auction.title}
+                      <h3
+                        title={auction.title}
+                        className="flex min-h-[3.5rem] items-center text-lg font-semibold leading-7 text-theme-heading"
+                      >
+                        <span className="line-clamp-2 block w-full">
+                          {auction.title}
+                        </span>
                       </h3>
                       <p className="mt-2 text-sm text-theme-muted">
                         Seller: {auction.seller}

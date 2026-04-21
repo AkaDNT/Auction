@@ -43,6 +43,8 @@ type BidViewModel = {
   placedAtMs: number;
 };
 
+const MAX_BID_HISTORY_ITEMS = 300;
+
 function toBidderLabel(bidderId: string) {
   const tail = bidderId.slice(-6).toUpperCase();
   return `Bidder #${tail}`;
@@ -144,6 +146,32 @@ function sortBidsByAmountAscThenCreatedAtDesc(bids: BidViewModel[]) {
   });
 }
 
+function dedupeBidsByKey(bids: BidViewModel[]) {
+  const seen = new Set<string>();
+  const deduped: BidViewModel[] = [];
+
+  for (let index = bids.length - 1; index >= 0; index -= 1) {
+    const bid = bids[index];
+    if (seen.has(bid.key)) {
+      continue;
+    }
+
+    seen.add(bid.key);
+    deduped.push(bid);
+  }
+
+  return deduped.reverse();
+}
+
+function normalizeBidHistory(bids: BidViewModel[]) {
+  const deduped = dedupeBidsByKey(bids);
+  const latestWindow = deduped
+    .sort((left, right) => right.placedAtMs - left.placedAtMs)
+    .slice(0, MAX_BID_HISTORY_ITEMS);
+
+  return sortBidsByAmountAscThenCreatedAtDesc(latestWindow);
+}
+
 export function LiveBidHistory({
   auctionId,
   suggestedBidAmount,
@@ -199,7 +227,7 @@ export function LiveBidHistory({
     const json = (await response.json()) as BidApiResponse;
     const mapped = (json.items ?? []).map(mapBidApiItem);
 
-    return sortBidsByAmountAscThenCreatedAtDesc(mapped);
+    return normalizeBidHistory(mapped);
   }, [auctionId]);
 
   useEffect(() => {
@@ -288,10 +316,7 @@ export function LiveBidHistory({
 
       const optimisticBid = createOptimisticBidViewModel(parsedAmount);
       setBidsDesc((currentBids) => {
-        return sortBidsByAmountAscThenCreatedAtDesc([
-          ...currentBids,
-          optimisticBid,
-        ]);
+        return normalizeBidHistory([...currentBids, optimisticBid]);
       });
       requestAnimationFrame(scrollToBottom);
 
@@ -365,7 +390,7 @@ export function LiveBidHistory({
       const shouldStickBottom = isNearBottom();
       const incoming = mapBidPlacedEvent(event);
       setBidsDesc((currentBids) => {
-        return sortBidsByAmountAscThenCreatedAtDesc([...currentBids, incoming]);
+        return normalizeBidHistory([...currentBids, incoming]);
       });
 
       if (shouldStickBottom) {

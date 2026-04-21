@@ -10,22 +10,24 @@ import { SiteHeader } from "@/features/landing/components/site-header";
 import { StatsSection } from "@/features/landing/components/stats-section";
 import { TeamSection } from "@/features/landing/components/team-section";
 import { TestimonialsSection } from "@/features/landing/components/testimonials-section";
+import { LandingPageShell } from "@/shared/components/layout/landing-page-shell";
 
 export default function HomePage() {
   return (
     <>
-      <SiteHeader />
-      <HeroSection />
-      <FeaturesSection />
-      <BenefitsSection />
-      <HowItWorksSection />
-      <StatsSection />
-      <TeamSection />
-      <LogoStripSection />
-      <TestimonialsSection />
-      <PricingSection />
-      <CtaSection />
-      <SiteFooter />
+      <LandingPageShell>
+        <HeroSection />
+        <FeaturesSection />
+        <BenefitsSection />
+        <HowItWorksSection />
+        <StatsSection />
+        <TeamSection />
+        <LogoStripSection />
+        <TestimonialsSection />
+        <PricingSection />
+        <CtaSection />
+        <SiteFooter />
+      </LandingPageShell>
     </>
   );
 }
