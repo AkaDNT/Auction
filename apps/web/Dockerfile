@@ -16,8 +16,10 @@ FROM base AS builder
 WORKDIR /app
 
 ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_SITE_URL
 
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json

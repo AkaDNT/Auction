@@ -75,6 +75,7 @@ package_web:
         --opt filename=apps/web/Dockerfile \
         --opt no-cache=true \
         --opt build-arg:NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL" \
+        --opt build-arg:NEXT_PUBLIC_SITE_URL="$NEXT_PUBLIC_SITE_URL" \
         --output type=image,name=$CI_REGISTRY_IMAGE/web:$CI_COMMIT_SHORT_SHA,push=true
 
 deploy_production:
