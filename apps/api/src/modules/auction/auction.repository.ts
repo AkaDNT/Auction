@@ -20,6 +20,7 @@ export interface IAuctionRepository {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
+    sellerId?: string;
     sellerSlug?: string;
     endTimeFilter?: AuctionEndTimeFilter;
     priceRangeFilter?: AuctionPriceRangeFilter;
@@ -30,6 +31,7 @@ export interface IAuctionRepository {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
+    sellerId?: string;
     sellerSlug?: string;
     endTimeFilter?: AuctionEndTimeFilter;
     priceRangeFilter?: AuctionPriceRangeFilter;

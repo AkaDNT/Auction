@@ -77,6 +77,28 @@ export class AuctionService {
     };
   }
 
+  async findMine(query: ListAuctionDto, sellerId: string) {
+    const [items, total] = await Promise.all([
+      this.auctionRepo.findMany({
+        ...query,
+        sellerId,
+      }),
+      this.auctionRepo.count({
+        ...query,
+        sellerId,
+      }),
+    ]);
+
+    return {
+      items,
+      meta: {
+        page: query.page,
+        limit: query.limit,
+        total,
+      },
+    };
+  }
+
   async findOne(id: string) {
     const auction = await this.auctionRepo.findById(id);
     if (!auction) {

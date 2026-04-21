@@ -2,14 +2,17 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuctionService } from './auction.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
+import { ListAuctionDto } from './dto/list-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { JwtAccessGuard } from 'src/common/guards/jwt-access.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
@@ -21,6 +24,11 @@ import { Role } from '@repo/db';
 @Roles(Role.SELLER, Role.ADMIN)
 export class SellerAuctionController {
   constructor(private readonly auctionService: AuctionService) {}
+
+  @Get()
+  findMine(@Query() query: ListAuctionDto, @Req() req: any) {
+    return this.auctionService.findMine(query, req.user.id);
+  }
 
   @Post()
   create(@Body() dto: CreateAuctionDto, @Req() req: any) {

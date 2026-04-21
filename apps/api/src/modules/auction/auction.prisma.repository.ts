@@ -67,6 +67,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
+    sellerId?: string;
     sellerSlug?: string;
     endTimeFilter?: AuctionEndTimeFilter;
     priceRangeFilter?: AuctionPriceRangeFilter;
@@ -78,6 +79,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
       search,
       categoryId,
       status,
+      sellerId,
       sellerSlug,
       endTimeFilter,
       priceRangeFilter,
@@ -95,6 +97,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         : {}),
       ...(categoryId ? { categoryId } : {}),
       ...(status ? { status } : {}),
+      ...(sellerId ? { sellerId } : {}),
       ...(sellerSlug
         ? {
             seller: {
@@ -157,6 +160,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
     search?: string;
     categoryId?: string;
     status?: AuctionStatus;
+    sellerId?: string;
     sellerSlug?: string;
     endTimeFilter?: AuctionEndTimeFilter;
     priceRangeFilter?: AuctionPriceRangeFilter;
@@ -165,6 +169,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
       search,
       categoryId,
       status,
+      sellerId,
       sellerSlug,
       endTimeFilter,
       priceRangeFilter,
@@ -181,6 +186,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         : {}),
       ...(categoryId ? { categoryId } : {}),
       ...(status ? { status } : {}),
+      ...(sellerId ? { sellerId } : {}),
       ...(sellerSlug
         ? {
             seller: {
