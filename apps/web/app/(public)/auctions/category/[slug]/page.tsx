@@ -101,15 +101,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             Đấu giá {getCategoryLabel(slug).toLowerCase()} trực tuyến minh bạch
           </h2>
           <p className="mt-2">
-            Theo dõi phiên đấu giá theo thời gian thực, cập nhật mức giá mới nhất
-            và tham gia đặt giá ngay trên nền tảng Vinabid Store. Mỗi lô đều có
-            thông tin rõ ràng về thời gian kết thúc, giá hiện tại và lịch sử
-            giao dịch để người mua đưa ra quyết định chính xác.
+            Theo dõi phiên đấu giá theo thời gian thực, cập nhật mức giá mới
+            nhất và tham gia đặt giá ngay trên nền tảng Vinabid Store. Mỗi lô
+            đều có thông tin rõ ràng về thời gian kết thúc, giá hiện tại và lịch
+            sử giao dịch để người mua đưa ra quyết định chính xác.
           </p>
           <p className="mt-2">
-            Bạn có thể quay lại trang danh sách tổng để khám phá thêm nhiều phiên
-            đấu giá theo ngành hàng khác và mở rộng cơ hội mua bán tài sản giá
-            trị cao.
+            Bạn có thể quay lại trang danh sách tổng để khám phá thêm nhiều
+            phiên đấu giá theo ngành hàng khác và mở rộng cơ hội mua bán tài sản
+            giá trị cao.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link href="/auctions" className="btn-secondary">

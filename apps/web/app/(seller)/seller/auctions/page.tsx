@@ -394,7 +394,7 @@ export default function SellerAuctionsPage() {
                   <col className="w-[15%]" />
                 </colgroup>
                 <thead className="bg-(--primary-soft)">
-                  <tr className="border-b border-theme-line text-xs font-semibold uppercase tracking-[0.2em] theme-muted divide-x divide-theme-line">
+                  <tr className="border-b border-theme-line text-xs font-semibold uppercase tracking-[0.2em] theme-muted">
                     <th className="px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 text-left">
                       Phiên đấu giá
                     </th>
@@ -424,7 +424,7 @@ export default function SellerAuctionsPage() {
                           void router.push(`/seller/auctions/${auction.id}`);
                         }
                       }}
-                      className="cursor-pointer border-b border-theme-line transition hover:bg-(--primary-soft) focus:outline-none focus:ring-2 focus:ring-(--border) focus:ring-inset divide-x divide-theme-line"
+                      className="cursor-pointer border-b border-theme-line transition hover:bg-(--primary-soft) focus:outline-none focus:ring-2 focus:ring-(--border) focus:ring-inset"
                     >
                       <td className="px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 align-middle">
                         <div className="min-w-0">

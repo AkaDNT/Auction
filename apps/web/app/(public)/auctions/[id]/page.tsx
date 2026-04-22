@@ -107,10 +107,9 @@ export default async function AuctionDetailPage({
   const startingPriceLabel = toCurrencyLabel(auctionItem.startingPrice);
   const buyNowPriceLabel = toCurrencyLabel(auctionItem.buyNowPrice);
   const minBidIncrementLabel = toCurrencyLabel(auctionItem.minBidIncrement);
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
-      ? process.env.NEXT_PUBLIC_SITE_URL.trim()
-      : "https://example.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
+    ? process.env.NEXT_PUBLIC_SITE_URL.trim()
+    : "https://example.com";
   const productStructuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -138,7 +137,9 @@ export default async function AuctionDetailPage({
     <main className="min-h-screen text-theme-body">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productStructuredData),
+        }}
       />
       <AuctionsNavbar />
 

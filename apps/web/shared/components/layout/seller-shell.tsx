@@ -9,9 +9,24 @@ import { AuthUserMenu } from "@/features/auth/components/auth-user-menu";
 const navigation = [
   { label: "Tổng quan", href: "/seller" },
   { label: "Phiên đấu giá", href: "/seller/auctions" },
-  { label: "Hình ảnh", href: "/seller/images" },
   { label: "Tạo phiên mới", href: "/seller/auctions/new" },
 ];
+
+function isNavActive(pathname: string, href: string) {
+  if (href === "/seller") {
+    return pathname === "/seller";
+  }
+
+  if (href === "/seller/auctions") {
+    return (
+      pathname === "/seller/auctions" ||
+      (pathname.startsWith("/seller/auctions/") &&
+        pathname !== "/seller/auctions/new")
+    );
+  }
+
+  return pathname === href;
+}
 
 function MenuIcon() {
   return (
@@ -95,9 +110,7 @@ export function SellerShell({ children }: SellerShellProps) {
 
           <nav className="mt-4 flex flex-col gap-1.5 sm:mt-5 lg:mt-6">
             {navigation.map((item) => {
-              const isActive =
-                pathname === item.href ||
-                (item.href !== "/seller" && pathname.startsWith(item.href));
+              const isActive = isNavActive(pathname, item.href);
 
               return (
                 <Link
@@ -135,12 +148,12 @@ export function SellerShell({ children }: SellerShellProps) {
                 href="/"
                 className="flex items-center gap-2 text-foreground sm:gap-3"
               >
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-(--border) bg-(--primary-soft) text-xs font-bold tracking-[0.3em] text-(--primary-strong) sm:h-10 sm:w-10 sm:rounded-xl sm:text-sm lg:h-11 lg:w-11 lg:rounded-2xl">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--border) bg-(--primary-soft) text-sm font-bold tracking-[0.3em] text-(--primary-strong) sm:h-11 sm:w-11">
                   AH
                 </span>
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.35em] theme-primary sm:text-sm">
-                    Sàn Đấu Giá Trực Tuyến
+                    Bảng điều khiển bán hàng
                   </p>
                 </div>
               </Link>

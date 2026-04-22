@@ -127,10 +127,7 @@ export default function HomePage() {
             <Link href="/auctions" className="btn-secondary">
               Phiên đấu giá trực tuyến đang mở
             </Link>
-            <Link
-              href="/auctions/category/xe-dien"
-              className="btn-secondary"
-            >
+            <Link href="/auctions/category/xe-dien" className="btn-secondary">
               Đấu giá xe điện
             </Link>
             <Link

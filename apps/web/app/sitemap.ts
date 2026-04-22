@@ -87,14 +87,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const categoryUrls: MetadataRoute.Sitemap = categories.map(
-    (category) => ({
-      url: toAbsoluteUrl(`/auctions/category/${category.slug}`),
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }),
-  );
+  const categoryUrls: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: toAbsoluteUrl(`/auctions/category/${category.slug}`),
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
 
   const fallbackAuctionUrls: MetadataRoute.Sitemap = liveAuctions.map(
     (auction) => ({
