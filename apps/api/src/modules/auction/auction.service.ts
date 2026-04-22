@@ -99,6 +99,23 @@ export class AuctionService {
     };
   }
 
+  async findMineOne(id: string, sellerId: string) {
+    const auction = await this.auctionRepo.findById(id);
+
+    if (!auction || auction.sellerId !== sellerId) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_NOT_FOUND,
+          message: 'Không tìm thấy phiên đấu giá',
+          details: { id },
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return auction;
+  }
+
   async findOne(id: string) {
     const auction = await this.auctionRepo.findById(id);
     if (!auction) {
@@ -227,6 +244,17 @@ export class AuctionService {
           details: { id },
         },
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (auction.status !== AuctionStatus.DRAFT) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.AUCTION_INVALID_STATUS,
+          message: 'Chỉ có thể phát hành phiên đấu giá ở trạng thái nháp',
+          details: { id, currentStatus: auction.status },
+        },
+        HttpStatus.BAD_REQUEST,
       );
     }
 

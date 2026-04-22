@@ -25,6 +25,11 @@ import { Role } from '@repo/db';
 export class SellerAuctionController {
   constructor(private readonly auctionService: AuctionService) {}
 
+  @Get(':id')
+  findMineOne(@Param('id') id: string, @Req() req: any) {
+    return this.auctionService.findMineOne(id, req.user.id);
+  }
+
   @Get()
   findMine(@Query() query: ListAuctionDto, @Req() req: any) {
     return this.auctionService.findMine(query, req.user.id);
