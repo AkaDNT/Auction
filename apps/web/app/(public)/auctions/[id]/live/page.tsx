@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -16,6 +17,36 @@ import { SiteFooter } from "@/features/landing/components/site-footer";
 type LiveRoomPageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: LiveRoomPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const auctionItem = await getAuctionById(id);
+
+  if (!auctionItem) {
+    return {
+      title: "Live room không tồn tại | Vinabid Store",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  return {
+    title: `Live: ${auctionItem.title} | Vinabid Store`,
+    description:
+      "Phòng theo dõi đấu giá theo thời gian thực dành cho người dùng đã truy cập phiên đấu giá tương ứng.",
+    alternates: {
+      canonical: `/auctions/${auctionItem.id}`,
+    },
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
+}
 
 function toCurrencyLabel(value: string | number | null | undefined) {
   if (value === null || value === undefined) {

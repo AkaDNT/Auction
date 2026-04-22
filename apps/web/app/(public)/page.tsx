@@ -7,16 +7,15 @@ import { HowItWorksSection } from "@/features/landing/components/how-it-works-se
 import { LogoStripSection } from "@/features/landing/components/logo-strip-section";
 import { PricingSection } from "@/features/landing/components/pricing-section";
 import { SiteFooter } from "@/features/landing/components/site-footer";
-import { SiteHeader } from "@/features/landing/components/site-header";
 import { StatsSection } from "@/features/landing/components/stats-section";
 import { TeamSection } from "@/features/landing/components/team-section";
 import { TestimonialsSection } from "@/features/landing/components/testimonials-section";
 import { LandingPageShell } from "@/shared/components/layout/landing-page-shell";
+import Link from "next/link";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
-    ? process.env.NEXT_PUBLIC_SITE_URL.trim()
-    : "https://example.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
+  ? process.env.NEXT_PUBLIC_SITE_URL.trim()
+  : "https://example.com";
 
 const pageTitle =
   "Sàn đấu giá trực tuyến doanh nghiệp | Đấu giá minh bạch theo thời gian thực";
@@ -115,6 +114,39 @@ export default function HomePage() {
       />
       <LandingPageShell>
         <HeroSection />
+        <section className="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10">
+          <h2 className="text-2xl font-semibold text-theme-heading sm:text-3xl">
+            Khám phá đấu giá trực tuyến theo nhu cầu
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-theme-muted sm:text-base">
+            Vinabid Store cung cấp nền tảng đấu giá trực tuyến cho doanh nghiệp
+            và cá nhân, tập trung vào trải nghiệm đặt giá minh bạch, theo dõi
+            thời gian thực và quản trị lô hàng hiệu quả.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            <Link href="/auctions" className="btn-secondary">
+              Phiên đấu giá trực tuyến đang mở
+            </Link>
+            <Link
+              href="/auctions/category/xe-dien"
+              className="btn-secondary"
+            >
+              Đấu giá xe điện
+            </Link>
+            <Link
+              href="/auctions/category/dong-ho-cao-cap"
+              className="btn-secondary"
+            >
+              Đấu giá đồng hồ cao cấp
+            </Link>
+            <Link
+              href="/auctions/category/nghe-thuat-suu-tam"
+              className="btn-secondary"
+            >
+              Đấu giá nghệ thuật sưu tầm
+            </Link>
+          </div>
+        </section>
         <FeaturesSection />
         <BenefitsSection />
         <HowItWorksSection />

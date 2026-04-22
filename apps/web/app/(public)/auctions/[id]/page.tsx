@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AuctionImageGallery } from "@/features/auction/components/auction-image-gallery";
@@ -11,6 +12,49 @@ import Link from "next/link";
 type AuctionDetailPageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: AuctionDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const auctionItem = await getAuctionById(id);
+
+  if (!auctionItem) {
+    return {
+      title: "Lô đấu giá không tồn tại | Vinabid Store",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const title = `${auctionItem.title} | Đấu giá trực tuyến | Vinabid Store`;
+  const description =
+    auctionItem.description?.trim() ||
+    `Theo dõi lô đấu giá ${auctionItem.title}, cập nhật giá theo thời gian thực và tham gia đặt giá minh bạch trên Vinabid Store.`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: `/auctions/${auctionItem.id}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `/auctions/${auctionItem.id}`,
+      type: "article",
+      locale: "vi_VN",
+      images: auctionItem.thumbnailUrl ? [auctionItem.thumbnailUrl] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 function toCurrencyLabel(value: string | number | null | undefined) {
   if (value === null || value === undefined) {
@@ -63,9 +107,39 @@ export default async function AuctionDetailPage({
   const startingPriceLabel = toCurrencyLabel(auctionItem.startingPrice);
   const buyNowPriceLabel = toCurrencyLabel(auctionItem.buyNowPrice);
   const minBidIncrementLabel = toCurrencyLabel(auctionItem.minBidIncrement);
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
+      ? process.env.NEXT_PUBLIC_SITE_URL.trim()
+      : "https://example.com";
+  const productStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: auctionItem.title,
+    description,
+    sku: auctionItem.code,
+    image: galleryImages,
+    brand: {
+      "@type": "Brand",
+      name: "Vinabid Store",
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${siteUrl}/auctions/${auctionItem.id}`,
+      priceCurrency: "VND",
+      price: Number(auctionItem.currentPrice ?? auctionItem.startingPrice) || 0,
+      availability:
+        auctionItem.status === "LIVE"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/LimitedAvailability",
+    },
+  };
 
   return (
     <main className="min-h-screen text-theme-body">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+      />
       <AuctionsNavbar />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">

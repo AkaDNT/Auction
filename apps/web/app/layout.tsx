@@ -18,10 +18,9 @@ const notoSansMono = Noto_Sans_Mono({
   weight: ["400", "500", "600"],
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
-    ? process.env.NEXT_PUBLIC_SITE_URL.trim()
-    : "https://example.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim().match(/^https?:\/\//)
+  ? process.env.NEXT_PUBLIC_SITE_URL.trim()
+  : "https://example.com";
 
 export const metadata: Metadata = {
   title: "Sàn Đấu Giá | Nền tảng đấu giá doanh nghiệp",
