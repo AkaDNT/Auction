@@ -38,6 +38,13 @@ export class BidPrismaRepository implements IBidRepository {
       where: { auctionId },
       orderBy: { createdAt: 'desc' }, // lấy 100 bid gần nhất
       take: 100,
+      include: {
+        bidder: {
+          select: {
+            slug: true,
+          },
+        },
+      },
     });
 
     return bids.sort((a, b) => {

@@ -71,6 +71,22 @@ function getLiveStatusLabel(status: string) {
   return "Nháp";
 }
 
+function getBidUnavailableMessage(status: string) {
+  if (status === "UPCOMING") {
+    return "Phiên chưa bắt đầu. Bạn có thể theo dõi và quay lại khi live mở đặt giá.";
+  }
+
+  if (status === "ENDED") {
+    return "Phiên đã kết thúc, không thể đặt giá thêm.";
+  }
+
+  if (status === "CANCELLED") {
+    return "Phiên đã bị hủy bởi hệ thống hoặc người bán.";
+  }
+
+  return "Phiên này hiện chưa nhận đặt giá.";
+}
+
 export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
   const { id } = await params;
   const auctionItem = await getAuctionById(id);
@@ -89,7 +105,9 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
   const suggestedBidAmount =
     (Number.isFinite(basePrice) ? basePrice : 0) + normalizedMinIncrement;
   const hasLiveCountdown = auctionItem.status === "LIVE";
+  const canPlaceBid = auctionItem.status === "LIVE";
   const statusLabel = getLiveStatusLabel(auctionItem.status);
+  const bidUnavailableMessage = getBidUnavailableMessage(auctionItem.status);
   const initialCurrentPriceAmount = Number(
     auctionItem.currentPrice ?? auctionItem.startingPrice,
   );
@@ -237,6 +255,8 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
             auctionId={auction.id}
             suggestedBidAmount={suggestedBidAmount}
             minBidIncrement={normalizedMinIncrement}
+            canPlaceBid={canPlaceBid}
+            bidUnavailableMessage={bidUnavailableMessage}
           />
         </div>
       </section>

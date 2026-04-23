@@ -501,26 +501,29 @@ export function AuctionsMarketFlow() {
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="rounded-full border border-theme-line bg-theme-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-muted">
-                            {auction.status}
-                          </span>
-                        </div>
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="rounded-full border border-theme-line bg-theme-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-muted">
+                                {auction.status}
+                              </span>
+                            </div>
 
-                        <div className="flex gap-3">
-                          <Link
-                            href={`/auctions/${auction.id}`}
-                            className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand/55 bg-[color:var(--primary-soft)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand transition hover:border-theme-brand hover:bg-theme-brand/15 hover:text-theme-heading"
-                          >
-                            Xem chi tiết
-                          </Link>
-                          <Link
-                            href={`/auctions/${auction.id}/live`}
-                            className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
-                          >
-                            Đặt giá ngay
-                          </Link>
-                        </div>
+                            <div className="flex gap-3">
+                              <Link
+                                href={`/auctions/${auction.id}`}
+                                className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand/55 bg-[color:var(--primary-soft)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand transition hover:border-theme-brand hover:bg-theme-brand/15 hover:text-theme-heading"
+                              >
+                                Xem chi tiết
+                              </Link>
+                              {auction.status === "Đang diễn ra" ||
+                              auction.status === "Sắp hết" ? (
+                                <Link
+                                  href={`/auctions/${auction.id}/live`}
+                                  className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
+                                >
+                                  Đặt giá ngay
+                                </Link>
+                              ) : null}
+                            </div>
                       </div>
                     </article>
                   ))
@@ -643,12 +646,15 @@ export function AuctionsMarketFlow() {
                         >
                           Xem chi tiết
                         </Link>
-                        <Link
-                          href={`/auctions/${auction.id}/live`}
-                          className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
-                        >
-                          Đặt giá ngay
-                        </Link>
+                        {auction.status === "Đang diễn ra" ||
+                        auction.status === "Sắp hết" ? (
+                          <Link
+                            href={`/auctions/${auction.id}/live`}
+                            className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
+                          >
+                            Đặt giá ngay
+                          </Link>
+                        ) : null}
                       </div>
                     </article>
                   ))}

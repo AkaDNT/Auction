@@ -3,7 +3,6 @@ import { Be_Vietnam_Pro, Noto_Sans_Mono } from "next/font/google";
 import { AuthSessionBootstrap } from "@/features/auth/components/auth-session-bootstrap";
 import { QueryProvider } from "@/shared/components/query/query-provider";
 import { ThemeProvider } from "@/shared/components/theme/theme-provider";
-import { ThemeScript } from "@/shared/components/theme/theme-script";
 import "./globals.css";
 
 const beVietnamPro = Be_Vietnam_Pro({
@@ -40,8 +39,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${beVietnamPro.variable} ${notoSansMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
-        <ThemeScript />
+      <body
+        className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]"
+        suppressHydrationWarning
+      >
         <QueryProvider>
           <ThemeProvider>
             <AuthSessionBootstrap />

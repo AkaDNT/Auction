@@ -585,7 +585,7 @@ export default function SellerAuctionDetailPage() {
             >
               {activeAction === "publish"
                 ? "Đang xuất bản..."
-                : "Xuất bản phiên"}
+                : "Công khai phiên"}
             </button>
           ) : null}
 

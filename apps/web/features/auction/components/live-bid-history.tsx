@@ -14,6 +14,8 @@ type LiveBidHistoryProps = {
   auctionId: string;
   suggestedBidAmount: number;
   minBidIncrement: number;
+  canPlaceBid?: boolean;
+  bidUnavailableMessage?: string;
 };
 
 type BidApiItem = {
@@ -21,6 +23,9 @@ type BidApiItem = {
   bidderId: string;
   amount: string | number;
   createdAt: string;
+  bidder: {
+    slug: string;
+  };
 };
 
 type BidApiResponse = {
@@ -45,9 +50,8 @@ type BidViewModel = {
 
 const MAX_BID_HISTORY_ITEMS = 300;
 
-function toBidderLabel(bidderId: string) {
-  const tail = bidderId.slice(-6).toUpperCase();
-  return `Bidder #${tail}`;
+function toBidderLabel(bidderSlug: string) {
+  return `Bidder @${bidderSlug}`;
 }
 
 function toAmountLabel(value: string | number) {
@@ -102,7 +106,7 @@ function mapBidApiItem(item: BidApiItem): BidViewModel {
 
   return {
     key: item.id,
-    bidderLabel: toBidderLabel(item.bidderId),
+    bidderLabel: toBidderLabel(item.bidder.slug),
     amountLabel: toAmountLabel(item.amount),
     amountValue: Number.isFinite(amountValue) ? amountValue : 0,
     timeLabel: toTimeLabel(item.createdAt),
@@ -176,6 +180,8 @@ export function LiveBidHistory({
   auctionId,
   suggestedBidAmount,
   minBidIncrement,
+  canPlaceBid = true,
+  bidUnavailableMessage = "Phiên này hiện chưa nhận đặt giá.",
 }: LiveBidHistoryProps) {
   const [bidsDesc, setBidsDesc] = useState<BidViewModel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -275,6 +281,12 @@ export function LiveBidHistory({
   }, [isLoading]);
 
   const placeBid = async () => {
+    if (!canPlaceBid) {
+      setSubmitError(null);
+      setSubmitMessage(bidUnavailableMessage);
+      return;
+    }
+
     const parsedAmount = parseBidInput(bidAmountInput);
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
       setSubmitError("Vui lòng nhập mức giá hợp lệ.");
@@ -469,20 +481,20 @@ export function LiveBidHistory({
           {realtimeError}
         </p>
       ) : null}
-      {isLoading ? (
-        <p className="relative z-10 mt-4 text-sm text-theme-muted">
-          Đang tải lịch sử đặt giá...
-        </p>
-      ) : bidsAsc.length === 0 ? (
-        <p className="relative z-10 mt-4 text-sm text-theme-muted">
-          Chưa có lượt đặt giá nào.
-        </p>
-      ) : (
-        <div className="relative z-10 mt-4 flex flex-1 flex-col space-y-3">
-          <div
-            ref={scrollContainerRef}
-            className="min-h-64 max-h-96 overflow-y-auto rounded-2xl border border-theme-line bg-theme-bg/80 p-3 backdrop-blur-sm lg:flex-1"
-          >
+      <div className="relative z-10 mt-4 flex flex-1 flex-col space-y-3">
+        <div
+          ref={scrollContainerRef}
+          className="min-h-64 max-h-96 overflow-y-auto rounded-2xl border border-theme-line bg-theme-bg/80 p-3 backdrop-blur-sm lg:flex-1"
+        >
+          {isLoading ? (
+            <p className="text-sm text-theme-muted">
+              Đang tải lịch sử đặt giá...
+            </p>
+          ) : bidsAsc.length === 0 ? (
+            <p className="text-sm text-theme-muted">
+              Chưa có lượt đặt giá nào.
+            </p>
+          ) : (
             <ul className="space-y-2.5">
               {bidsAsc.map((event, index) => (
                 <li
@@ -510,72 +522,79 @@ export function LiveBidHistory({
                 </li>
               ))}
             </ul>
+          )}
+        </div>
+
+        <div className="rounded-3xl border border-theme-line bg-[linear-gradient(180deg,var(--surface-strong),color-mix(in_srgb,var(--surface-strong)_78%,var(--primary-soft)))] p-4 shadow-[0_18px_40px_-30px_var(--glow)] backdrop-blur-sm">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand">
+                Đặt giá ngay
+              </p>
+              <p className="mt-1 text-sm text-theme-muted">
+                {canPlaceBid
+                  ? `Mức gợi ý hiện tại: ${toAmountLabel(suggestedAmount)}`
+                  : bidUnavailableMessage}
+              </p>
+            </div>
+            <span className="rounded-full border border-theme-line bg-theme-bg px-3 py-1 text-[11px] font-medium text-theme-muted">
+              {canPlaceBid ? "Ưu tiên giá hợp lệ" : "Đang theo dõi"}
+            </span>
           </div>
 
-          <div className="rounded-3xl border border-theme-line bg-[linear-gradient(180deg,var(--surface-strong),color-mix(in_srgb,var(--surface-strong)_78%,var(--primary-soft)))] p-4 shadow-[0_18px_40px_-30px_var(--glow)] backdrop-blur-sm">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand">
-                  Đặt giá ngay
-                </p>
-                <p className="mt-1 text-sm text-theme-muted">
-                  Mức gợi ý hiện tại: {toAmountLabel(suggestedAmount)}
-                </p>
-              </div>
-              <span className="rounded-full border border-theme-line bg-theme-bg px-3 py-1 text-[11px] font-medium text-theme-muted">
-                Ưu tiên giá hợp lệ
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-theme-muted">
-                Số tiền bid
-              </label>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                <div className="relative flex-1">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9.]*"
-                    min={1}
-                    step={1000}
-                    value={bidAmountInput}
-                    onChange={(event) => {
-                      setBidAmountInput(formatBidInput(event.target.value));
-                    }}
-                    className="h-12 w-full rounded-2xl border border-theme-line bg-theme-panel px-4 pr-20 text-base font-semibold text-theme-heading outline-none transition-colors placeholder:font-normal placeholder:text-theme-muted focus:border-theme-brand focus:ring-2 focus:ring-theme-brand/15"
-                    placeholder="Nhập mức giá"
-                  />
-                  <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-theme-muted">
-                    VND
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    void placeBid();
+          <div className="mt-4 space-y-3">
+            <label className="block text-xs font-semibold uppercase tracking-[0.12em] text-theme-muted">
+              Số tiền bid
+            </label>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9.]*"
+                  min={1}
+                  step={1000}
+                  value={bidAmountInput}
+                  onChange={(event) => {
+                    setBidAmountInput(formatBidInput(event.target.value));
                   }}
-                  disabled={isSubmittingBid}
-                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-theme-brand px-5 text-sm font-semibold text-theme-brand-foreground shadow-[0_14px_30px_-16px_var(--glow)] transition-all hover:-translate-y-0.5 hover:bg-theme-brand/90 hover:shadow-[0_18px_36px_-18px_var(--glow)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:min-w-36"
-                >
-                  {isSubmittingBid ? "Đang gửi..." : "Xác nhận bid"}
-                </button>
+                  disabled={!canPlaceBid || isSubmittingBid}
+                  className="h-12 w-full rounded-2xl border border-theme-line bg-theme-panel px-4 pr-20 text-base font-semibold text-theme-heading outline-none transition-colors placeholder:font-normal placeholder:text-theme-muted focus:border-theme-brand focus:ring-2 focus:ring-theme-brand/15"
+                  placeholder={canPlaceBid ? "Nhập mức giá" : "Chưa mở đặt giá"}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm font-semibold text-theme-muted">
+                  VND
+                </span>
               </div>
-
-              {submitError ? (
-                <p className="rounded-2xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-500">
-                  {submitError}
-                </p>
-              ) : null}
-              {submitMessage ? (
-                <p className="rounded-2xl border border-theme-brand/25 bg-theme-brand/10 px-3 py-2 text-xs text-theme-brand">
-                  {submitMessage}
-                </p>
-              ) : null}
+              <button
+                type="button"
+                onClick={() => {
+                  void placeBid();
+                }}
+                disabled={!canPlaceBid || isSubmittingBid}
+                className="inline-flex h-12 items-center justify-center rounded-2xl bg-theme-brand px-5 text-sm font-semibold text-theme-brand-foreground shadow-[0_14px_30px_-16px_var(--glow)] transition-all hover:-translate-y-0.5 hover:bg-theme-brand/90 hover:shadow-[0_18px_36px_-18px_var(--glow)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 sm:min-w-36"
+              >
+                {canPlaceBid
+                  ? isSubmittingBid
+                    ? "Đang gửi..."
+                    : "Xác nhận bid"
+                  : "Chưa thể đặt giá"}
+              </button>
             </div>
+
+            {submitError ? (
+              <p className="rounded-2xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-xs text-red-500">
+                {submitError}
+              </p>
+            ) : null}
+            {submitMessage ? (
+              <p className="rounded-2xl border border-theme-brand/25 bg-theme-brand/10 px-3 py-2 text-xs text-theme-brand">
+                {submitMessage}
+              </p>
+            ) : null}
           </div>
         </div>
-      )}
+      </div>
     </aside>
   );
 }

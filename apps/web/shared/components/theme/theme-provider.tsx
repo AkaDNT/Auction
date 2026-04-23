@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useLayoutEffect,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -58,6 +59,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     getCurrentTheme,
     () => "light",
   );
+
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   const setTheme = (nextTheme: ThemeMode) => {
     applyTheme(nextTheme);
