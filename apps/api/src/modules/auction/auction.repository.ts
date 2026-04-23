@@ -4,6 +4,8 @@ import {
   AuctionPriceRangeFilter,
   AuctionSortBy,
 } from './dto/list-auction.dto';
+import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
+import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
 
 export const AUCTION_REPOSITORY = Symbol('AUCTION_REPOSITORY');
 
@@ -13,6 +15,9 @@ export interface IAuctionRepository {
   findById(id: string): Promise<Auction | null>;
   findBySlug(slug: string): Promise<Auction | null>;
   findByCode(code: string): Promise<Auction | null>;
+
+  createWithRelations(dto: CreateAuctionDataDto): Promise<Auction>;
+  updateWithRelations(dto: UpdateAuctionDataDto): Promise<Auction>;
 
   findMany(params: {
     page: number;

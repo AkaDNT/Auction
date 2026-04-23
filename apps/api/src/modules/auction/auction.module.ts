@@ -7,9 +7,10 @@ import { AuctionPrismaRepository } from './auction.prisma.repository';
 import { AUCTION_REPOSITORY } from './auction.repository';
 import { AuctionCategoryModule } from '../auction-category/auction-category.module';
 import { AuctionLifecycleModule } from '../auction-lifecycle/auction-lifecycle.module';
+import { UploadAssetModule } from '../upload-asset/upload-asset.module';
 
 @Module({
-  imports: [AuctionCategoryModule, AuctionLifecycleModule],
+  imports: [AuctionCategoryModule, AuctionLifecycleModule, UploadAssetModule],
   controllers: [
     AuctionController,
     SellerAuctionController,

@@ -42,6 +42,27 @@ export async function seedUsers(prisma: PrismaClient) {
       roles: [Role.USER, Role.SELLER, Role.ADMIN],
     },
     {
+      name: "Hoang Lam",
+      email: "hoanglam@gmail.com",
+      slug: "hoang-lam",
+      status: UserStatus.ACTIVE,
+      roles: [Role.USER, Role.SELLER, Role.ADMIN],
+    },
+    {
+      name: "Minh Quan",
+      email: "minhquan@gmail.com",
+      slug: "minh-quan",
+      status: UserStatus.ACTIVE,
+      roles: [Role.USER, Role.SELLER, Role.ADMIN],
+    },
+    {
+      name: "Quang Thinh",
+      email: "QuangThinh@gmail.com",
+      slug: "quang-thinh",
+      status: UserStatus.ACTIVE,
+      roles: [Role.USER, Role.SELLER, Role.ADMIN],
+    },
+    {
       name: "Minh Quan",
       email: "minhquan@gmail.com",
       slug: "minh-quan",

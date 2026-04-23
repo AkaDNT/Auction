@@ -8,6 +8,7 @@ import { useAuctionCategories } from "@/features/auction/hooks/use-auction-categ
 import { useQuery } from "@tanstack/react-query";
 import { listSellerAuctions } from "@/features/auction/services/list-seller-auctions";
 import type { AuctionApiStatus } from "@/features/auction/types/auction-api";
+import { getVietnameseCategoryLabel } from "@/features/auction/utils/category-label";
 
 const PAGE_SIZE = 10;
 
@@ -350,7 +351,7 @@ export default function SellerAuctionsPage() {
             <option value="ALL">Tất cả danh mục</option>
             {(categoriesQuery.data ?? []).map((category) => (
               <option key={category.id} value={category.id}>
-                {category.label}
+                {getVietnameseCategoryLabel(category.slug, category.label)}
               </option>
             ))}
           </select>
@@ -438,7 +439,7 @@ export default function SellerAuctionsPage() {
                       </td>
                       <td className="px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 align-middle text-center">
                         <span
-                          className={`inline-flex h-6 sm:h-7 md:h-8 min-w-[100px] sm:min-w-[118px] items-center justify-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-center text-xs font-semibold tracking-[0.18em] uppercase ${statusBadgeClass(
+                          className={`inline-flex h-6 sm:h-7 md:h-8 min-w-25 sm:min-w-29.5 items-center justify-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-center text-xs font-semibold tracking-[0.18em] uppercase ${statusBadgeClass(
                             auction.status,
                           )}`}
                         >

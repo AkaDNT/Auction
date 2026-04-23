@@ -1,0 +1,12 @@
+enum UploadAssetStatus {
+  PENDING
+  READY
+  CONSUMED
+  EXPIRED
+}
+
+enum UploadAssetScope {
+  AUCTION_THUMBNAIL
+  AUCTION_IMAGE
+  USER_AVATAR
+}

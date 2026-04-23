@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { AuctionStatus, Role } from '@prisma/client';
+import { AuctionStatus, Role, UploadAssetScope } from '@prisma/client';
 import slugify from 'slugify';
 import * as auctionRepository from './auction.repository';
 import * as auctionCategoryRepository from '../auction-category/auction-category.repository';
@@ -9,6 +9,10 @@ import { CreateAuctionDto } from './dto/create-auction.dto';
 import { ListAuctionDto } from './dto/list-auction.dto';
 import { UpdateAuctionDto } from './dto/update-auction.dto';
 import { AuctionLifecycleService } from '../auction-lifecycle/auction-lifecycle.service';
+import { UploadAssetService } from '../upload-asset/upload-asset.service';
+import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
+import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
+import { AuctionThumbnailAssetDto } from './dto/auction-thumbnail-asset.dto';
 
 @Injectable()
 export class AuctionService {
@@ -18,6 +22,7 @@ export class AuctionService {
     @Inject(auctionCategoryRepository.AUCTION_CATEGORY_REPOSITORY)
     private readonly categoryRepo: auctionCategoryRepository.IAuctionCategoryRepository,
     private readonly auctionLifecycleService: AuctionLifecycleService,
+    private readonly uploadAssetService: UploadAssetService,
   ) {}
 
   async create(dto: CreateAuctionDto, sellerId: string) {
@@ -36,29 +41,32 @@ export class AuctionService {
     this.validateTimeRange(dto.startAt, dto.endAt);
     this.validatePrices(dto.startingPrice, dto.buyNowPrice);
 
+    const { thumbnailUrl, thumbnailAsset } = await this.resolveThumbnailInput(
+      dto.thumbnailUrl,
+      sellerId,
+    );
+
     const code = await this.generateAuctionCode();
     const slug = await this.generateUniqueSlug(dto.title);
 
-    return this.auctionRepo.create({
-      code,
-      title: dto.title,
-      slug,
-      description: dto.description,
-      startingPrice: dto.startingPrice,
-      currentPrice: dto.startingPrice,
-      buyNowPrice: dto.buyNowPrice,
-      minBidIncrement: dto.minBidIncrement,
-      startAt: dto.startAt ? new Date(dto.startAt) : null,
-      endAt: new Date(dto.endAt),
-      status: AuctionStatus.DRAFT,
-      thumbnailUrl: dto.thumbnailUrl,
-      seller: {
-        connect: { id: sellerId },
-      },
-      category: {
-        connect: { id: dto.categoryId },
-      },
-    });
+    const createData = new CreateAuctionDataDto();
+    createData.code = code;
+    createData.title = dto.title;
+    createData.slug = slug;
+    createData.description = dto.description;
+    createData.startingPrice = dto.startingPrice;
+    createData.currentPrice = dto.startingPrice;
+    createData.buyNowPrice = dto.buyNowPrice;
+    createData.minBidIncrement = dto.minBidIncrement;
+    createData.startAt = dto.startAt ? new Date(dto.startAt) : null;
+    createData.endAt = new Date(dto.endAt);
+    createData.status = AuctionStatus.DRAFT;
+    createData.thumbnailUrl = thumbnailUrl;
+    createData.sellerId = sellerId;
+    createData.categoryId = dto.categoryId;
+    createData.thumbnailAsset = thumbnailAsset;
+
+    return this.auctionRepo.createWithRelations(createData);
   }
 
   async findAll(query: ListAuctionDto) {
@@ -207,30 +215,38 @@ export class AuctionService {
         (current.buyNowPrice ? Number(current.buyNowPrice) : undefined),
     );
 
+    const { thumbnailUrl, thumbnailAsset } = await this.resolveThumbnailInput(
+      dto.thumbnailUrl,
+      sellerId,
+    );
+
     let nextSlug: string | undefined;
+    if (dto.title !== undefined) {
+      nextSlug = await this.generateUniqueSlug(dto.title, current.id);
+    }
 
-    nextSlug = await this.generateUniqueSlug(dto.title!, current.id);
+    const updateData = new UpdateAuctionDataDto();
+    updateData.id = id;
+    updateData.title = dto.title;
+    updateData.slug = nextSlug;
+    updateData.description = dto.description;
+    updateData.startingPrice = dto.startingPrice;
+    updateData.buyNowPrice = dto.buyNowPrice;
+    updateData.minBidIncrement = dto.minBidIncrement;
+    updateData.startAt =
+      dto.startAt !== undefined
+        ? dto.startAt
+          ? new Date(dto.startAt)
+          : null
+        : undefined;
+    updateData.endAt =
+      dto.endAt !== undefined ? new Date(dto.endAt) : undefined;
+    updateData.thumbnailUrl =
+      dto.thumbnailUrl !== undefined ? thumbnailUrl : undefined;
+    updateData.categoryId = dto.categoryId;
+    updateData.thumbnailAsset = thumbnailAsset;
 
-    const auctionReturnValue = this.auctionRepo.update(id, {
-      title: dto.title,
-      slug: nextSlug,
-      description: dto.description,
-      startingPrice: dto.startingPrice,
-      buyNowPrice: dto.buyNowPrice,
-      minBidIncrement: dto.minBidIncrement,
-      startAt: dto.startAt ? new Date(dto.startAt) : undefined,
-      endAt: dto.endAt ? new Date(dto.endAt) : undefined,
-      thumbnailUrl: dto.thumbnailUrl,
-      ...(dto.categoryId
-        ? {
-            category: {
-              connect: { id: dto.categoryId },
-            },
-          }
-        : {}),
-    });
-
-    return auctionReturnValue;
+    return this.auctionRepo.updateWithRelations(updateData);
   }
 
   async publish(id: string, sellerId: string) {
@@ -478,5 +494,46 @@ export class AuctionService {
         auction.status === AuctionStatus.LIVE ||
         auction.status === AuctionStatus.UPCOMING,
     });
+  }
+
+  private async resolveThumbnailInput(
+    thumbnailUrl: string | undefined,
+    ownerId: string,
+  ): Promise<{
+    thumbnailUrl: string | null;
+    thumbnailAsset: AuctionThumbnailAssetDto | null;
+  }> {
+    if (!thumbnailUrl) {
+      return {
+        thumbnailUrl: null,
+        thumbnailAsset: null,
+      };
+    }
+
+    if (
+      thumbnailUrl.startsWith('http://') ||
+      thumbnailUrl.startsWith('https://')
+    ) {
+      return {
+        thumbnailUrl,
+        thumbnailAsset: null,
+      };
+    }
+
+    const asset = await this.uploadAssetService.assertReady(
+      thumbnailUrl,
+      ownerId,
+      UploadAssetScope.AUCTION_THUMBNAIL,
+    );
+
+    const thumbnailAsset = new AuctionThumbnailAssetDto();
+    thumbnailAsset.id = asset.id;
+    thumbnailAsset.fileUrl = asset.fileUrl;
+    thumbnailAsset.storageKey = asset.storageKey;
+
+    return {
+      thumbnailUrl: asset.fileUrl,
+      thumbnailAsset,
+    };
   }
 }

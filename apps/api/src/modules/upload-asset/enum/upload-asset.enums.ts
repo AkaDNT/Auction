@@ -1,0 +1,12 @@
+export enum UploadAssetScope {
+  AUCTION_THUMBNAIL = "AUCTION_THUMBNAIL",
+  AUCTION_IMAGE = "AUCTION_IMAGE",
+  USER_AVATAR = "USER_AVATAR",
+}
+
+export enum UploadAssetStatus {
+  PENDING = "PENDING",
+  READY = "READY",
+  CONSUMED = "CONSUMED",
+  EXPIRED = "EXPIRED",
+}

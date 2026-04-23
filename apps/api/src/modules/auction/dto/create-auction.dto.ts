@@ -19,7 +19,7 @@ export class CreateAuctionDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(1001)
+  @Min(5000)
   minBidIncrement?: number;
 
   @IsOptional()

@@ -1,75 +1,41 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { CountdownText } from "./countdown-text";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuctions } from "@/features/auction/hooks/use-auctions";
 import { useAuctionCategories } from "@/features/auction/hooks/use-auction-categories";
 import { useFeaturedAuctions } from "@/features/auction/hooks/use-featured-auctions";
-import type {
-  AuctionApiStatus,
-  AuctionEndTimeFilter,
-  AuctionPriceRangeFilter,
-  AuctionSortBy,
-} from "@/features/auction/types/auction-api";
-
-const sortOptions: Array<{ label: string; value: AuctionSortBy }> = [
-  { label: "Mới nhất", value: "NEWEST" },
-  { label: "Sắp kết thúc", value: "ENDING_SOON" },
-  { label: "Giá từ cao đến thấp", value: "HIGHEST_PRICE" },
-  { label: "Giá từ thấp đến cao", value: "LOWEST_PRICE" },
-];
-
-const statusOptions: Array<{ label: string; value: AuctionApiStatus }> = [
-  { label: "Đang diễn ra", value: "LIVE" },
-  { label: "Sắp tới", value: "UPCOMING" },
-  { label: "Đã kết thúc", value: "ENDED" },
-  { label: "Đã hủy", value: "CANCELLED" },
-];
-
-const endTimeFilterOptions: Array<{
-  label: string;
-  value: AuctionEndTimeFilter;
-}> = [
-  { label: "Mọi mốc thời gian", value: "ALL" },
-  { label: "Trong 1 giờ tới", value: "WITHIN_1_HOUR" },
-  { label: "Trong ngày hôm nay", value: "TODAY" },
-  { label: "Tuần này", value: "THIS_WEEK" },
-];
-
-const priceRangeOptions: Array<{
-  label: string;
-  value: AuctionPriceRangeFilter;
-}> = [
-  { label: "Tất cả mức giá", value: "ALL" },
-  { label: "Dưới 1,000,000", value: "BELOW_1M" },
-  { label: "Từ 1,000,000 đến 5,000,000", value: "FROM_1M_TO_5M" },
-  { label: "Trên 5,000,000", value: "ABOVE_5M" },
-];
-
-const AUCTIONS_PER_PAGE = 12;
-
-type NavigatorConnection = {
-  effectiveType?: string;
-  saveData?: boolean;
-  addEventListener?: (type: "change", listener: () => void) => void;
-  removeEventListener?: (type: "change", listener: () => void) => void;
-};
+import { useAuctionsMarketFilters } from "@/features/auction/hooks/use-auctions-market-filters";
+import { NavigatorConnection } from "@/features/auction/components/market-flow/constants";
+import { AuctionFiltersPanel } from "@/features/auction/components/market-flow/auction-filters-panel";
+import { AuctionSortToolbar } from "@/features/auction/components/market-flow/auction-sort-toolbar";
+import { FeaturedAuctionCard } from "@/features/auction/components/market-flow/featured-auction-card";
+import { AuctionListCard } from "@/features/auction/components/market-flow/auction-list-card";
 
 export function AuctionsMarketFlow() {
   const listSectionRef = useRef<HTMLElement | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [priceRangeFilter, setPriceRangeFilter] =
-    useState<AuctionPriceRangeFilter>("ALL");
-  const [statusFilter, setStatusFilter] = useState<"" | AuctionApiStatus>("");
-  const [endTimeFilter, setEndTimeFilter] =
-    useState<AuctionEndTimeFilter>("ALL");
-  const [sortBy, setSortBy] = useState<AuctionSortBy>("NEWEST");
-  const [sellerSlugInput, setSellerSlugInput] = useState("");
   const [imageQuality, setImageQuality] = useState(70);
+  const {
+    currentPage,
+    searchInput,
+    categoryId,
+    priceRangeFilter,
+    statusFilter,
+    endTimeFilter,
+    sortBy,
+    sellerSlugInput,
+    queryParams,
+    hasActiveFilters,
+    setCurrentPage,
+    setSearchInput,
+    setCategoryId,
+    setPriceRangeFilter,
+    setStatusFilter,
+    setEndTimeFilter,
+    setSortBy,
+    setSellerSlugInput,
+    clearAllFilters,
+  } = useAuctionsMarketFilters();
 
   useEffect(() => {
     if (typeof navigator === "undefined") {
@@ -102,42 +68,6 @@ export function AuctionsMarketFlow() {
       connection.removeEventListener?.("change", updateImageQualityByNetwork);
     };
   }, []);
-
-  const deferredSearchInput = useDeferredValue(searchInput.trim());
-  const deferredSellerSlugInput = useDeferredValue(sellerSlugInput.trim());
-
-  const queryParams = useMemo(
-    () => ({
-      page: currentPage,
-      limit: AUCTIONS_PER_PAGE,
-      search: deferredSearchInput || undefined,
-      categoryId: categoryId || undefined,
-      status: statusFilter || undefined,
-      sellerSlug: deferredSellerSlugInput || undefined,
-      priceRangeFilter,
-      endTimeFilter,
-      sortBy,
-    }),
-    [
-      categoryId,
-      currentPage,
-      deferredSearchInput,
-      deferredSellerSlugInput,
-      endTimeFilter,
-      priceRangeFilter,
-      statusFilter,
-      sortBy,
-    ],
-  );
-
-  const hasActiveFilters =
-    deferredSearchInput.length > 0 ||
-    categoryId.length > 0 ||
-    statusFilter.length > 0 ||
-    deferredSellerSlugInput.length > 0 ||
-    endTimeFilter !== "ALL" ||
-    priceRangeFilter !== "ALL" ||
-    sortBy !== "NEWEST";
 
   const {
     auctions: liveAuctions,
@@ -172,17 +102,6 @@ export function AuctionsMarketFlow() {
     );
   }, [page, totalPages]);
 
-  function clearAllFilters() {
-    setSearchInput("");
-    setCategoryId("");
-    setPriceRangeFilter("ALL");
-    setStatusFilter("");
-    setEndTimeFilter("ALL");
-    setSortBy("NEWEST");
-    setSellerSlugInput("");
-    setCurrentPage(1);
-  }
-
   function goToPage(nextPage: number) {
     setCurrentPage(nextPage);
     listSectionRef.current?.scrollIntoView({
@@ -193,8 +112,8 @@ export function AuctionsMarketFlow() {
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-8 sm:py-10">
-      <div className="relative overflow-hidden rounded-[2rem] theme-card p-6 sm:p-8">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-theme-brand/60 to-transparent" />
+      <div className="relative overflow-hidden rounded-4xl theme-card p-6 sm:p-8">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-theme-brand/60 to-transparent" />
         <div className="pointer-events-none absolute -left-28 top-16 h-56 w-56 rounded-full bg-theme-brand/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 top-10 h-52 w-52 rounded-full bg-theme-brand/10 blur-3xl" />
 
@@ -216,177 +135,49 @@ export function AuctionsMarketFlow() {
             </p>
           </header>
 
-          <section className="theme-card rounded-2xl p-5 sm:p-6">
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Tìm sản phẩm
-                </span>
-                <input
-                  type="text"
-                  placeholder="Tìm theo tên sản phẩm..."
-                  value={searchInput}
-                  onChange={(event) => {
-                    setSearchInput(event.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder-[color:var(--muted)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                />
-              </label>
+          <AuctionFiltersPanel
+            categories={categories}
+            searchInput={searchInput}
+            categoryId={categoryId}
+            priceRangeFilter={priceRangeFilter}
+            statusFilter={statusFilter}
+            endTimeFilter={endTimeFilter}
+            sellerSlugInput={sellerSlugInput}
+            hasActiveFilters={hasActiveFilters}
+            onSearchChange={(value) => {
+              setSearchInput(value);
+              setCurrentPage(1);
+            }}
+            onCategoryChange={(value) => {
+              setCategoryId(value);
+              setCurrentPage(1);
+            }}
+            onPriceRangeChange={(value) => {
+              setPriceRangeFilter(value);
+              setCurrentPage(1);
+            }}
+            onStatusChange={(value) => {
+              setStatusFilter(value);
+              setCurrentPage(1);
+            }}
+            onEndTimeChange={(value) => {
+              setEndTimeFilter(value);
+              setCurrentPage(1);
+            }}
+            onSellerChange={(value) => {
+              setSellerSlugInput(value);
+              setCurrentPage(1);
+            }}
+            onClearFilters={clearAllFilters}
+          />
 
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Danh mục
-                </span>
-                <select
-                  value={categoryId}
-                  onChange={(event) => {
-                    setCategoryId(event.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                >
-                  <option value="">Tất cả</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Khoảng giá
-                </span>
-                <select
-                  value={priceRangeFilter}
-                  onChange={(event) => {
-                    setPriceRangeFilter(
-                      event.target.value as AuctionPriceRangeFilter,
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                >
-                  {priceRangeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Trạng thái
-                </span>
-                <select
-                  value={statusFilter}
-                  onChange={(event) => {
-                    setStatusFilter(
-                      event.target.value as AuctionApiStatus | "",
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                >
-                  <option value="">Tất cả trạng thái</option>
-                  {statusOptions.map((status) => (
-                    <option key={status.value} value={status.value}>
-                      {status.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Thời gian kết thúc
-                </span>
-                <select
-                  value={endTimeFilter}
-                  onChange={(event) => {
-                    setEndTimeFilter(
-                      event.target.value as AuctionEndTimeFilter,
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                >
-                  {endTimeFilterOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="space-y-2">
-                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                  Người bán
-                </span>
-                <input
-                  type="text"
-                  placeholder="Tag name người bán..."
-                  value={sellerSlugInput}
-                  onChange={(event) => {
-                    setSellerSlugInput(event.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="w-full rounded-xl border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2.5 text-sm text-[color:var(--foreground)] placeholder-[color:var(--muted)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-                />
-              </label>
-            </div>
-
-            <div className="mt-5 flex justify-end">
-              <button
-                type="button"
-                className="btn-secondary cursor-pointer disabled:cursor-not-allowed"
-                onClick={clearAllFilters}
-                disabled={!hasActiveFilters}
-              >
-                Xóa bộ lọc
-              </button>
-            </div>
-          </section>
-
-          <section className="theme-card rounded-2xl p-5 sm:p-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-theme-muted">
-                Sắp xếp
-              </span>
-              <select
-                value={sortBy}
-                onChange={(event) => {
-                  setSortBy(event.target.value as AuctionSortBy);
-                  setCurrentPage(1);
-                }}
-                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2 text-sm text-[color:var(--foreground)] outline-none focus:ring-2 focus:ring-[color:var(--primary)]/40"
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="rounded-lg border border-[color:var(--primary)] bg-[color:var(--primary)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_8px_20px_color-mix(in_srgb,var(--primary)_30%,transparent)]"
-              >
-                Lưới
-              </button>
-              <button
-                type="button"
-                className="rounded-lg border border-[color:var(--border)] bg-[color:var(--panel)] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--muted)] hover:text-[color:var(--foreground)]"
-              >
-                Danh sách
-              </button>
-            </div>
-          </section>
+          <AuctionSortToolbar
+            sortBy={sortBy}
+            onSortByChange={(value) => {
+              setSortBy(value);
+              setCurrentPage(1);
+            }}
+          />
 
           {!hasActiveFilters ? (
             <section className="space-y-5">
@@ -425,107 +216,11 @@ export function AuctionsMarketFlow() {
                   </p>
                 ) : (
                   featuredAuctions.map((auction) => (
-                    <article
+                    <FeaturedAuctionCard
                       key={auction.id}
-                      className="theme-card overflow-hidden rounded-2xl"
-                    >
-                      <Link
-                        href={`/auctions/${auction.id}`}
-                        className="relative block h-40 sm:h-44"
-                        aria-label={`Xem chi tiết ${auction.title}`}
-                      >
-                        <Image
-                          src={auction.imageUrl}
-                          alt={auction.title}
-                          fill
-                          className="object-cover"
-                          loading="lazy"
-                          decoding="async"
-                          quality={imageQuality}
-                          sizes="(max-width: 1024px) 100vw, 50vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                        <p className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/35 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/90 backdrop-blur">
-                          {auction.status}
-                        </p>
-                      </Link>
-                      <div className="space-y-3 p-4">
-                        <h3
-                          title={auction.title}
-                          className="flex min-h-[3.5rem] items-center text-xl font-semibold leading-7 text-theme-heading"
-                        >
-                          <span className="line-clamp-2 block w-full">
-                            {auction.title}
-                          </span>
-                        </h3>
-                        <p className="text-sm text-theme-muted">
-                          Người bán: {auction.seller}
-                        </p>
-
-                        <div className="grid grid-cols-2 auto-rows-fr gap-3 text-sm">
-                          <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                            <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                              Giá hiện tại
-                            </p>
-                            <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                              {auction.currentBid}
-                            </p>
-                          </div>
-                          <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                            <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                              Giá khởi điểm
-                            </p>
-                            <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                              {auction.startingPrice}
-                            </p>
-                          </div>
-                          <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                            <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                              Thời gian
-                            </p>
-                            <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                              <CountdownText
-                                timeEnd={auction.timeEnd}
-                                mode="stacked"
-                                className="break-words"
-                              />
-                            </p>
-                          </div>
-                          <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                            <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                              Số lượt đặt
-                            </p>
-                            <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                              {auction.bidCount}
-                            </p>
-                          </div>
-                        </div>
-
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="rounded-full border border-theme-line bg-theme-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-muted">
-                                {auction.status}
-                              </span>
-                            </div>
-
-                            <div className="flex gap-3">
-                              <Link
-                                href={`/auctions/${auction.id}`}
-                                className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand/55 bg-[color:var(--primary-soft)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand transition hover:border-theme-brand hover:bg-theme-brand/15 hover:text-theme-heading"
-                              >
-                                Xem chi tiết
-                              </Link>
-                              {auction.status === "Đang diễn ra" ||
-                              auction.status === "Sắp hết" ? (
-                                <Link
-                                  href={`/auctions/${auction.id}/live`}
-                                  className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
-                                >
-                                  Đặt giá ngay
-                                </Link>
-                              ) : null}
-                            </div>
-                      </div>
-                    </article>
+                      auction={auction}
+                      imageQuality={imageQuality}
+                    />
                   ))
                 )}
               </div>
@@ -561,102 +256,11 @@ export function AuctionsMarketFlow() {
                     </article>
                   ))
                 : liveAuctions.map((auction) => (
-                    <article
+                    <AuctionListCard
                       key={auction.id}
-                      className="group rounded-2xl border border-theme-line bg-theme-panel/95 p-4 transition-transform hover:-translate-y-1 hover:shadow-[0_18px_38px_color-mix(in_srgb,var(--primary)_16%,transparent)]"
-                    >
-                      <Link
-                        href={`/auctions/${auction.id}`}
-                        className="relative mb-3 block h-44 overflow-hidden rounded-xl border border-theme-line"
-                        aria-label={`Xem chi tiết ${auction.title}`}
-                      >
-                        <Image
-                          src={auction.imageUrl}
-                          alt={auction.title}
-                          fill
-                          className="object-cover transition duration-500 group-hover:scale-105"
-                          loading="lazy"
-                          decoding="async"
-                          quality={imageQuality}
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                      </Link>
-
-                      <h3
-                        title={auction.title}
-                        className="flex min-h-[3.5rem] items-center text-lg font-semibold leading-7 text-theme-heading"
-                      >
-                        <span className="line-clamp-2 block w-full">
-                          {auction.title}
-                        </span>
-                      </h3>
-                      <p className="mt-2 text-sm text-theme-muted">
-                        Seller: {auction.seller}
-                      </p>
-
-                      <div className="mt-4 grid grid-cols-2 auto-rows-fr gap-3 text-sm">
-                        <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                          <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                            Giá hiện tại
-                          </p>
-                          <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                            {auction.currentBid}
-                          </p>
-                        </div>
-                        <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                          <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                            Giá khởi điểm
-                          </p>
-                          <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                            {auction.startingPrice}
-                          </p>
-                        </div>
-                        <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                          <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                            Thời gian
-                          </p>
-                          <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                            <CountdownText
-                              timeEnd={auction.timeEnd}
-                              mode="stacked"
-                              className="break-words"
-                            />
-                          </p>
-                        </div>
-                        <div className="flex h-full flex-col rounded-lg border border-theme-line bg-theme-bg p-3">
-                          <p className="text-[11px] uppercase tracking-[0.12em] text-theme-muted">
-                            Số lượt đặt
-                          </p>
-                          <p className="mt-2 flex min-h-12 items-center font-semibold leading-tight text-theme-heading">
-                            {auction.bidCount}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <span className="rounded-full border border-theme-line bg-theme-bg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-theme-muted">
-                          {auction.status}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 flex gap-3">
-                        <Link
-                          href={`/auctions/${auction.id}`}
-                          className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand/55 bg-[color:var(--primary-soft)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-theme-brand transition hover:border-theme-brand hover:bg-theme-brand/15 hover:text-theme-heading"
-                        >
-                          Xem chi tiết
-                        </Link>
-                        {auction.status === "Đang diễn ra" ||
-                        auction.status === "Sắp hết" ? (
-                          <Link
-                            href={`/auctions/${auction.id}/live`}
-                            className="inline-flex w-full items-center justify-center rounded-xl border border-theme-brand bg-[color:var(--primary)] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--primary-foreground)] shadow-[0_12px_28px_color-mix(in_srgb,var(--primary)_35%,transparent)] transition hover:-translate-y-0.5 hover:bg-[color:var(--primary-strong)] hover:shadow-[0_16px_32px_color-mix(in_srgb,var(--primary)_45%,transparent)]"
-                          >
-                            Đặt giá ngay
-                          </Link>
-                        ) : null}
-                      </div>
-                    </article>
+                      auction={auction}
+                      imageQuality={imageQuality}
+                    />
                   ))}
             </div>
 

@@ -16,6 +16,7 @@ import { BidModule } from './modules/bid/bid.module';
 import { AuctionContentModule } from './modules/auction-content/auction-content.module';
 import { BullModule } from '@nestjs/bullmq';
 import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-lifecycle.module';
+import { UploadAssetModule } from './modules/upload-asset/upload-asset.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-life
     BidModule,
     AuctionContentModule,
     AuctionLifecycleModule,
+    UploadAssetModule,
   ],
   controllers: [AppController],
   providers: [

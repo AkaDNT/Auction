@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Auction, AuctionStatus, Prisma } from '@prisma/client';
+import {
+  Auction,
+  AuctionStatus,
+  Prisma,
+  UploadAssetStatus,
+} from '@prisma/client';
 import { IAuctionRepository } from './auction.repository';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
@@ -7,6 +12,8 @@ import {
   AuctionPriceRangeFilter,
   AuctionSortBy,
 } from './dto/list-auction.dto';
+import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
+import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
 
 @Injectable()
 export class AuctionPrismaRepository implements IAuctionRepository {
@@ -58,6 +65,141 @@ export class AuctionPrismaRepository implements IAuctionRepository {
   findByCode(code: string): Promise<Auction | null> {
     return this.prisma.auction.findUnique({
       where: { code },
+    });
+  }
+
+  async createWithRelations(dto: CreateAuctionDataDto): Promise<Auction> {
+    return this.prisma.$transaction(async (tx) => {
+      const auction = await tx.auction.create({
+        data: {
+          code: dto.code,
+          title: dto.title,
+          slug: dto.slug,
+          description: dto.description,
+          startingPrice: dto.startingPrice,
+          currentPrice: dto.currentPrice,
+          buyNowPrice: dto.buyNowPrice,
+          minBidIncrement: dto.minBidIncrement,
+          startAt: dto.startAt ?? null,
+          endAt: dto.endAt,
+          status: dto.status,
+          thumbnailUrl: dto.thumbnailUrl ?? null,
+          seller: {
+            connect: { id: dto.sellerId },
+          },
+          category: {
+            connect: { id: dto.categoryId },
+          },
+        },
+      });
+
+      if (dto.thumbnailAsset) {
+        await tx.auctionImage.create({
+          data: {
+            auctionId: auction.id,
+            imageUrl: dto.thumbnailAsset.fileUrl,
+            storageKey: dto.thumbnailAsset.storageKey,
+            altText: dto.title,
+            sortOrder: 0,
+            isPrimary: true,
+          },
+        });
+
+        await tx.uploadAsset.update({
+          where: { id: dto.thumbnailAsset.id },
+          data: {
+            status: UploadAssetStatus.CONSUMED,
+            usedAt: new Date(),
+          },
+        });
+      }
+
+      return auction;
+    });
+  }
+
+  async updateWithRelations(dto: UpdateAuctionDataDto): Promise<Auction> {
+    return this.prisma.$transaction(async (tx) => {
+      const data: Prisma.AuctionUpdateInput = {
+        ...(dto.title !== undefined ? { title: dto.title } : {}),
+        ...(dto.slug !== undefined ? { slug: dto.slug } : {}),
+        ...(dto.description !== undefined
+          ? { description: dto.description }
+          : {}),
+        ...(dto.startingPrice !== undefined
+          ? { startingPrice: dto.startingPrice }
+          : {}),
+        ...(dto.currentPrice !== undefined
+          ? { currentPrice: dto.currentPrice }
+          : {}),
+        ...(dto.buyNowPrice !== undefined
+          ? { buyNowPrice: dto.buyNowPrice }
+          : {}),
+        ...(dto.minBidIncrement !== undefined
+          ? { minBidIncrement: dto.minBidIncrement }
+          : {}),
+        ...(dto.startAt !== undefined ? { startAt: dto.startAt } : {}),
+        ...(dto.endAt !== undefined ? { endAt: dto.endAt } : {}),
+        ...(dto.thumbnailUrl !== undefined
+          ? { thumbnailUrl: dto.thumbnailUrl }
+          : {}),
+        ...(dto.categoryId
+          ? {
+              category: {
+                connect: { id: dto.categoryId },
+              },
+            }
+          : {}),
+      };
+
+      const auction = await tx.auction.update({
+        where: { id: dto.id },
+        data,
+      });
+
+      if (dto.thumbnailAsset) {
+        const primaryImage = await tx.auctionImage.findFirst({
+          where: {
+            auctionId: dto.id,
+            isPrimary: true,
+          },
+          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+        });
+
+        if (primaryImage) {
+          await tx.auctionImage.update({
+            where: { id: primaryImage.id },
+            data: {
+              imageUrl: dto.thumbnailAsset.fileUrl,
+              storageKey: dto.thumbnailAsset.storageKey,
+              altText: dto.title ?? auction.title,
+              sortOrder: 0,
+              isPrimary: true,
+            },
+          });
+        } else {
+          await tx.auctionImage.create({
+            data: {
+              auctionId: dto.id,
+              imageUrl: dto.thumbnailAsset.fileUrl,
+              storageKey: dto.thumbnailAsset.storageKey,
+              altText: dto.title ?? auction.title,
+              sortOrder: 0,
+              isPrimary: true,
+            },
+          });
+        }
+
+        await tx.uploadAsset.update({
+          where: { id: dto.thumbnailAsset.id },
+          data: {
+            status: UploadAssetStatus.CONSUMED,
+            usedAt: new Date(),
+          },
+        });
+      }
+
+      return auction;
     });
   }
 
@@ -291,7 +433,6 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         const endOfWeek = new Date(now);
         const currentDay = endOfWeek.getDay();
         const daysUntilSunday = currentDay === 0 ? 0 : 7 - currentDay;
-
         endOfWeek.setDate(endOfWeek.getDate() + daysUntilSunday);
         endOfWeek.setHours(23, 59, 59, 999);
 

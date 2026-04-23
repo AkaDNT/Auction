@@ -1,0 +1,21 @@
+model UploadAsset {
+  id          String            @id @default(cuid())
+  ownerId     String
+  storageKey  String            @unique
+  fileUrl     String
+  fileName    String
+  contentType String
+  scope       UploadAssetScope
+  status      UploadAssetStatus @default(PENDING)
+  usedAt      DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  owner       User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+  @@index([scope])
+  @@index([status])
+  @@index([expiresAt])
+}

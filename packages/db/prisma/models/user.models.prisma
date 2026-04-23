@@ -18,6 +18,7 @@ model User {
   refreshTokens RefreshToken[]
   auctions      Auction[]     @relation("AuctionSeller")
   bids          Bid[]
+  uploadAsset   UploadAsset[]
   @@index([slug])
 }
 

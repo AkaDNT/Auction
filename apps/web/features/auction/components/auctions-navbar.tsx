@@ -56,18 +56,12 @@ export function AuctionsNavbar() {
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-5 text-sm md:flex">
+          {/* <nav className="hidden items-center gap-5 text-sm md:flex">
             <Link href="/auctions" className="theme-heading">
               Đấu giá
             </Link>
-            <span className="theme-muted">/</span>
-            <Link
-              href="/auctions/category/xe-dien"
-              className="theme-muted transition-colors hover:text-(--primary-strong)"
-            >
-              Danh mục
-            </Link>
-          </nav>
+            <span className="theme-muted">/</span> 
+          </nav> */}
 
           <div className="flex items-center gap-2">
             <button
@@ -130,14 +124,6 @@ export function AuctionsNavbar() {
             className="rounded-xl px-3 py-3 text-sm font-medium theme-heading transition hover:bg-(--primary-soft)"
           >
             Đấu giá
-          </Link>
-
-          <Link
-            href="/auctions/category/xe-dien"
-            onClick={() => setMobileMenuOpen(false)}
-            className="rounded-xl px-3 py-3 text-sm font-medium theme-muted transition hover:bg-(--primary-soft) hover:text-(--primary-strong)"
-          >
-            Danh mục
           </Link>
         </nav>
 

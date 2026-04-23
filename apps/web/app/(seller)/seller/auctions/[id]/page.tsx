@@ -15,6 +15,7 @@ import {
   type UpdateSellerAuctionPayload,
 } from "@/features/auction/services/seller-auction-detail";
 import type { AuctionApiStatus } from "@/features/auction/types/auction-api";
+import { getVietnameseCategoryLabel } from "@/features/auction/utils/category-label";
 
 type EditFormState = {
   title: string;
@@ -479,7 +480,10 @@ export default function SellerAuctionDetailPage() {
               Danh mục
             </p>
             <p className="mt-2 font-semibold theme-heading">
-              {auction.category.label}
+              {getVietnameseCategoryLabel(
+                auction.category.slug,
+                auction.category.label,
+              )}
             </p>
           </article>
 
@@ -781,7 +785,10 @@ export default function SellerAuctionDetailPage() {
                     <option value="">Chọn danh mục</option>
                     {(categoriesQuery.data ?? []).map((category) => (
                       <option key={category.id} value={category.id}>
-                        {category.label}
+                        {getVietnameseCategoryLabel(
+                          category.slug,
+                          category.label,
+                        )}
                       </option>
                     ))}
                   </select>

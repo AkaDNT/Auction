@@ -7,6 +7,7 @@ import { auctionCategories, sortOptions } from "../mocks/auctions.mock";
 import { mockImages } from "@/shared/lib/mock-images";
 import { AuthUserMenu } from "@/features/auth/components/auth-user-menu";
 import { useAuthUser } from "@/features/auth/services/auth-user.store";
+import { getVietnameseCategoryLabel } from "@/features/auction/utils/category-label";
 
 export function AuctionsPageHeader() {
   const user = useAuthUser();
@@ -64,7 +65,8 @@ export function AuctionsPageHeader() {
                   href={`/auctions/category/${category.slug}`}
                   className="rounded-full border border-theme-line bg-theme-bg px-3 py-1.5 text-xs font-medium text-theme-muted transition hover:border-theme-brand/50 hover:text-theme-heading"
                 >
-                  {category.label} ({category.count})
+                  {getVietnameseCategoryLabel(category.slug, category.label)} (
+                  {category.count})
                 </Link>
               ))}
             </div>
@@ -119,7 +121,12 @@ export function AuctionsPageHeader() {
                 >
                   <option>Tất cả danh mục</option>
                   {auctionCategories.map((category) => (
-                    <option key={category.slug}>{category.label}</option>
+                    <option key={category.slug}>
+                      {getVietnameseCategoryLabel(
+                        category.slug,
+                        category.label,
+                      )}
+                    </option>
                   ))}
                 </select>
               </div>
