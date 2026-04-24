@@ -48,7 +48,10 @@ type AuctionApiSeller = {
 };
 
 type AuctionApiImage = {
+  id: string;
   imageUrl: string;
+  altText: string | null;
+  storageKey: string | null;
   isPrimary: boolean;
   sortOrder: number;
 };

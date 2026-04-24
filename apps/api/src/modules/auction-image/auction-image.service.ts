@@ -1,5 +1,5 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { AuctionImage, AuctionStatus, Role } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import * as auctionImageRepository from './auction-image.repository';
 import * as auctionRepository from '../auction/auction.repository';
@@ -33,6 +33,8 @@ export class AuctionImageService {
       roles,
     );
 
+    this.assertAuctionImagesEditable(auction);
+
     const extension = this.extractExtension(dto.fileName, dto.contentType);
     const storageKey = `auctions/${auction.id}/images/${Date.now()}-${randomUUID()}.${extension}`;
 
@@ -42,6 +44,12 @@ export class AuctionImageService {
       expiresInSeconds: 300,
     });
 
+    const existingImages = await this.imageRepo.findByAuctionId(auction.id);
+    const nextSortOrder = this.resolveSortOrderFromImages(
+      existingImages,
+      dto.sortOrder,
+    );
+
     return {
       storageKey: result.key,
       uploadUrl: result.uploadUrl,
@@ -49,8 +57,8 @@ export class AuctionImageService {
       expiresInSeconds: result.expiresInSeconds,
       metadata: {
         altText: dto.altText ?? null,
-        sortOrder: dto.sortOrder ?? 0,
-        isPrimary: dto.isPrimary ?? false,
+        sortOrder: nextSortOrder,
+        isPrimary: dto.isPrimary ?? existingImages.length === 0,
       },
     };
   }
@@ -67,18 +75,36 @@ export class AuctionImageService {
       roles,
     );
 
-    if (dto.isPrimary) {
+    this.assertAuctionImagesEditable(auction);
+    this.assertAuctionImageStorageKey(auction.id, dto.storageKey);
+
+    const existingImages = await this.imageRepo.findByAuctionId(auction.id);
+    const shouldSetPrimary = dto.isPrimary ?? existingImages.length === 0;
+    const nextSortOrder = this.resolveSortOrderFromImages(
+      existingImages,
+      dto.sortOrder,
+    );
+
+    if (shouldSetPrimary) {
       await this.imageRepo.clearPrimaryByAuctionId(auction.id);
     }
 
-    return this.imageRepo.create({
+    const createdImage = await this.imageRepo.create({
       auctionId: auction.id,
       imageUrl: this.storage.getFileUrl(dto.storageKey),
       storageKey: dto.storageKey,
       altText: dto.altText ?? null,
-      sortOrder: dto.sortOrder ?? 0,
-      isPrimary: dto.isPrimary ?? false,
+      sortOrder: nextSortOrder,
+      isPrimary: shouldSetPrimary,
     });
+
+    if (shouldSetPrimary) {
+      await this.auctionRepo.update(auction.id, {
+        thumbnailUrl: createdImage.imageUrl,
+      });
+    }
+
+    return createdImage;
   }
 
   async listByAuction(auctionId: string) {
@@ -104,35 +130,90 @@ export class AuctionImageService {
     actorId: string,
     roles: string[],
   ) {
-    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
+    const { image, auction } = await this.getAccessibleImageOrThrow(
+      imageId,
+      actorId,
+      roles,
+    );
 
-    if (dto.isPrimary) {
+    this.assertAuctionImagesEditable(auction);
+
+    const shouldSetPrimary = dto.isPrimary === true;
+    const shouldUnsetPrimary = dto.isPrimary === false && image.isPrimary;
+
+    if (shouldSetPrimary) {
       await this.imageRepo.clearPrimaryByAuctionId(image.auctionId);
     }
 
-    return this.imageRepo.update(imageId, {
+    const updatedImage = await this.imageRepo.update(imageId, {
       altText: dto.altText,
       sortOrder: dto.sortOrder,
       isPrimary: dto.isPrimary,
     });
+
+    if (shouldSetPrimary) {
+      await this.auctionRepo.update(image.auctionId, {
+        thumbnailUrl: updatedImage.imageUrl,
+      });
+    }
+
+    if (shouldUnsetPrimary) {
+      await this.promoteNextPrimaryOrClearThumbnail(image.auctionId, image.id);
+    }
+
+    return updatedImage;
   }
 
   async removeImage(imageId: string, actorId: string, roles: string[]) {
-    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
+    const { image, auction } = await this.getAccessibleImageOrThrow(
+      imageId,
+      actorId,
+      roles,
+    );
 
-    if (image.storageKey) {
-      await this.storage.deleteObject(image.storageKey);
+    this.assertAuctionImagesEditable(auction);
+
+    const deletedImage = await this.imageRepo.delete(imageId);
+
+    if (image.isPrimary) {
+      await this.promoteNextPrimaryOrClearThumbnail(image.auctionId, image.id);
+    } else if (auction.thumbnailUrl === image.imageUrl) {
+      await this.auctionRepo.update(image.auctionId, {
+        thumbnailUrl: null,
+      });
     }
 
-    return this.imageRepo.delete(imageId);
+    if (image.storageKey) {
+      try {
+        await this.storage.deleteObject(image.storageKey);
+      } catch {
+        // DB state has already been fixed. Object cleanup can be retried later.
+      }
+    }
+
+    return deletedImage;
   }
 
   async setPrimary(imageId: string, actorId: string, roles: string[]) {
-    const image = await this.getAccessibleImageOrThrow(imageId, actorId, roles);
+    const { image, auction } = await this.getAccessibleImageOrThrow(
+      imageId,
+      actorId,
+      roles,
+    );
+
+    this.assertAuctionImagesEditable(auction);
 
     await this.imageRepo.clearPrimaryByAuctionId(image.auctionId);
 
-    return this.imageRepo.update(imageId, { isPrimary: true });
+    const primaryImage = await this.imageRepo.update(imageId, {
+      isPrimary: true,
+    });
+
+    await this.auctionRepo.update(image.auctionId, {
+      thumbnailUrl: primaryImage.imageUrl,
+    });
+
+    return primaryImage;
   }
 
   private async getAccessibleAuctionOrThrow(
@@ -185,9 +266,106 @@ export class AuctionImageService {
       );
     }
 
-    await this.getAccessibleAuctionOrThrow(image.auctionId, actorId, roles);
+    const auction = await this.getAccessibleAuctionOrThrow(
+      image.auctionId,
+      actorId,
+      roles,
+    );
 
-    return image;
+    return { image, auction };
+  }
+
+  private resolveSortOrderFromImages(
+    existingImages: Pick<AuctionImage, 'sortOrder'>[],
+    sortOrder?: number,
+  ): number {
+    if (sortOrder !== undefined) {
+      return sortOrder;
+    }
+
+    const maxSortOrder = existingImages.reduce(
+      (currentMax, image) => Math.max(currentMax, image.sortOrder ?? 0),
+      -1,
+    );
+
+    return maxSortOrder + 1;
+  }
+
+  private async promoteNextPrimaryOrClearThumbnail(
+    auctionId: string,
+    excludedImageId?: string,
+  ) {
+    const remainingImages = (await this.imageRepo.findByAuctionId(auctionId))
+      .filter((image) => image.id !== excludedImageId)
+      .sort((left, right) => {
+        const leftSortOrder = left.sortOrder ?? 0;
+        const rightSortOrder = right.sortOrder ?? 0;
+
+        return leftSortOrder - rightSortOrder;
+      });
+
+    const nextPrimaryCandidate = remainingImages[0];
+
+    if (!nextPrimaryCandidate) {
+      await this.auctionRepo.update(auctionId, {
+        thumbnailUrl: null,
+      });
+
+      return null;
+    }
+
+    await this.imageRepo.clearPrimaryByAuctionId(auctionId);
+
+    const nextPrimary = await this.imageRepo.update(nextPrimaryCandidate.id, {
+      isPrimary: true,
+    });
+
+    await this.auctionRepo.update(auctionId, {
+      thumbnailUrl: nextPrimary.imageUrl,
+    });
+
+    return nextPrimary;
+  }
+
+  private assertAuctionImageStorageKey(
+    auctionId: string,
+    storageKey: string,
+  ): void {
+    const expectedPrefix = `auctions/${auctionId}/images/`;
+
+    if (!storageKey.startsWith(expectedPrefix) || storageKey.includes('..')) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.VALIDATION_ERROR,
+          message: 'Storage key không hợp lệ',
+          details: { auctionId, storageKey },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private assertAuctionImagesEditable(auction: {
+    id: string;
+    status: AuctionStatus;
+  }): void {
+    if (
+      auction.status === AuctionStatus.LIVE ||
+      auction.status === AuctionStatus.ENDED
+    ) {
+      throw new AppException(
+        {
+          code: ERROR_CODES.VALIDATION_ERROR,
+          message:
+            'Không thể thay đổi hình ảnh khi phiên đấu giá đang hoặc đã diễn ra',
+          details: {
+            auctionId: auction.id,
+            status: auction.status,
+          },
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   private extractExtension(fileName: string, contentType: string): string {

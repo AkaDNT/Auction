@@ -394,7 +394,7 @@ export default function SellerNewAuctionPage() {
 
           <label className="block">
             <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] theme-muted">
-              Bước giá tối thiểu (không bắt buộc)
+              Bước giá tối thiểu (tối thiểu 5.000)
             </span>
             <input
               type="text"
@@ -471,9 +471,6 @@ export default function SellerNewAuctionPage() {
 
             {uploadedThumbnail ? (
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-                <span className="rounded-full border border-theme-line px-2.5 py-1 theme-muted">
-                  assetId: {uploadedThumbnail.assetId}
-                </span>
                 <button
                   type="button"
                   onClick={clearThumbnail}

@@ -1,6 +1,8 @@
 import { authHttpFetch } from "@/features/auth/services/auth-http.client";
 import type { AuctionApiItem } from "@/features/auction/types/auction-api";
 
+type SellerAuctionImage = AuctionApiItem["images"][number];
+
 export type UpdateSellerAuctionPayload = {
   title?: string;
   description?: string;
@@ -18,6 +20,28 @@ type ApiErrorPayload = {
     message?: string;
   };
   message?: string;
+};
+
+type SellerAuctionImageUploadUrlPayload = {
+  fileName: string;
+  contentType: string;
+  altText?: string;
+  sortOrder?: number;
+  isPrimary?: boolean;
+};
+
+type SellerAuctionImageUploadUrlResponse = {
+  storageKey: string;
+  uploadUrl: string;
+  fileUrl: string;
+  expiresInSeconds: number;
+};
+
+type SellerAuctionImageConfirmPayload = {
+  storageKey: string;
+  altText?: string;
+  sortOrder?: number;
+  isPrimary?: boolean;
 };
 
 async function toErrorMessage(response: Response, fallback: string) {
@@ -104,5 +128,121 @@ export async function deleteSellerAuction(id: string): Promise<void> {
     throw new Error(
       await toErrorMessage(response, "Không thể xóa phiên đấu giá."),
     );
+  }
+}
+
+export async function createSellerAuctionImageUploadUrl(
+  auctionId: string,
+  payload: SellerAuctionImageUploadUrlPayload,
+): Promise<SellerAuctionImageUploadUrlResponse> {
+  const response = await authHttpFetch(
+    `/seller/auctions/${auctionId}/images/upload-url`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await toErrorMessage(response, "Không thể lấy đường dẫn upload ảnh."),
+    );
+  }
+
+  return (await response.json()) as SellerAuctionImageUploadUrlResponse;
+}
+
+export async function confirmSellerAuctionImageUpload(
+  auctionId: string,
+  payload: SellerAuctionImageConfirmPayload,
+): Promise<SellerAuctionImage> {
+  const response = await authHttpFetch(
+    `/seller/auctions/${auctionId}/images/confirm`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      await toErrorMessage(response, "Không thể xác nhận ảnh upload."),
+    );
+  }
+
+  return (await response.json()) as SellerAuctionImage;
+}
+
+export async function uploadSellerAuctionImageToS3(
+  uploadUrl: string,
+  file: File,
+  contentType: string,
+): Promise<void> {
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": contentType,
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload ảnh lên lưu trữ thất bại.");
+  }
+}
+
+export async function updateSellerAuctionImage(
+  imageId: string,
+  payload: {
+    altText?: string | null;
+    sortOrder?: number;
+    isPrimary?: boolean;
+  },
+): Promise<SellerAuctionImage> {
+  const response = await authHttpFetch(`/seller/auction-images/${imageId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await toErrorMessage(response, "Không thể cập nhật ảnh."));
+  }
+
+  return (await response.json()) as SellerAuctionImage;
+}
+
+export async function setPrimarySellerAuctionImage(
+  imageId: string,
+): Promise<SellerAuctionImage> {
+  const response = await authHttpFetch(
+    `/seller/auction-images/${imageId}/set-primary`,
+    {
+      method: "PATCH",
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(await toErrorMessage(response, "Không thể đặt ảnh chính."));
+  }
+
+  return (await response.json()) as SellerAuctionImage;
+}
+
+export async function deleteSellerAuctionImage(imageId: string): Promise<void> {
+  const response = await authHttpFetch(`/seller/auction-images/${imageId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error(await toErrorMessage(response, "Không thể xóa ảnh."));
   }
 }

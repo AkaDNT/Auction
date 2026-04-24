@@ -70,6 +70,10 @@ export class AuctionPrismaRepository implements IAuctionRepository {
 
   async createWithRelations(dto: CreateAuctionDataDto): Promise<Auction> {
     return this.prisma.$transaction(async (tx) => {
+      const thumbnailImageUrl =
+        dto.thumbnailAsset?.fileUrl ?? dto.thumbnailUrl ?? null;
+      const thumbnailStorageKey = dto.thumbnailAsset?.storageKey ?? null;
+
       const auction = await tx.auction.create({
         data: {
           code: dto.code,
@@ -77,13 +81,13 @@ export class AuctionPrismaRepository implements IAuctionRepository {
           slug: dto.slug,
           description: dto.description,
           startingPrice: dto.startingPrice,
-          currentPrice: dto.currentPrice,
+          currentPrice: dto.currentPrice ?? dto.startingPrice,
           buyNowPrice: dto.buyNowPrice,
           minBidIncrement: dto.minBidIncrement,
           startAt: dto.startAt ?? null,
           endAt: dto.endAt,
           status: dto.status,
-          thumbnailUrl: dto.thumbnailUrl ?? null,
+          thumbnailUrl: thumbnailImageUrl,
           seller: {
             connect: { id: dto.sellerId },
           },
@@ -93,18 +97,20 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         },
       });
 
-      if (dto.thumbnailAsset) {
+      if (thumbnailImageUrl) {
         await tx.auctionImage.create({
           data: {
             auctionId: auction.id,
-            imageUrl: dto.thumbnailAsset.fileUrl,
-            storageKey: dto.thumbnailAsset.storageKey,
+            imageUrl: thumbnailImageUrl,
+            storageKey: thumbnailStorageKey,
             altText: dto.title,
             sortOrder: 0,
             isPrimary: true,
           },
         });
+      }
 
+      if (dto.thumbnailAsset) {
         await tx.uploadAsset.update({
           where: { id: dto.thumbnailAsset.id },
           data: {
@@ -120,6 +126,12 @@ export class AuctionPrismaRepository implements IAuctionRepository {
 
   async updateWithRelations(dto: UpdateAuctionDataDto): Promise<Auction> {
     return this.prisma.$transaction(async (tx) => {
+      const hasThumbnailInput =
+        dto.thumbnailAsset !== undefined || dto.thumbnailUrl !== undefined;
+      const thumbnailImageUrl =
+        dto.thumbnailAsset?.fileUrl ?? dto.thumbnailUrl ?? null;
+      const thumbnailStorageKey = dto.thumbnailAsset?.storageKey ?? null;
+
       const data: Prisma.AuctionUpdateInput = {
         ...(dto.title !== undefined ? { title: dto.title } : {}),
         ...(dto.slug !== undefined ? { slug: dto.slug } : {}),
@@ -140,9 +152,7 @@ export class AuctionPrismaRepository implements IAuctionRepository {
           : {}),
         ...(dto.startAt !== undefined ? { startAt: dto.startAt } : {}),
         ...(dto.endAt !== undefined ? { endAt: dto.endAt } : {}),
-        ...(dto.thumbnailUrl !== undefined
-          ? { thumbnailUrl: dto.thumbnailUrl }
-          : {}),
+        ...(hasThumbnailInput ? { thumbnailUrl: thumbnailImageUrl } : {}),
         ...(dto.categoryId
           ? {
               category: {
@@ -157,39 +167,53 @@ export class AuctionPrismaRepository implements IAuctionRepository {
         data,
       });
 
-      if (dto.thumbnailAsset) {
+      if (hasThumbnailInput) {
         const primaryImage = await tx.auctionImage.findFirst({
           where: {
             auctionId: dto.id,
             isPrimary: true,
           },
-          orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }],
+          orderBy: [{ sortOrder: 'asc' }],
         });
 
-        if (primaryImage) {
-          await tx.auctionImage.update({
-            where: { id: primaryImage.id },
-            data: {
-              imageUrl: dto.thumbnailAsset.fileUrl,
-              storageKey: dto.thumbnailAsset.storageKey,
-              altText: dto.title ?? auction.title,
-              sortOrder: 0,
-              isPrimary: true,
-            },
-          });
-        } else {
-          await tx.auctionImage.create({
-            data: {
-              auctionId: dto.id,
-              imageUrl: dto.thumbnailAsset.fileUrl,
-              storageKey: dto.thumbnailAsset.storageKey,
-              altText: dto.title ?? auction.title,
-              sortOrder: 0,
-              isPrimary: true,
-            },
-          });
-        }
+        await tx.auctionImage.updateMany({
+          where: {
+            auctionId: dto.id,
+            isPrimary: true,
+          },
+          data: {
+            isPrimary: false,
+          },
+        });
 
+        if (thumbnailImageUrl) {
+          if (primaryImage) {
+            await tx.auctionImage.update({
+              where: { id: primaryImage.id },
+              data: {
+                imageUrl: thumbnailImageUrl,
+                storageKey: thumbnailStorageKey,
+                altText: dto.title ?? auction.title,
+                sortOrder: 0,
+                isPrimary: true,
+              },
+            });
+          } else {
+            await tx.auctionImage.create({
+              data: {
+                auctionId: dto.id,
+                imageUrl: thumbnailImageUrl,
+                storageKey: thumbnailStorageKey,
+                altText: dto.title ?? auction.title,
+                sortOrder: 0,
+                isPrimary: true,
+              },
+            });
+          }
+        }
+      }
+
+      if (dto.thumbnailAsset) {
         await tx.uploadAsset.update({
           where: { id: dto.thumbnailAsset.id },
           data: {
@@ -273,6 +297,9 @@ export class AuctionPrismaRepository implements IAuctionRepository {
     return this.prisma.auction.findMany({
       where: {
         status: AuctionStatus.LIVE,
+        endAt: {
+          gt: new Date(),
+        },
       },
       include: {
         category: true,

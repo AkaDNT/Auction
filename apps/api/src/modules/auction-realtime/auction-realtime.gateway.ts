@@ -15,16 +15,16 @@ import {
 import { JoinAuctionRoomDto } from './dto/join-auction-room.dto';
 import { BidPlacedEventDto } from './dto/bid-placed.event.dto';
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+console.log(allowedOrigins);
 @WebSocketGateway({
   namespace: AUCTION_WS_NAMESPACE,
   cors: {
     credentials: true,
     origin: [
-      'https://example.com',
-      'https://admin.example.com',
-      'https://app.example.com',
       'http://localhost:4000',
       'http://localhost:3000',
+      ...allowedOrigins,
     ],
   },
 })
