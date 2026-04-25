@@ -229,7 +229,9 @@ export function AdminAuctionDetail({
             </p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <p className="text-xs theme-muted">Auction ID: {auction.id}</p>
-              <p className="text-xs theme-muted">Số ảnh: {auction.imageCount}</p>
+              <p className="text-xs theme-muted">
+                Số ảnh: {auction.imageCount}
+              </p>
               <p className="text-xs theme-muted">
                 Bắt đầu: {formatDateTime(auction.startAt)}
               </p>
