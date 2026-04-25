@@ -1,6 +1,6 @@
 type AuthRole = "ADMIN" | "SELLER";
 
-const ADMIN_ROUTE_PREFIXES = ["/dashboard", "/lots", "/users", "/settings"];
+const ADMIN_ROUTE_PREFIXES = ["/admin"];
 
 function normalizeRole(role: string): AuthRole | string {
   return role.toUpperCase();
@@ -12,7 +12,7 @@ export function hasRole(roles: string[], expectedRole: AuthRole): boolean {
 
 export function getRoleLandingPath(roles: string[]): string {
   if (hasRole(roles, "ADMIN")) {
-    return "/dashboard";
+    return "/admin/dashboard";
   }
 
   if (hasRole(roles, "SELLER")) {
