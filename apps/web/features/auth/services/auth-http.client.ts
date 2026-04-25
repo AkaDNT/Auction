@@ -3,10 +3,6 @@ import {
   getAuthAccessToken,
   setAuthAccessToken,
 } from "@/features/auth/services/auth-token.store";
-import {
-  clearRefreshTokenCookieMarker,
-  hasRefreshTokenCookie,
-} from "@/features/auth/services/auth-refresh-cookie";
 
 type RefreshResponse = {
   accessToken: string;
@@ -25,9 +21,10 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
   "http://localhost:3999";
 
-async function clearRefreshTokenCookie(): Promise<void> {
-  clearRefreshTokenCookieMarker();
+let refreshRequest: Promise<string | null> | null = null;
+let hasAttemptedBootstrapRefresh = false;
 
+async function clearRefreshTokenCookie(): Promise<void> {
   try {
     await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
@@ -38,12 +35,7 @@ async function clearRefreshTokenCookie(): Promise<void> {
   }
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  if (!hasRefreshTokenCookie()) {
-    clearAuthAccessToken();
-    return null;
-  }
-
+async function requestRefreshAccessToken(): Promise<string | null> {
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
@@ -76,6 +68,30 @@ async function refreshAccessToken(): Promise<string | null> {
   return null;
 }
 
+async function refreshAccessToken(options?: {
+  force?: boolean;
+}): Promise<string | null> {
+  const force = options?.force ?? false;
+
+  if (!force && hasAttemptedBootstrapRefresh) {
+    return getAuthAccessToken();
+  }
+
+  if (refreshRequest) {
+    return refreshRequest;
+  }
+
+  if (!force) {
+    hasAttemptedBootstrapRefresh = true;
+  }
+
+  refreshRequest = requestRefreshAccessToken().finally(() => {
+    refreshRequest = null;
+  });
+
+  return refreshRequest;
+}
+
 function shouldSkipRefresh(path: string): boolean {
   return AUTH_PATHS_WITHOUT_REFRESH.some((authPath) =>
     path.startsWith(authPath),
@@ -92,11 +108,11 @@ export async function authHttpFetch(
   // After page reload, access token in memory is empty. Refresh first to avoid
   // an initial 401 on protected endpoints such as /auth/me.
   if (!token && !skipRefresh) {
-    if (!hasRefreshTokenCookie()) {
+    token = await refreshAccessToken();
+
+    if (!token) {
       return new Response(null, { status: 401 });
     }
-
-    token = await refreshAccessToken();
   }
 
   const headers = new Headers(init.headers);
@@ -115,7 +131,7 @@ export async function authHttpFetch(
     return response;
   }
 
-  const refreshedToken = await refreshAccessToken();
+  const refreshedToken = await refreshAccessToken({ force: true });
   if (!refreshedToken) {
     return response;
   }

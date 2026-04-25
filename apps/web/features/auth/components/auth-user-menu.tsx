@@ -93,7 +93,10 @@ export function AuthUserMenu() {
     }
 
     if (hasRole(user.roles, "ADMIN")) {
-      menuItems.push({ label: "Bảng điều khiển quản trị", href: "/dashboard" });
+      menuItems.push({
+        label: "Bảng điều khiển quản trị",
+        href: "/admin/dashboard",
+      });
     }
 
     return menuItems;

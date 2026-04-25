@@ -11,11 +11,14 @@ import { ThemeToggle } from "@/shared/components/theme/theme-toggle";
 import { mockImages } from "@/shared/lib/mock-images";
 
 const navigation = [
-  { label: "Tổng quan", href: "/dashboard" },
-  { label: "Phân tích", href: "/dashboard/analytics" },
-  { label: "Lô hàng", href: "/lots" },
-  { label: "Người dùng", href: "/users" },
-  { label: "Cài đặt", href: "/settings" },
+  { label: "Tổng quan", href: "/admin/dashboard" },
+  { label: "Phân tích", href: "/admin/dashboard/analytics" },
+  { label: "Phiên đấu giá", href: "/admin/auctions" },
+  { label: "Danh mục", href: "/admin/categories" },
+  { label: "Nội dung", href: "/admin/content" },
+  { label: "Lượt đặt giá", href: "/admin/bids" },
+  { label: "Người dùng", href: "/admin/users" },
+  { label: "Cài đặt", href: "/admin/settings" },
 ];
 
 function MenuIcon() {
@@ -63,8 +66,8 @@ export function AdminShell({ children }: AdminShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") {
-      return pathname === "/dashboard";
+    if (href === "/admin/dashboard") {
+      return pathname === "/admin/dashboard";
     }
 
     return pathname.startsWith(href);
@@ -159,7 +162,7 @@ export function AdminShell({ children }: AdminShellProps) {
                 <MenuIcon />
               </button>
               <Link
-                href="/dashboard"
+                href="/admin/dashboard"
                 className="flex items-center gap-2 text-foreground sm:gap-3"
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-(--border) bg-(--primary-soft) text-sm font-bold tracking-[0.3em] text-(--primary-strong) sm:h-11 sm:w-11">

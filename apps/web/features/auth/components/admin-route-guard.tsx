@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { AuthGuardSkeleton } from "@/features/auth/components/auth-guard-skeleton";
-import { hasRefreshTokenCookie } from "@/features/auth/services/auth-refresh-cookie";
 import {
   getRoleLandingPath,
   hasRole,
@@ -26,12 +25,6 @@ export function AdminRouteGuard({ children }: AdminRouteGuardProps) {
     async function checkAuth() {
       setIsReady(false);
 
-      if (!hasRefreshTokenCookie()) {
-        const nextPath = pathname || "/dashboard";
-        router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
-        return;
-      }
-
       try {
         const currentUser = await getCurrentUser();
         if (!isMounted) {
@@ -49,7 +42,7 @@ export function AdminRouteGuard({ children }: AdminRouteGuardProps) {
           return;
         }
 
-        const nextPath = pathname || "/dashboard";
+        const nextPath = pathname || "/admin/dashboard";
         router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
       }
     }

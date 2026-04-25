@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AuthGuardSkeleton } from "@/features/auth/components/auth-guard-skeleton";
-import { hasRefreshTokenCookie } from "@/features/auth/services/auth-refresh-cookie";
 import { getRoleLandingPath } from "@/features/auth/services/auth-routing";
 import { getCurrentUser } from "@/features/auth/services/auth-session.service";
 
@@ -21,11 +20,6 @@ export function AuthRouteGuard({ children }: AuthRouteGuardProps) {
 
     async function checkAuth() {
       setIsReady(false);
-
-      if (!hasRefreshTokenCookie()) {
-        setIsReady(true);
-        return;
-      }
 
       try {
         const currentUser = await getCurrentUser();
