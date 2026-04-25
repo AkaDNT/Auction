@@ -2,14 +2,15 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { AuthApiError } from "@/features/auth/services/auth-api.error";
-import { getRoleLandingPath } from "@/features/auth/services/auth-routing";
+import { resolvePostAuthPath } from "@/features/auth/services/auth-routing";
 import { LocalAuthSessionStorage } from "@/features/auth/services/auth-session.storage";
 import { setAuthUser } from "@/features/auth/services/auth-user.store";
 import { setAuthAccessToken } from "@/features/auth/services/auth-token.store";
 import { registerUser } from "@/features/auth/services/register-user";
+import { safeNextPath } from "@/features/auth/services/safe-next-path";
 
 type RegisterFormState = {
   name: string;
@@ -27,7 +28,12 @@ const defaultState: RegisterFormState = {
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const storage = new LocalAuthSessionStorage();
+  const nextPath = safeNextPath(searchParams.get("next"));
+  const loginHref = nextPath
+    ? `/login?next=${encodeURIComponent(nextPath)}`
+    : "/login";
   const [form, setForm] = useState<RegisterFormState>(defaultState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -63,7 +69,7 @@ export function RegisterForm() {
         "Tạo tài khoản thành công. Đang chuyển đến khu vực phù hợp...",
       );
       setForm(defaultState);
-      router.replace(getRoleLandingPath(result.user.roles));
+      router.replace(resolvePostAuthPath(result.user.roles, nextPath));
     } catch (error) {
       if (error instanceof AuthApiError) {
         setErrorMessage(error.message);
@@ -184,7 +190,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm theme-muted">
         Đã có tài khoản?{" "}
-        <Link href="/login" className="theme-primary">
+        <Link href={loginHref} className="theme-primary">
           Đăng nhập
         </Link>
       </p>

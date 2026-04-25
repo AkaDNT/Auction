@@ -49,6 +49,9 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = safeNextPath(searchParams.get("next"));
+  const registerHref = nextPath
+    ? `/register?next=${encodeURIComponent(nextPath)}`
+    : "/register";
 
   const [form, setForm] = useState<LoginFormState>(defaultState);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -179,7 +182,7 @@ export function LoginForm() {
           <Link href="/forgot-password" className="theme-primary">
             Quên mật khẩu?
           </Link>
-          <Link href="/register" className="theme-muted">
+          <Link href={registerHref} className="theme-muted">
             Tạo tài khoản
           </Link>
         </div>
