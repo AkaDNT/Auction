@@ -21,21 +21,48 @@ import { ERROR_CODES } from '@repo/shared';
 
 @Controller('auth')
 export class AuthController {
+  private readonly refreshTokenCookieName = 'refresh_token';
+  private readonly refreshTokenMarkerCookieName = 'refresh_token_present';
+
   constructor(private readonly authService: AuthService) {}
-  private setRefreshCookie(res: Response, token: string) {
+
+  private getRefreshCookieOptions() {
     const days = Number(process.env.JWT_REFRESH_TTL_DAYS || 7);
     const secure = (process.env.COOKIE_SECURE ?? 'false') === 'true';
     const sameSite = (process.env.COOKIE_SAMESITE ?? 'lax') as
       | 'lax'
       | 'strict'
       | 'none';
-    res.cookie('refresh_token', token, {
+
+    return {
+      days,
+      secure,
+      sameSite,
+    };
+  }
+
+  private setRefreshCookie(res: Response, token: string) {
+    const { days, secure, sameSite } = this.getRefreshCookieOptions();
+
+    res.cookie(this.refreshTokenCookieName, token, {
       httpOnly: true,
       secure,
       sameSite,
       maxAge: days * 24 * 3600 * 1000,
       path: '/auth',
     });
+    res.cookie(this.refreshTokenMarkerCookieName, '1', {
+      httpOnly: false,
+      secure,
+      sameSite,
+      maxAge: days * 24 * 3600 * 1000,
+      path: '/',
+    });
+  }
+
+  private clearRefreshCookie(res: Response) {
+    res.clearCookie(this.refreshTokenCookieName, { path: '/auth' });
+    res.clearCookie(this.refreshTokenMarkerCookieName, { path: '/' });
   }
 
   @Post('/login')
@@ -63,7 +90,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const rt = (req as any).cookies?.refresh_token;
+    const rt = (req as any).cookies?.[this.refreshTokenCookieName];
     if (!rt) {
       throw new AppException(
         {
@@ -80,9 +107,9 @@ export class AuthController {
 
   @Post('/logout')
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const rt = (req as any).cookies?.refresh_token;
+    const rt = (req as any).cookies?.[this.refreshTokenCookieName];
     await this.authService.logout(rt);
-    res.clearCookie('refresh_token', { path: '/auth' });
+    this.clearRefreshCookie(res);
     return { ok: true };
   }
 

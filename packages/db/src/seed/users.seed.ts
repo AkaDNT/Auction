@@ -88,7 +88,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: "admin@gmail.com",
       slug: "system-admin",
       status: UserStatus.ACTIVE,
-      roles: [Role.ADMIN],
+      roles: [Role.ADMIN, Role.SELLER, Role.USER],
     },
     {
       name: "Nguyen Minh Anh",
@@ -98,9 +98,9 @@ export async function seedUsers(prisma: PrismaClient) {
       roles: [Role.USER],
     },
     {
-      name: "Tran Quoc Bao",
-      email: "quocbao@gmail.com",
-      slug: "tran-quoc-bao",
+      name: "User",
+      email: "user@gmail.com",
+      slug: "user",
       status: UserStatus.ACTIVE,
       roles: [Role.USER],
     },
@@ -151,7 +151,7 @@ export async function seedUsers(prisma: PrismaClient) {
       email: "seller@gmail.com",
       slug: "seller-support",
       status: UserStatus.ACTIVE,
-      roles: [Role.SELLER],
+      roles: [Role.SELLER, Role.USER],
     },
   ];
 

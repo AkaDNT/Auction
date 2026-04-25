@@ -3,6 +3,10 @@ import {
   getAuthAccessToken,
   setAuthAccessToken,
 } from "@/features/auth/services/auth-token.store";
+import {
+  clearRefreshTokenCookieMarker,
+  hasRefreshTokenCookie,
+} from "@/features/auth/services/auth-refresh-cookie";
 
 type RefreshResponse = {
   accessToken: string;
@@ -22,6 +26,8 @@ const API_BASE_URL =
   "http://localhost:3999";
 
 async function clearRefreshTokenCookie(): Promise<void> {
+  clearRefreshTokenCookieMarker();
+
   try {
     await fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
@@ -33,6 +39,11 @@ async function clearRefreshTokenCookie(): Promise<void> {
 }
 
 async function refreshAccessToken(): Promise<string | null> {
+  if (!hasRefreshTokenCookie()) {
+    clearAuthAccessToken();
+    return null;
+  }
+
   const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: "POST",
     credentials: "include",
@@ -81,6 +92,10 @@ export async function authHttpFetch(
   // After page reload, access token in memory is empty. Refresh first to avoid
   // an initial 401 on protected endpoints such as /auth/me.
   if (!token && !skipRefresh) {
+    if (!hasRefreshTokenCookie()) {
+      return new Response(null, { status: 401 });
+    }
+
     token = await refreshAccessToken();
   }
 

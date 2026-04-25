@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { AuthGuardSkeleton } from "@/features/auth/components/auth-guard-skeleton";
+import { hasRefreshTokenCookie } from "@/features/auth/services/auth-refresh-cookie";
 import {
   getRoleLandingPath,
   hasRole,
@@ -24,6 +25,13 @@ export function SellerRouteGuard({ children }: SellerRouteGuardProps) {
 
     async function checkAuth() {
       setIsReady(false);
+
+      if (!hasRefreshTokenCookie()) {
+        const nextPath = pathname || "/seller";
+        router.replace(`/login?next=${encodeURIComponent(nextPath)}`);
+        return;
+      }
+
       try {
         const currentUser = await getCurrentUser();
         if (!isMounted) {
