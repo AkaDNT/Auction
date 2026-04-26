@@ -4,53 +4,54 @@ export async function seedAuctionCategories(prisma: PrismaClient) {
   const categories = [
     {
       slug: "electronics",
-      label: "Electronics",
-      description: "Phones, laptops, tablets, and gadgets",
+      label: "Điện tử",
+      description:
+        "Điện thoại, máy tính xách tay, máy tính bảng và thiết bị công nghệ",
     },
     {
       slug: "fashion",
-      label: "Fashion",
-      description: "Clothes, shoes, bags, and accessories",
+      label: "Thời trang",
+      description: "Quần áo, giày dép, túi xách và phụ kiện",
     },
     {
       slug: "collectibles",
-      label: "Collectibles",
-      description: "Figures, cards, rare items, and memorabilia",
+      label: "Đồ sưu tầm",
+      description: "Mô hình, thẻ bài, vật phẩm hiếm và đồ lưu niệm",
     },
     {
       slug: "home-living",
-      label: "Home & Living",
-      description: "Furniture, kitchenware, and home products",
+      label: "Nhà cửa & Đời sống",
+      description: "Nội thất, dụng cụ nhà bếp và đồ gia dụng",
     },
     {
       slug: "sports",
-      label: "Sports",
-      description: "Sports equipment and fitness accessories",
+      label: "Thể thao",
+      description: "Dụng cụ thể thao và phụ kiện tập gym",
     },
     {
       slug: "beauty",
-      label: "Beauty",
-      description: "Beauty and personal care products",
+      label: "Làm đẹp",
+      description: "Sản phẩm chăm sóc da và làm đẹp cá nhân",
     },
     {
       slug: "books",
-      label: "Books",
-      description: "Books, novels, comics, and magazines",
+      label: "Sách",
+      description: "Sách, tiểu thuyết, truyện tranh và tạp chí",
     },
     {
       slug: "toys",
-      label: "Toys",
-      description: "Toys, games, and entertainment products",
+      label: "Đồ chơi",
+      description: "Đồ chơi, trò chơi và các sản phẩm giải trí",
     },
     {
       slug: "automotive",
-      label: "Automotive",
-      description: "Vehicle accessories and maintenance tools",
+      label: "Ô tô & Xe máy",
+      description: "Phụ kiện xe và dụng cụ bảo dưỡng",
     },
     {
       slug: "art",
-      label: "Art",
-      description: "Artwork, handmade products, and decor",
+      label: "Nghệ thuật",
+      description: "Tác phẩm nghệ thuật, đồ thủ công và trang trí",
     },
   ];
 
@@ -65,5 +66,5 @@ export async function seedAuctionCategories(prisma: PrismaClient) {
     });
   }
 
-  console.log(`✅ Seeded ${categories.length} auction categories`);
+  console.log(`✅ Đã cập nhật ${categories.length} danh mục đấu giá`);
 }

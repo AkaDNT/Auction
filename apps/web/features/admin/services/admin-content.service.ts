@@ -14,8 +14,7 @@ import type {
   CreateFaqRequest,
   UpdateFaqRequest,
 } from "@/features/admin/types";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import { authHttpFetch } from "@/features/auth/services/auth-http.client";
 
 // ============================================================================
 // Features Service
@@ -34,9 +33,7 @@ export async function listAdminFeatures(
   if (request.sortOrder) params.append("sortOrder", request.sortOrder);
   if (request.search) params.append("search", request.search);
 
-  const response = await fetch(`${API_BASE}/admin/auction-features?${params}`, {
-    credentials: "include",
-  });
+  const response = await authHttpFetch(`/admin/auction-features?${params}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch features");
@@ -48,11 +45,8 @@ export async function listAdminFeatures(
 export async function getAdminFeatureById(
   featureId: string,
 ): Promise<AdminAuctionFeature> {
-  const response = await fetch(
-    `${API_BASE}/admin/auction-features/${featureId}`,
-    {
-      credentials: "include",
-    },
+  const response = await authHttpFetch(
+    `/admin/auction-features/${featureId}`,
   );
 
   if (!response.ok) {
@@ -65,9 +59,8 @@ export async function getAdminFeatureById(
 export async function createAdminFeature(
   request: CreateFeatureRequest,
 ): Promise<AdminAuctionFeature> {
-  const response = await fetch(`${API_BASE}/admin/auction-features`, {
+  const response = await authHttpFetch("/admin/auction-features", {
     method: "POST",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -85,11 +78,10 @@ export async function updateAdminFeature(
   featureId: string,
   request: UpdateFeatureRequest,
 ): Promise<AdminAuctionFeature> {
-  const response = await fetch(
-    `${API_BASE}/admin/auction-features/${featureId}`,
+  const response = await authHttpFetch(
+    `/admin/auction-features/${featureId}`,
     {
       method: "PATCH",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -105,11 +97,10 @@ export async function updateAdminFeature(
 }
 
 export async function deleteAdminFeature(featureId: string): Promise<void> {
-  const response = await fetch(
-    `${API_BASE}/admin/auction-features/${featureId}`,
+  const response = await authHttpFetch(
+    `/admin/auction-features/${featureId}`,
     {
       method: "DELETE",
-      credentials: "include",
     },
   );
 
@@ -136,9 +127,7 @@ export async function listAdminFaqs(
   if (request.sortOrder) params.append("sortOrder", request.sortOrder);
   if (request.search) params.append("search", request.search);
 
-  const response = await fetch(`${API_BASE}/admin/auction-faqs?${params}`, {
-    credentials: "include",
-  });
+  const response = await authHttpFetch(`/admin/auction-faqs?${params}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch FAQs");
@@ -148,9 +137,7 @@ export async function listAdminFaqs(
 }
 
 export async function getAdminFaqById(faqId: string): Promise<AdminAuctionFaq> {
-  const response = await fetch(`${API_BASE}/admin/auction-faqs/${faqId}`, {
-    credentials: "include",
-  });
+  const response = await authHttpFetch(`/admin/auction-faqs/${faqId}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch FAQ");
@@ -162,9 +149,8 @@ export async function getAdminFaqById(faqId: string): Promise<AdminAuctionFaq> {
 export async function createAdminFaq(
   request: CreateFaqRequest,
 ): Promise<AdminAuctionFaq> {
-  const response = await fetch(`${API_BASE}/admin/auction-faqs`, {
+  const response = await authHttpFetch("/admin/auction-faqs", {
     method: "POST",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -182,9 +168,8 @@ export async function updateAdminFaq(
   faqId: string,
   request: UpdateFaqRequest,
 ): Promise<AdminAuctionFaq> {
-  const response = await fetch(`${API_BASE}/admin/auction-faqs/${faqId}`, {
+  const response = await authHttpFetch(`/admin/auction-faqs/${faqId}`, {
     method: "PATCH",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -199,9 +184,8 @@ export async function updateAdminFaq(
 }
 
 export async function deleteAdminFaq(faqId: string): Promise<void> {
-  const response = await fetch(`${API_BASE}/admin/auction-faqs/${faqId}`, {
+  const response = await authHttpFetch(`/admin/auction-faqs/${faqId}`, {
     method: "DELETE",
-    credentials: "include",
   });
 
   if (!response.ok) {

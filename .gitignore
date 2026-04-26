@@ -4,3 +4,4 @@ dist
 .env
 .env.prod
 ADMIN_DESIGN.md
+manual-deploy.sh

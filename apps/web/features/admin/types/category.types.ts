@@ -5,41 +5,25 @@
 
 export interface AdminCategory {
   id: string;
-  name: string;
-  description?: string;
-  displayOrder: number;
-  isActive: boolean;
-  auctionCount: number;
+  slug: string;
+  label: string;
+  description?: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateCategoryRequest {
-  name: string;
+  slug: string;
+  label: string;
   description?: string;
-  displayOrder: number;
 }
 
 export interface UpdateCategoryRequest {
-  name?: string;
+  slug?: string;
+  label?: string;
   description?: string;
-  displayOrder?: number;
-  isActive?: boolean;
 }
 
 export interface AdminCategoryListRequest {
-  page?: number;
-  limit?: number;
-  isActive?: boolean;
-  sortBy?: "createdAt" | "displayOrder" | "auctionCount";
-  sortOrder?: "ASC" | "DESC";
   search?: string;
-}
-
-export interface AdminCategoryListResponse {
-  data: AdminCategory[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
 }

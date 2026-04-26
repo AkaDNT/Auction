@@ -39,6 +39,9 @@ export type AuctionApiCategory = {
   id: string;
   slug: string;
   label: string;
+  description?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 type AuctionApiSeller = {

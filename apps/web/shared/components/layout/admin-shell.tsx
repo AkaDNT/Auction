@@ -139,10 +139,6 @@ export function AdminShell({ children }: AdminShellProps) {
                 sizes="260px"
               />
             </div>
-            <p className="mt-3 text-xs leading-5 theme-muted">
-              Hình ảnh mock từ nguồn public. Khi có backend, thay URL bằng ảnh
-              AWS S3 tại tầng dữ liệu.
-            </p>
           </div>
 
           <div className="mt-auto hidden border-t border-(--border) pt-5 lg:block">

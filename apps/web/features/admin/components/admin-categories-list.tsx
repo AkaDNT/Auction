@@ -1,170 +1,280 @@
-/**
- * Admin Categories List Component
- * SOLID: Single Responsibility - displays category list with CRUD
- * Dependency: hooks, types
- */
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import {
   useAdminCategories,
   useCreateAdminCategory,
-  useUpdateAdminCategory,
   useDeleteAdminCategory,
+  useUpdateAdminCategory,
 } from "@/features/admin/hooks";
+import type { AdminCategory } from "@/features/admin/types";
+import {
+  AdminCategoriesListProps,
+  CategoryFormState,
+  initialCategoryFormState,
+} from "./admin-categories-list/types";
+import { useAnimatedDialog } from "./admin-categories-list/use-animated-dialog";
+import { AdminCategoryStats } from "./admin-categories-list/admin-category-stats";
+import { AdminCategoriesTable } from "./admin-categories-list/admin-categories-table";
+import { AdminCategoryFormDialog } from "./admin-categories-list/admin-category-form-dialog";
+import { AdminCategoryDeleteDialog } from "./admin-categories-list/admin-category-delete-dialog";
 
-export function AdminCategoriesList() {
+export function AdminCategoriesList({ search = "" }: AdminCategoriesListProps) {
   const categoriesQuery = useAdminCategories();
   const createMutation = useCreateAdminCategory();
   const updateMutation = useUpdateAdminCategory();
   const deleteMutation = useDeleteAdminCategory();
 
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    displayOrder: 0,
+  const [editingCategory, setEditingCategory] = useState<AdminCategory | null>(
+    null,
+  );
+  const [deleteTarget, setDeleteTarget] = useState<AdminCategory | null>(null);
+  const [formData, setFormData] = useState<CategoryFormState>(
+    initialCategoryFormState,
+  );
+
+  const popupRef = useRef<HTMLDivElement>(null);
+  const slugInputRef = useRef<HTMLInputElement>(null);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
+  const deleteConfirmButtonRef = useRef<HTMLButtonElement>(null);
+
+  const formDialog = useAnimatedDialog({
+    isOpen: showForm,
+    dialogRef: popupRef,
+    focusRef: slugInputRef,
+    resetScroll: true,
+  });
+
+  const deleteDialog = useAnimatedDialog({
+    isOpen: Boolean(deleteTarget),
+    dialogRef: deleteDialogRef,
+    focusRef: deleteConfirmButtonRef,
   });
 
   const categories = useMemo(() => {
-    return categoriesQuery.data?.data ?? [];
-  }, [categoriesQuery.data]);
+    const rawCategories = categoriesQuery.data ?? [];
+    const normalizedSearch = search.trim().toLowerCase();
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await createMutation.mutateAsync({
-        name: formData.name,
-        description: formData.description,
-        displayOrder: formData.displayOrder,
-      });
-      setFormData({ name: "", description: "", displayOrder: 0 });
+    if (!normalizedSearch) {
+      return rawCategories;
+    }
+
+    return rawCategories.filter((category) => {
+      return [category.label, category.slug, category.description ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+    });
+  }, [categoriesQuery.data, search]);
+
+  const stats = useMemo(() => {
+    return {
+      total: categoriesQuery.data?.length ?? categories.length,
+      shown: categories.length,
+    };
+  }, [categories, categoriesQuery.data]);
+
+  const isFormPending = createMutation.isPending || updateMutation.isPending;
+
+  const openCreateForm = () => {
+    setEditingCategory(null);
+    setFormData(initialCategoryFormState);
+    setShowForm(true);
+  };
+
+  const openEditForm = (category: AdminCategory) => {
+    setEditingCategory(category);
+    setFormData({
+      slug: category.slug,
+      label: category.label,
+      description: category.description || "",
+    });
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    formDialog.hide(() => {
       setShowForm(false);
-      alert("Danh mục đã được tạo thành công");
-    } catch {
-      alert("Lỗi: Không thể tạo danh mục");
+      setEditingCategory(null);
+      setFormData(initialCategoryFormState);
+    });
+  };
+
+  const openDeleteDialog = (category: AdminCategory) => {
+    setDeleteTarget(category);
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteMutation.isPending) {
+      return;
+    }
+
+    deleteDialog.hide(() => {
+      setDeleteTarget(null);
+    });
+  };
+
+  const updateFormField = (field: keyof CategoryFormState, value: string) => {
+    setFormData((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      if (editingCategory) {
+        await updateMutation.mutateAsync({
+          categoryId: editingCategory.id,
+          request: {
+            slug: formData.slug,
+            label: formData.label,
+            description: formData.description || undefined,
+          },
+        });
+        toast.success("Danh mục đã được cập nhật thành công.");
+      } else {
+        await createMutation.mutateAsync({
+          slug: formData.slug,
+          label: formData.label,
+          description: formData.description || undefined,
+        });
+        toast.success("Danh mục đã được tạo thành công.");
+      }
+
+      closeForm();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Không thể lưu danh mục.";
+      toast.error(`Lỗi: ${message}`);
     }
   };
 
-  const handleDelete = async (categoryId: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
-      try {
-        await deleteMutation.mutateAsync(categoryId);
-        alert("Danh mục đã được xóa thành công");
-      } catch {
-        alert("Lỗi: Không thể xóa danh mục");
-      }
+  const handleDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      toast.success("Danh mục đã được xóa thành công.");
+      closeDeleteDialog();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Không thể xóa danh mục.";
+      toast.error(`Lỗi: ${message}`);
     }
   };
 
   if (categoriesQuery.isLoading) {
-    return <div>Đang tải danh mục...</div>;
+    return (
+      <div className="space-y-4 animate-pulse">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="h-24 rounded-2xl border border-theme-line bg-(--primary-soft)"
+            />
+          ))}
+        </div>
+        <div className="h-28 rounded-2xl border border-theme-line bg-(--primary-soft)" />
+        <div className="h-112 rounded-2xl border border-theme-line bg-(--primary-soft)" />
+      </div>
+    );
   }
 
   if (categoriesQuery.isError) {
     return (
-      <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-800">
-        Lỗi: Không thể tải danh mục
+      <div className="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+        {categoriesQuery.error instanceof Error
+          ? categoriesQuery.error.message
+          : "Không thể tải danh mục."}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Quản lý danh mục</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          {showForm ? "Đóng" : "Thêm danh mục"}
-        </button>
-      </div>
+    <div className="space-y-5">
+      <AdminCategoryStats total={stats.total} shown={stats.shown} />
 
-      {showForm && (
-        <form
-          onSubmit={handleCreate}
-          className="space-y-4 rounded-lg border border-gray-200 p-6"
-        >
-          <div>
-            <label className="block text-sm font-semibold">Tên danh mục</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
-              required
-            />
+      {categories.length === 0 ? (
+        <div className="rounded-2xl border border-theme-line bg-(--primary-soft)/35 p-6 text-center">
+          <p className="text-sm font-semibold theme-heading">
+            Chưa có danh mục nào
+          </p>
+          <p className="mt-2 text-sm theme-muted">
+            Tạo danh mục đầu tiên để bắt đầu sắp xếp phiên đấu giá.
+          </p>
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="theme-button-secondary cursor-pointer inline-flex rounded-full px-4 py-2 text-sm font-semibold transition"
+            >
+              Thêm danh mục
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-semibold">Mô tả</label>
-            <textarea
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
-            />
+        </div>
+      ) : (
+        <section className="theme-card rounded-2xl p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.2em] theme-primary">
+                Danh sách danh mục
+              </p>
+              <h2 className="mt-2 text-xl font-semibold theme-heading sm:text-2xl">
+                Cấu hình tên hiển thị, nhãn và mô tả
+              </h2>
+              <p className="mt-1 text-sm theme-muted">
+                Sửa nhanh tên hiển thị, nhãn và mô tả của danh mục.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={openCreateForm}
+              className="theme-button-secondary cursor-pointer inline-flex rounded-full px-4 py-2 text-sm font-semibold transition"
+            >
+              Thêm danh mục
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-semibold">
-              Thứ tự hiển thị
-            </label>
-            <input
-              type="number"
-              value={formData.displayOrder}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  displayOrder: parseInt(e.target.value),
-                })
-              }
-              className="mt-1 w-full rounded border border-gray-300 px-3 py-2"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={createMutation.isPending}
-            className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700 disabled:bg-gray-400"
-          >
-            {createMutation.isPending ? "Đang tạo..." : "Tạo danh mục"}
-          </button>
-        </form>
+
+          <AdminCategoriesTable
+            categories={categories}
+            isDeleting={deleteMutation.isPending}
+            onEdit={openEditForm}
+            onDelete={openDeleteDialog}
+          />
+        </section>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-gray-300">
-              <th className="px-4 py-2 text-left font-semibold">Tên</th>
-              <th className="px-4 py-2 text-left font-semibold">Mô tả</th>
-              <th className="px-4 py-2 text-left font-semibold">Phiên</th>
-              <th className="px-4 py-2 text-left font-semibold">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((category) => (
-              <tr key={category.id} className="border-b border-gray-200">
-                <td className="px-4 py-2">{category.name}</td>
-                <td className="px-4 py-2">{category.description || "-"}</td>
-                <td className="px-4 py-2">{category.auctionCount}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    disabled={deleteMutation.isPending}
-                    className="text-red-600 hover:underline"
-                  >
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminCategoryFormDialog
+        formData={formData}
+        isOpen={showForm}
+        isVisible={formDialog.isVisible}
+        isPending={isFormPending}
+        mode={editingCategory ? "edit" : "create"}
+        onChange={updateFormField}
+        onClose={closeForm}
+        onSubmit={handleSubmit}
+        popupRef={popupRef}
+        slugInputRef={slugInputRef}
+      />
+
+      <AdminCategoryDeleteDialog
+        category={deleteTarget}
+        isOpen={Boolean(deleteTarget)}
+        isVisible={deleteDialog.isVisible}
+        isPending={deleteMutation.isPending}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDelete}
+        dialogRef={deleteDialogRef}
+        confirmButtonRef={deleteConfirmButtonRef}
+      />
     </div>
   );
 }

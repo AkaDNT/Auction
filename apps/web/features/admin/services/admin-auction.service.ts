@@ -11,6 +11,7 @@ import type {
   AdminAuctionCancelRequest,
   AdminAuctionCancelResponse,
 } from "@/features/admin/types";
+import { authHttpFetch } from "@/features/auth/services/auth-http.client";
 import {
   listAuctions,
   getAuctionById,
@@ -19,10 +20,6 @@ import type {
   AuctionApiItem,
   AuctionListParams,
 } from "@/features/auction/types/auction-api";
-
-const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ??
-  "http://localhost:3999";
 
 function toNumber(value: string | number | null | undefined): number {
   if (value === null || value === undefined) {
@@ -125,11 +122,10 @@ export async function cancelAdminAuction(
   auctionId: string,
   request: AdminAuctionCancelRequest = {},
 ): Promise<AdminAuctionCancelResponse> {
-  const response = await fetch(
-    `${API_BASE}/admin/auctions/${auctionId}/cancel`,
+  const response = await authHttpFetch(
+    `/admin/auctions/${auctionId}/cancel`,
     {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

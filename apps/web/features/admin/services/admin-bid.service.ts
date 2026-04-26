@@ -13,8 +13,7 @@ import type {
   CancelBidRequest,
   CancelBidResponse,
 } from "@/features/admin/types";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+import { authHttpFetch } from "@/features/auth/services/auth-http.client";
 
 export async function listAdminBids(
   request: AdminBidListRequest = {},
@@ -29,9 +28,7 @@ export async function listAdminBids(
   if (request.sortOrder) params.append("sortOrder", request.sortOrder);
   if (request.search) params.append("search", request.search);
 
-  const response = await fetch(`${API_BASE}/admin/bids?${params}`, {
-    credentials: "include",
-  });
+  const response = await authHttpFetch(`/admin/bids?${params}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch bids");
@@ -41,9 +38,7 @@ export async function listAdminBids(
 }
 
 export async function getAdminBidById(bidId: string): Promise<AdminBid> {
-  const response = await fetch(`${API_BASE}/admin/bids/${bidId}`, {
-    credentials: "include",
-  });
+  const response = await authHttpFetch(`/admin/bids/${bidId}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch bid");
@@ -56,9 +51,8 @@ export async function rejectAdminBid(
   bidId: string,
   request: RejectBidRequest = {},
 ): Promise<RejectBidResponse> {
-  const response = await fetch(`${API_BASE}/admin/bids/${bidId}/reject`, {
+  const response = await authHttpFetch(`/admin/bids/${bidId}/reject`, {
     method: "PATCH",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -76,9 +70,8 @@ export async function cancelAdminBid(
   bidId: string,
   request: CancelBidRequest = {},
 ): Promise<CancelBidResponse> {
-  const response = await fetch(`${API_BASE}/admin/bids/${bidId}/cancel`, {
+  const response = await authHttpFetch(`/admin/bids/${bidId}/cancel`, {
     method: "PATCH",
-    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
