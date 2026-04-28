@@ -29,7 +29,7 @@ export class DepositOrderService {
       );
     }
 
-    const wallet = await this.walletService.getOrCreateWallet(userId);
+    const wallet = await this.walletService.getMyWallet(userId);
     const internalCode = this.generateInternalCode();
 
     return this.depositOrderRepository.create({

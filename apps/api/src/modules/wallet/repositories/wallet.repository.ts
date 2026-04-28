@@ -6,5 +6,10 @@ export interface IWalletRepository {
   findByUserId(userId: string): Promise<Wallet | null>;
   create(data: Prisma.WalletCreateInput): Promise<Wallet>;
   update(id: string, data: Prisma.WalletUpdateInput): Promise<Wallet>;
-  upsertByUserId(userId: string): Promise<Wallet>;
+  bootstrapMissingWallets(): Promise<{
+    totalUsers: number;
+    existingWalletUsers: number;
+    missingWalletUsers: number;
+    createdCount: number;
+  }>;
 }

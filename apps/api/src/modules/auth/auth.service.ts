@@ -88,6 +88,9 @@ export class AuthService {
         userRoles: {
           create: [{ role: Role.USER }],
         },
+        wallet: {
+          create: {},
+        },
       },
       include: {
         userRoles: true,
