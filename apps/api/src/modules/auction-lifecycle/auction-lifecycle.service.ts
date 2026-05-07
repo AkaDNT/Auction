@@ -26,6 +26,10 @@ export class AuctionLifecycleService {
     await this.producer.cancelEndAuction(auctionId);
   }
 
+  async cancelStartAuction(auctionId: string): Promise<void> {
+    await this.producer.cancelStartAuction(auctionId);
+  }
+
   async syncEndAuctionJob(params: {
     auctionId: string;
     endAt?: Date | null;
@@ -42,5 +46,18 @@ export class AuctionLifecycleService {
       auctionId,
       endAt,
     });
+  }
+
+  async syncStartAuctionJob(params: {
+    auctionId: string,
+    startAt?: Date| null,
+    shouldSchedule: boolean
+  }){
+    const {auctionId, startAt, shouldSchedule} = params;
+    if(!shouldSchedule || !startAt){
+      await this.cancelStartAuction(auctionId);
+      return;
+    }
+    await this.producer.scheduleStartAuction({auctionId, startAt});
   }
 }

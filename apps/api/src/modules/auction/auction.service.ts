@@ -295,6 +295,13 @@ export class AuctionService {
       status: nextStatus,
     });
 
+    await this.syncAuctionStartJob({
+      id: updatedAuction.id,
+      startAt: updatedAuction.startAt,
+      status: updatedAuction.status,
+    });
+
+
     await this.syncAuctionEndJob({
       id: updatedAuction.id,
       endAt: updatedAuction.endAt,
@@ -323,7 +330,7 @@ export class AuctionService {
     });
 
     await this.auctionLifecycleService.cancelEndAuction(current.id);
-
+    await this.auctionLifecycleService.cancelStartAuction(current.id);
     return updatedAuction;
   }
 
@@ -495,6 +502,18 @@ export class AuctionService {
         auction.status === AuctionStatus.UPCOMING,
     });
   }
+
+  private async syncAuctionStartJob(auction: {
+  id: string;
+  startAt: Date | null;
+  status: AuctionStatus;
+}): Promise<void> {
+  await this.auctionLifecycleService.syncStartAuctionJob({
+    auctionId: auction.id,
+    startAt: auction.startAt,
+    shouldSchedule: auction.status === AuctionStatus.UPCOMING,
+  });
+}
 
   private async resolveThumbnailInput(
     thumbnailUrl: string | undefined,

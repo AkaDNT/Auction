@@ -23,4 +23,25 @@ export class AuctionPrismaRepository implements IAuctionRepository {
 
     return result.count > 0;
   }
+
+  async markStartedIfDue(auctionId: string, now: Date): Promise<boolean> {
+    const result = await this.prisma.auction.updateMany({
+      where: {
+        id: auctionId,
+        status: AuctionStatus.UPCOMING,
+        startAt: {
+          not: null,
+          lte: now,
+        },
+        endAt: {
+          gt: now,
+        },
+      },
+      data: {
+        status: AuctionStatus.LIVE,
+      },
+    });
+
+    return result.count > 0;
+  }
 }

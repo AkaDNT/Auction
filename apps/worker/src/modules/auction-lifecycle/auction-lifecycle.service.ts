@@ -25,4 +25,20 @@ export class AuctionLifecycleService {
 
     this.logger.log(`Auction ended successfully: auctionId=${auctionId}`);
   }
+
+  async startAuction(auctionId: string): Promise<void> {
+    const updated = await this.auctionRepo.markStartedIfDue(
+      auctionId,
+      new Date(),
+    );
+
+    if (!updated) {
+      this.logger.debug(
+        `Skip starting auction: auctionId=${auctionId}, reason=already-started-cancelled-ended-or-not-due`,
+      );
+      return;
+    }
+
+    this.logger.log(`Auction started successfully: auctionId=${auctionId}`);
+  }
 }

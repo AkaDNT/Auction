@@ -3,6 +3,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { buildRedisConnection } from '@repo/shared';
 import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-lifecycle.module';
+import { AuctionModule } from './modules/auction/auction.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-life
         prefix: config.get<string>('REDIS_KEY_PREFIX', 'auction:'),
       }),
     }),
+    AuctionModule,
+    PrismaModule,
     AuctionLifecycleModule,
   ],
 })
