@@ -1,19 +1,25 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { AppException } from 'src/common/errors/app.exception';
 
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ERROR_CODES } from '@repo/shared';
 import { RegisterDto } from './dto/register.dto';
-import { Role } from '@repo/db';
+import { Role } from '@prisma/client';
 import slugify from 'slugify';
 import { nanoid } from 'nanoid';
+import * as authRepository from './auth.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
+    @Inject(authRepository.AUTH_REPOSITORY)
+    private readonly authRepo: authRepository.IAuthRepository,
     private jwt: JwtService,
   ) {}
 
@@ -42,9 +48,7 @@ export class AuthService {
   private async generateUserSlug(name: string): Promise<string> {
     const baseSlug = slugify(name, { lower: true, strict: true, locale: 'vi' });
 
-    const existedBase = await this.prisma.user.findUnique({
-      where: { slug: baseSlug },
-    });
+    const existedBase = await this.authRepo.findUserBySlug(baseSlug);
     if (!existedBase) return baseSlug;
 
     return `${baseSlug}-${nanoid(4)}`;
@@ -63,11 +67,7 @@ export class AuthService {
       );
     }
 
-    const existed = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const existed = await this.authRepo.findUserByEmailWithRoles(email);
     if (existed) {
       throw new AppException(
         {
@@ -79,44 +79,29 @@ export class AuthService {
       );
     }
 
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        name: data.name,
-        passwordHash: await bcrypt.hash(password, 10),
-        slug: await this.generateUserSlug(data.name),
-        userRoles: {
-          create: [{ role: Role.USER }],
-        },
-        wallet: {
-          create: {},
-        },
-      },
-      include: {
-        userRoles: true,
-      },
+    const user = await this.authRepo.createUser({
+      email,
+      name: data.name,
+      passwordHash: await bcrypt.hash(password, 10),
+      slug: await this.generateUserSlug(data.name),
+      role: Role.USER,
     });
 
     const roles = user.userRoles.map((item) => item.role);
 
-    const tokenRow = await this.prisma.refreshToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: 'tmp',
-        expiresAt: new Date(
-          Date.now() +
-            Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
-        ),
-      },
+    const tokenRow = await this.authRepo.createRefreshToken({
+      userId: user.id,
+      tokenHash: 'tmp',
+      expiresAt: new Date(
+        Date.now() +
+          Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
+      ),
     });
 
     const refresh = this.refreshToken({ id: user.id }, tokenRow.id);
     const tokenHash = await bcrypt.hash(refresh, 10);
 
-    await this.prisma.refreshToken.update({
-      where: { id: tokenRow.id },
-      data: { tokenHash },
-    });
+    await this.authRepo.updateRefreshTokenHash(tokenRow.id, tokenHash);
 
     return {
       accessToken: this.accessToken({ id: user.id, roles }),
@@ -132,12 +117,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-      include: {
-        userRoles: true,
-      },
-    });
+    const user = await this.authRepo.findUserByEmailWithRoles(email);
 
     if (!user) {
       throw new AppException(
@@ -172,24 +152,19 @@ export class AuthService {
 
     const roles = user.userRoles.map((item) => item.role);
 
-    const tokenRow = await this.prisma.refreshToken.create({
-      data: {
-        userId: user.id,
-        tokenHash: 'tmp',
-        expiresAt: new Date(
-          Date.now() +
-            Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
-        ),
-      },
+    const tokenRow = await this.authRepo.createRefreshToken({
+      userId: user.id,
+      tokenHash: 'tmp',
+      expiresAt: new Date(
+        Date.now() +
+          Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
+      ),
     });
 
     const refresh = this.refreshToken({ id: user.id }, tokenRow.id);
     const tokenHash = await bcrypt.hash(refresh, 10);
 
-    await this.prisma.refreshToken.update({
-      where: { id: tokenRow.id },
-      data: { tokenHash },
-    });
+    await this.authRepo.updateRefreshTokenHash(tokenRow.id, tokenHash);
 
     return {
       accessToken: this.accessToken({ id: user.id, roles }),
@@ -220,19 +195,9 @@ export class AuthService {
       );
     }
 
-    const tokenRow = await this.prisma.refreshToken.findFirst({
-      where: {
-        id: payload.tid,
-        userId: payload.sub,
-        revokedAt: null,
-      },
-      include: {
-        user: {
-          include: {
-            userRoles: true,
-          },
-        },
-      },
+    const tokenRow = await this.authRepo.findActiveRefreshTokenWithUser({
+      id: payload.tid,
+      userId: payload.sub,
     });
 
     if (!tokenRow) {
@@ -248,20 +213,15 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token đã hết hạn');
     }
 
-    await this.prisma.refreshToken.update({
-      where: { id: tokenRow.id },
-      data: { revokedAt: new Date() },
-    });
+    await this.authRepo.revokeRefreshToken(tokenRow.id);
 
-    const newRow = await this.prisma.refreshToken.create({
-      data: {
-        userId: payload.sub,
-        tokenHash: 'tmp',
-        expiresAt: new Date(
-          Date.now() +
-            Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
-        ),
-      },
+    const newRow = await this.authRepo.createRefreshToken({
+      userId: payload.sub,
+      tokenHash: 'tmp',
+      expiresAt: new Date(
+        Date.now() +
+          Number(process.env.JWT_REFRESH_TTL_DAYS || 7) * 60 * 60 * 24 * 1000,
+      ),
     });
 
     const roles = tokenRow.user.userRoles.map((item) => item.role);
@@ -273,10 +233,7 @@ export class AuthService {
 
     const newHash = await bcrypt.hash(newRefreshToken, 10);
 
-    await this.prisma.refreshToken.update({
-      where: { id: newRow.id },
-      data: { tokenHash: newHash },
-    });
+    await this.authRepo.updateRefreshTokenHash(newRow.id, newHash);
 
     return {
       accessToken: this.accessToken({
@@ -288,12 +245,7 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        userRoles: true,
-      },
-    });
+    const user = await this.authRepo.findUserByIdWithRoles(userId);
 
     if (!user) {
       throw new AppException(
@@ -319,15 +271,9 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET!,
       });
 
-      await this.prisma.refreshToken.updateMany({
-        where: {
-          id: payload.tid,
-          userId: payload.sub,
-          revokedAt: null,
-        },
-        data: {
-          revokedAt: new Date(),
-        },
+      await this.authRepo.revokeActiveRefreshToken({
+        id: payload.tid,
+        userId: payload.sub,
       });
     } catch {}
 

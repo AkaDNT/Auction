@@ -18,6 +18,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-lifecycle.module';
 import { UploadAssetModule } from './modules/upload-asset/upload-asset.module';
 import { WalletModule } from './modules/wallet/wallet.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { WalletModule } from './modules/wallet/wallet.module';
     AuctionLifecycleModule,
     UploadAssetModule,
     WalletModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [
