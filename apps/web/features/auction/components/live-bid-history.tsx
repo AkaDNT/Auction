@@ -116,10 +116,11 @@ function mapBidApiItem(item: BidApiItem): BidViewModel {
 
 function mapBidPlacedEvent(event: AuctionBidPlacedEvent): BidViewModel {
   const amountValue = Number(event.amount);
+  const bidderSlug = event.bidderSlug ?? event.bidderId;
 
   return {
     key: `${event.bidderId}-${event.amount}-${event.placedAt}`,
-    bidderLabel: toBidderLabel(event.bidderId),
+    bidderLabel: toBidderLabel(bidderSlug),
     amountLabel: toAmountLabel(event.amount),
     amountValue: Number.isFinite(amountValue) ? amountValue : 0,
     timeLabel: toTimeLabel(event.placedAt),

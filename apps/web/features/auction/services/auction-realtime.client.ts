@@ -22,6 +22,7 @@ export type AuctionRoomEvent = {
 export type AuctionBidPlacedEvent = {
   auctionId: string;
   bidderId: string;
+  bidderSlug?: string;
   amount: number;
   placedAt: string;
 };

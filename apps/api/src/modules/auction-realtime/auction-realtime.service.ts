@@ -9,12 +9,14 @@ export class AuctionRealtimeService implements AuctionRealtimePublisher {
   async publishBidPlaced(event: {
     auctionId: string;
     bidderId: string;
+    bidderSlug: string;
     amount: number;
     placedAt: Date;
   }): Promise<void> {
     this.gateway.emitBidPlaced({
       auctionId: event.auctionId,
       bidderId: event.bidderId,
+      bidderSlug: event.bidderSlug,
       amount: event.amount,
       placedAt: event.placedAt.toISOString(),
     });

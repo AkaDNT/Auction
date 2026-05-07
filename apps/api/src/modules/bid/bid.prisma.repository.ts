@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { AuctionStatus, Bid, BidStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { IBidRepository } from './bid.repository';
+import { IBidRepository, PlacedBidResult } from './bid.repository';
 import { AppException } from 'src/common/errors/app.exception';
 import { ERROR_CODES } from '@repo/shared';
 import { calculateMinimumAllowedBid } from 'src/common/utils/bid.util';
@@ -66,10 +66,10 @@ export class BidPrismaRepository implements IBidRepository {
     auctionId: string;
     bidderId: string;
     amount: number;
-  }): Promise<void> {
+  }): Promise<PlacedBidResult> {
     const { auctionId, bidderId, amount } = params;
 
-    await this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx) => {
       const rows = await tx.$queryRaw<
         Array<{
           id: string;
@@ -246,11 +246,22 @@ export class BidPrismaRepository implements IBidRepository {
         );
       }
 
-      await tx.bid.create({
+      const bid = await tx.bid.create({
         data: {
           auctionId,
           bidderId,
           amount: new Prisma.Decimal(amount),
+        },
+        select: {
+          id: true,
+          bidderId: true,
+          amount: true,
+          createdAt: true,
+          bidder: {
+            select: {
+              slug: true,
+            },
+          },
         },
       });
 
@@ -260,6 +271,8 @@ export class BidPrismaRepository implements IBidRepository {
           currentPrice: new Prisma.Decimal(amount),
         },
       });
+
+      return bid;
     });
   }
 

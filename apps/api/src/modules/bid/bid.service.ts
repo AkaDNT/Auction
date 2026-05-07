@@ -79,7 +79,7 @@ export class BidService {
       );
     }
 
-    await this.bidRepo.executePlaceBidTransaction({
+    const bid = await this.bidRepo.executePlaceBidTransaction({
       auctionId,
       bidderId,
       amount: dto.amount,
@@ -88,8 +88,9 @@ export class BidService {
     await this.auctionRealtimePublisher.publishBidPlaced({
       auctionId,
       bidderId,
+      bidderSlug: bid.bidder.slug,
       amount: dto.amount,
-      placedAt: new Date(),
+      placedAt: bid.createdAt,
     });
 
     return {
