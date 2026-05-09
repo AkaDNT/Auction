@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import { AuctionsNavbar } from "@/features/auction/components/auctions-navbar";
 import { CountdownText } from "@/features/auction/components/countdown-text";
 import {
   LiveBidCountText,
@@ -117,8 +116,6 @@ export default async function LiveRoomPage({ params }: LiveRoomPageProps) {
 
   return (
     <main className="min-h-screen text-theme-body">
-      <AuctionsNavbar />
-
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>

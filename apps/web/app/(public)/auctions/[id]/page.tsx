@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { AuctionImageGallery } from "@/features/auction/components/auction-image-gallery";
-import { AuctionsNavbar } from "@/features/auction/components/auctions-navbar";
 import { CountdownText } from "@/features/auction/components/countdown-text";
 import { mapAuctionApiItemToSummary } from "@/features/auction/services/auction.mapper";
 import { getAuctionById } from "@/features/auction/services/list-auctions";
@@ -141,7 +140,6 @@ export default async function AuctionDetailPage({
           __html: JSON.stringify(productStructuredData),
         }}
       />
-      <AuctionsNavbar />
 
       <section className="mx-auto w-full max-w-6xl px-6 py-10 sm:py-12">
         <article className="rounded-3xl border border-theme-line bg-theme-panel p-6 dark:border-[color-mix(in_srgb,var(--primary)_32%,var(--border))] dark:shadow-[0_24px_60px_color-mix(in_srgb,var(--glow)_75%,transparent)]">
