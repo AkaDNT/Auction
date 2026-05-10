@@ -1,10 +1,15 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { DepositStatus } from '@prisma/client';
+import { DepositProvider, DepositStatus } from '@prisma/client';
 import { ERROR_CODES } from '@repo/shared';
 import * as depositOrderRepository from '../repositories/deposit-order.repository';
 import { WalletService } from './wallet.service';
 import { CreateDepositOrderDto } from '../dto/create-deposit-order.dto';
 import { AppException } from 'src/common/errors/app.exception';
+import {
+  MOMO_PAYMENT_GATEWAY,
+  VNPAY_PAYMENT_GATEWAY,
+} from '../contracts/tokens';
+import * as paymentGatewayPort from '../contracts/payment-gateway.port';
 
 @Injectable()
 export class DepositOrderService {
@@ -12,6 +17,10 @@ export class DepositOrderService {
     @Inject(depositOrderRepository.DEPOSIT_ORDER_REPOSITORY)
     private readonly depositOrderRepository: depositOrderRepository.IDepositOrderRepository,
     private readonly walletService: WalletService,
+    @Inject(MOMO_PAYMENT_GATEWAY)
+    private readonly momoGateway: paymentGatewayPort.IPaymentGatewayPort,
+    @Inject(VNPAY_PAYMENT_GATEWAY)
+    private readonly vnpayGateway: paymentGatewayPort.IPaymentGatewayPort,
   ) {}
 
   async create(userId: string, dto: CreateDepositOrderDto) {
@@ -32,6 +41,15 @@ export class DepositOrderService {
     const wallet = await this.walletService.getMyWallet(userId);
     const internalCode = this.generateInternalCode();
 
+    const gateway = this.resolveGateway(dto.provider);
+
+    const payment = await gateway.createDepositPayment({
+      provider: dto.provider,
+      internalCode,
+      amount: dto.amount,
+      description: `Deposit ${internalCode}`,
+    });
+
     return this.depositOrderRepository.create({
       user: {
         connect: { id: userId },
@@ -43,6 +61,10 @@ export class DepositOrderService {
       amount: dto.amount,
       status: DepositStatus.PENDING,
       internalCode,
+      providerOrderId: payment.providerOrderId,
+      paymentUrl: payment.paymentUrl,
+      qrContent: payment.qrContent,
+      rawPayload: payment.rawPayload as any,
     });
   }
 
@@ -60,6 +82,26 @@ export class DepositOrderService {
         total,
       },
     };
+  }
+
+  private resolveGateway(
+    provider: DepositProvider,
+  ): paymentGatewayPort.IPaymentGatewayPort {
+    switch (provider) {
+      case DepositProvider.MOMO:
+        return this.momoGateway;
+      case DepositProvider.VNPAY:
+        return this.vnpayGateway;
+      default:
+        throw new AppException(
+          {
+            code: ERROR_CODES.VALIDATION_ERROR,
+            message: 'Provider nạp tiền không được hỗ trợ',
+            details: { provider },
+          },
+          400,
+        );
+    }
   }
 
   private generateInternalCode() {

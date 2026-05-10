@@ -19,6 +19,16 @@ import { WALLET_HOLD_REPOSITORY } from './repositories/wallet-hold.repository';
 import { WALLET_LEDGER_REPOSITORY } from './repositories/wallet-ledger.repository';
 import { WITHDRAWAL_TRANSACTION_REPOSITORY } from './repositories/withdrawal-transaction.repository';
 import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal-transaction.prisma.repository';
+import { WalletWebhookController } from './controllers/wallet-webhook.controller';
+import { DepositWebhookService } from './services/deposit-webhook.service';
+import { DepositPrismaTransactionRepository } from './repositories/deposit-transaction.prisma.repository';
+import { MomoPaymentGatewayService } from './infrastructure/momo-payment-gateway.service';
+import { VnpayPaymentGatewayService } from './infrastructure/vnpay-payment-gateway.service';
+import { DEPOSIT_TRANSACTION_REPOSITORY } from './repositories/deposit-transaction.repository';
+import {
+  MOMO_PAYMENT_GATEWAY,
+  VNPAY_PAYMENT_GATEWAY,
+} from './contracts/tokens';
 
 @Module({
   controllers: [
@@ -27,6 +37,7 @@ import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal
     WalletDepositController,
     WalletWithdrawalController,
     AdminWalletWithdrawalController,
+    WalletWebhookController,
   ],
   providers: [
     WalletService,
@@ -34,12 +45,17 @@ import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal
 
     DepositOrderService,
     DepositOrderPrismaRepository,
+    DepositWebhookService,
+    DepositPrismaTransactionRepository,
 
     WithdrawalRequestService,
     WithdrawalRequestPrismaRepository,
     WalletHoldPrismaRepository,
     WalletLedgerPrismaRepository,
     WithdrawalTransactionPrismaRepository,
+
+    MomoPaymentGatewayService,
+    VnpayPaymentGatewayService,
     {
       provide: WALLET_REPOSITORY,
       useExisting: WalletPrismaRepository,
@@ -63,6 +79,18 @@ import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal
     {
       provide: WITHDRAWAL_TRANSACTION_REPOSITORY,
       useExisting: WithdrawalTransactionPrismaRepository,
+    },
+    {
+      provide: DEPOSIT_TRANSACTION_REPOSITORY,
+      useExisting: DepositPrismaTransactionRepository,
+    },
+    {
+      provide: MOMO_PAYMENT_GATEWAY,
+      useExisting: MomoPaymentGatewayService,
+    },
+    {
+      provide: VNPAY_PAYMENT_GATEWAY,
+      useExisting: VnpayPaymentGatewayService,
     },
   ],
   exports: [
