@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+
 import * as auctionLifecycleProducer from './auction-lifecycle.producer';
 
 @Injectable()
@@ -49,15 +50,15 @@ export class AuctionLifecycleService {
   }
 
   async syncStartAuctionJob(params: {
-    auctionId: string,
-    startAt?: Date| null,
-    shouldSchedule: boolean
-  }){
-    const {auctionId, startAt, shouldSchedule} = params;
-    if(!shouldSchedule || !startAt){
+    auctionId: string;
+    startAt?: Date | null;
+    shouldSchedule: boolean;
+  }) {
+    const { auctionId, startAt, shouldSchedule } = params;
+    if (!shouldSchedule || !startAt) {
       await this.cancelStartAuction(auctionId);
       return;
     }
-    await this.producer.scheduleStartAuction({auctionId, startAt});
+    await this.producer.scheduleStartAuction({ auctionId, startAt });
   }
 }

@@ -1,34 +1,35 @@
 import { Module } from '@nestjs/common';
-import { WalletService } from './services/wallet.service';
-import { WalletPrismaRepository } from './repositories/wallet.prisma.repository';
-import { WALLET_REPOSITORY } from './repositories/wallet.repository';
-import { WalletDepositController } from './controllers/wallet-deposit.controller';
-import { DepositOrderService } from './services/deposit-order.service';
-import { DEPOSIT_ORDER_REPOSITORY } from './repositories/deposit-order.repository';
-import { DepositOrderPrismaRepository } from './repositories/deposit-order.prisma.repository';
-import { WalletController } from './controllers/wallet.controller';
-import { AdminWalletController } from './controllers/admin-wallet.controller';
-import { WalletWithdrawalController } from './controllers/wallet-withdrawal.controller';
-import { AdminWalletWithdrawalController } from './controllers/admin-wallet-withdrawal.controller';
-import { WithdrawalRequestService } from './services/withdrawal-request.service';
-import { WithdrawalRequestPrismaRepository } from './repositories/withdrawal-request.prisma.repository';
-import { WalletHoldPrismaRepository } from './repositories/wallet-hold.prisma.repository';
-import { WalletLedgerPrismaRepository } from './repositories/wallet-ledger.prisma.repository';
-import { WITHDRAWAL_REQUEST_REPOSITORY } from './repositories/withdrawal-request.repository';
-import { WALLET_HOLD_REPOSITORY } from './repositories/wallet-hold.repository';
-import { WALLET_LEDGER_REPOSITORY } from './repositories/wallet-ledger.repository';
-import { WITHDRAWAL_TRANSACTION_REPOSITORY } from './repositories/withdrawal-transaction.repository';
-import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal-transaction.prisma.repository';
-import { WalletWebhookController } from './controllers/wallet-webhook.controller';
-import { DepositWebhookService } from './services/deposit-webhook.service';
-import { DepositPrismaTransactionRepository } from './repositories/deposit-transaction.prisma.repository';
-import { MomoPaymentGatewayService } from './infrastructure/momo-payment-gateway.service';
-import { VnpayPaymentGatewayService } from './infrastructure/vnpay-payment-gateway.service';
-import { DEPOSIT_TRANSACTION_REPOSITORY } from './repositories/deposit-transaction.repository';
+
 import {
   MOMO_PAYMENT_GATEWAY,
   VNPAY_PAYMENT_GATEWAY,
 } from './contracts/tokens';
+import { AdminWalletController } from './controllers/admin-wallet.controller';
+import { AdminWalletWithdrawalController } from './controllers/admin-wallet-withdrawal.controller';
+import { WalletController } from './controllers/wallet.controller';
+import { WalletDepositController } from './controllers/wallet-deposit.controller';
+import { WalletWebhookController } from './controllers/wallet-webhook.controller';
+import { WalletWithdrawalController } from './controllers/wallet-withdrawal.controller';
+import { MomoPaymentGatewayService } from './infrastructure/momo-payment-gateway.service';
+import { VnpayPaymentGatewayService } from './infrastructure/vnpay-payment-gateway.service';
+import { DepositOrderPrismaRepository } from './repositories/deposit-order.prisma.repository';
+import { DEPOSIT_ORDER_REPOSITORY } from './repositories/deposit-order.repository';
+import { DepositPrismaTransactionRepository } from './repositories/deposit-transaction.prisma.repository';
+import { DEPOSIT_TRANSACTION_REPOSITORY } from './repositories/deposit-transaction.repository';
+import { WalletPrismaRepository } from './repositories/wallet.prisma.repository';
+import { WALLET_REPOSITORY } from './repositories/wallet.repository';
+import { WalletHoldPrismaRepository } from './repositories/wallet-hold.prisma.repository';
+import { WALLET_HOLD_REPOSITORY } from './repositories/wallet-hold.repository';
+import { WalletLedgerPrismaRepository } from './repositories/wallet-ledger.prisma.repository';
+import { WALLET_LEDGER_REPOSITORY } from './repositories/wallet-ledger.repository';
+import { WithdrawalRequestPrismaRepository } from './repositories/withdrawal-request.prisma.repository';
+import { WITHDRAWAL_REQUEST_REPOSITORY } from './repositories/withdrawal-request.repository';
+import { WithdrawalTransactionPrismaRepository } from './repositories/withdrawal-transaction.prisma.repository';
+import { WITHDRAWAL_TRANSACTION_REPOSITORY } from './repositories/withdrawal-transaction.repository';
+import { DepositOrderService } from './services/deposit-order.service';
+import { DepositWebhookService } from './services/deposit-webhook.service';
+import { WalletService } from './services/wallet.service';
+import { WithdrawalRequestService } from './services/withdrawal-request.service';
 
 @Module({
   controllers: [

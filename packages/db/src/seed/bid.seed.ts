@@ -92,6 +92,24 @@ function getBidStatuses(
   return statuses;
 }
 
+function applyEdgeCaseStatuses(
+  statuses: BidStatus[],
+  auctionStatus: AuctionStatus,
+  auctionIndex: number,
+) {
+  if (statuses.length < 4) return;
+
+  if (auctionStatus === AuctionStatus.LIVE || auctionStatus === AuctionStatus.ENDED) {
+    if (auctionIndex % 3 === 0) {
+      statuses[1] = BidStatus.REJECTED;
+    }
+
+    if (auctionIndex % 4 === 0) {
+      statuses[2] = BidStatus.CANCELLED;
+    }
+  }
+}
+
 export async function seedBids(prisma: PrismaClient) {
   const [auctions, users] = await Promise.all([
     prisma.auction.findMany({
@@ -124,7 +142,7 @@ export async function seedBids(prisma: PrismaClient) {
     }),
   ]);
 
-  for (const auction of auctions) {
+  for (const [auctionIndex, auction] of auctions.entries()) {
     const eligibleBidders = users.filter(
       (user) => user.id !== auction.sellerId,
     );
@@ -147,6 +165,7 @@ export async function seedBids(prisma: PrismaClient) {
     const bidderIds = shuffleArray(eligibleBidders.map((user) => user.id));
     const bidderSequence = buildBidderSequence(bidderIds, totalBids);
     const bidStatuses = getBidStatuses(auction.status, totalBids);
+    applyEdgeCaseStatuses(bidStatuses, auction.status, auctionIndex);
 
     const startAt =
       auction.startAt ??

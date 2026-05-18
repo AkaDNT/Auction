@@ -1,10 +1,8 @@
-import { AuctionStatus, PrismaClient } from "@prisma/client";
-
-const SETTLEMENT_STATUS = {
-  PENDING: "PENDING",
-  COMPLETED: "COMPLETED",
-  FAILED: "FAILED",
-} as const;
+import {
+  AuctionSettlementStatus,
+  AuctionStatus,
+  PrismaClient,
+} from "@prisma/client";
 
 export async function seedAuctionSettlements(prisma: PrismaClient) {
   const auctions = await prisma.auction.findMany({
@@ -19,7 +17,7 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
     },
   });
 
-  for (const auction of auctions) {
+  for (const [auctionIndex, auction] of auctions.entries()) {
     const highestBid = await prisma.bid.findFirst({
       where: {
         auctionId: auction.id,
@@ -41,7 +39,7 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: highestBid?.bidderId ?? null,
           winningBidId: highestBid?.id ?? null,
           finalAmount: highestBid?.amount ?? auction.currentPrice ?? null,
-          status: SETTLEMENT_STATUS.COMPLETED as any,
+          status: AuctionSettlementStatus.COMPLETED,
           processedAt: new Date(),
           failureReason: null,
         },
@@ -50,7 +48,7 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: highestBid?.bidderId ?? null,
           winningBidId: highestBid?.id ?? null,
           finalAmount: highestBid?.amount ?? auction.currentPrice ?? null,
-          status: SETTLEMENT_STATUS.COMPLETED as any,
+          status: AuctionSettlementStatus.COMPLETED,
           processedAt: new Date(),
           failureReason: null,
         },
@@ -68,8 +66,11 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: null,
           winningBidId: null,
           finalAmount: null,
-          status: SETTLEMENT_STATUS.PENDING as any,
-          processedAt: null,
+          status:
+            auctionIndex % 2 === 0
+              ? AuctionSettlementStatus.PROCESSING
+              : AuctionSettlementStatus.PENDING,
+          processedAt: auctionIndex % 2 === 0 ? new Date() : null,
           failureReason: null,
         },
         create: {
@@ -77,8 +78,11 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: null,
           winningBidId: null,
           finalAmount: null,
-          status: SETTLEMENT_STATUS.PENDING as any,
-          processedAt: null,
+          status:
+            auctionIndex % 2 === 0
+              ? AuctionSettlementStatus.PROCESSING
+              : AuctionSettlementStatus.PENDING,
+          processedAt: auctionIndex % 2 === 0 ? new Date() : null,
           failureReason: null,
         },
       });
@@ -95,7 +99,7 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: null,
           winningBidId: null,
           finalAmount: null,
-          status: SETTLEMENT_STATUS.FAILED as any,
+          status: AuctionSettlementStatus.FAILED,
           processedAt: new Date(),
           failureReason: "Auction was cancelled",
         },
@@ -104,9 +108,36 @@ export async function seedAuctionSettlements(prisma: PrismaClient) {
           winnerUserId: null,
           winningBidId: null,
           finalAmount: null,
-          status: SETTLEMENT_STATUS.FAILED as any,
+          status: AuctionSettlementStatus.FAILED,
           processedAt: new Date(),
           failureReason: "Auction was cancelled",
+        },
+      });
+
+      continue;
+    }
+
+    if (auction.status === AuctionStatus.UPCOMING) {
+      await prisma.auctionSettlement.upsert({
+        where: {
+          auctionId: auction.id,
+        },
+        update: {
+          winnerUserId: null,
+          winningBidId: null,
+          finalAmount: null,
+          status: AuctionSettlementStatus.PENDING,
+          processedAt: null,
+          failureReason: null,
+        },
+        create: {
+          auctionId: auction.id,
+          winnerUserId: null,
+          winningBidId: null,
+          finalAmount: null,
+          status: AuctionSettlementStatus.PENDING,
+          processedAt: null,
+          failureReason: null,
         },
       });
 

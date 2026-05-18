@@ -7,12 +7,15 @@ import { AppException } from 'src/common/errors/app.exception';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { ListBidsDto } from './dto/list-bids.dto';
 import * as auctionRealtimePublisher from '../auction-realtime/contracts/auction-realtime.publisher';
+import * as bidTransactionRepository from './bid-transaction.repository';
 
 @Injectable()
 export class BidService {
   constructor(
     @Inject(bidRepository.BID_REPOSITORY)
     private readonly bidRepo: bidRepository.IBidRepository,
+    @Inject(bidTransactionRepository.BID_TRANSACTION_REPOSITORY)
+    private readonly bidTransactionRepository: bidTransactionRepository.IBidTransactionRepository,
     @Inject(auctionRepository.AUCTION_REPOSITORY)
     private readonly auctionRepo: auctionRepository.IAuctionRepository,
     @Inject(auctionRealtimePublisher.AUCTION_REALTIME_PUBLISHER)
@@ -20,85 +23,11 @@ export class BidService {
   ) {}
 
   async placeBid(auctionId: string, bidderId: string, dto: CreateBidDto) {
-    const auction = await this.auctionRepo.findById(auctionId);
-
-    if (!auction) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.AUCTION_NOT_FOUND,
-          message: 'Không tìm thấy phiên đấu giá',
-          details: { auctionId },
-        },
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const now = new Date();
-
-    if (auction.status !== AuctionStatus.LIVE) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.BID_AUCTION_NOT_LIVE,
-          message: 'Phiên đấu giá hiện không ở trạng thái đang diễn ra',
-          details: { auctionId, status: auction.status },
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (auction.startAt && auction.startAt > now) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.BID_AUCTION_NOT_STARTED,
-          message: 'Phiên đấu giá chưa bắt đầu',
-          details: { auctionId, startAt: auction.startAt },
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (auction.endAt <= now) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.BID_AUCTION_ALREADY_ENDED,
-          message: 'Phiên đấu giá đã kết thúc',
-          details: { auctionId, endAt: auction.endAt },
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (auction.sellerId === bidderId) {
-      throw new AppException(
-        {
-          code: ERROR_CODES.BID_SELF_BIDDING_NOT_ALLOWED,
-          message: 'Người bán không thể tự đấu giá phiên của mình',
-          details: { auctionId, bidderId },
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const bid = await this.bidRepo.executePlaceBidTransaction({
+    return this.bidTransactionRepository.placeBid({
       auctionId,
       bidderId,
       amount: dto.amount,
     });
-
-    await this.auctionRealtimePublisher.publishBidPlaced({
-      auctionId,
-      bidderId,
-      bidderSlug: bid.bidder.slug,
-      amount: dto.amount,
-      placedAt: bid.createdAt,
-    });
-
-    return {
-      success: true,
-      auctionId,
-      bidderId,
-      amount: dto.amount,
-    };
   }
 
   async listAuctionBids(auctionId: string, query: ListBidsDto) {

@@ -44,7 +44,7 @@ model Auction {
   @@index([status])
   @@index([endAt])
   @@index([startAt, endAt])
-  auctionSettlements AuctionSettlement[]
+  auctionSettlements AuctionSettlement?
 }
 
 model AuctionImage {

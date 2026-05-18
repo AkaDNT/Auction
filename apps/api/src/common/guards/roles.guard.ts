@@ -5,9 +5,10 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { ERROR_CODES } from '@repo/shared';
+
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { AppException } from '../errors/app.exception';
-import { ERROR_CODES } from '@repo/shared';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

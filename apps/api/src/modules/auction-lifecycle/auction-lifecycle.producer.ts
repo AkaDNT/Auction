@@ -5,6 +5,9 @@ export interface AuctionLifecycleProducer {
 
   cancelEndAuction(auctionId: string): Promise<void>;
 
-  scheduleStartAuction(params: {auctionId: string; startAt: Date}): Promise<void>
+  scheduleStartAuction(params: {
+    auctionId: string;
+    startAt: Date;
+  }): Promise<void>;
   cancelStartAuction(auctionId: string): Promise<void>;
 }

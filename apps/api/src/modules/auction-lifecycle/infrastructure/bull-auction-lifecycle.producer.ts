@@ -1,16 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   AUCTION_LIFECYCLE_END_JOB,
-  AUCTION_LIFECYCLE_START_JOB,
   AUCTION_LIFECYCLE_QUEUE_NAME,
+  AUCTION_LIFECYCLE_START_JOB,
   AuctionLifeCycleJobData,
   buildEndAuctionJobId,
   buildStartAuctionJobId,
   EndAuctionJobData,
   StartAuctionJobData,
 } from '@repo/shared';
+import { Queue } from 'bullmq';
+
 import { AuctionLifecycleProducer } from '../auction-lifecycle.producer';
 
 @Injectable()
@@ -21,28 +22,31 @@ export class BullAuctionLifecycleProducer implements AuctionLifecycleProducer {
     @InjectQueue(AUCTION_LIFECYCLE_QUEUE_NAME)
     private readonly queue: Queue<AuctionLifeCycleJobData>,
   ) {}
-  async scheduleStartAuction(params: { auctionId: string; startAt: Date; }): Promise<void> {
-    const {auctionId, startAt} = params;
+  async scheduleStartAuction(params: {
+    auctionId: string;
+    startAt: Date;
+  }): Promise<void> {
+    const { auctionId, startAt } = params;
     await this.cancelStartAuction(auctionId);
 
-    const delay = Math.max(startAt.getTime() - Date.now(), 0)
+    const delay = Math.max(startAt.getTime() - Date.now(), 0);
 
     const payload: StartAuctionJobData = {
       version: 1,
-      auctionId
-    }
+      auctionId,
+    };
 
     await this.queue.add(AUCTION_LIFECYCLE_START_JOB, payload, {
       jobId: buildStartAuctionJobId(auctionId),
       delay,
       attempts: 5,
-      backoff:{
-        type: "exponential",
-        delay: 5000
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
       },
       removeOnComplete: 1000,
-      removeOnFail: false
-    })
+      removeOnFail: false,
+    });
     this.logger.log(
       `Scheduled auction start job: auctionId=${auctionId}, startAt=${startAt.toISOString()}`,
     );
