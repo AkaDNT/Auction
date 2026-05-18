@@ -1,4 +1,5 @@
 import {
+  BidStatus,
   DepositProvider,
   DepositStatus,
   Prisma,
@@ -20,6 +21,8 @@ type WalletLite = {
   id: string;
   userId: string;
 };
+
+type ActiveHoldTotalByWalletId = Map<string, Prisma.Decimal>;
 
 function addDays(date: Date, days: number) {
   const next = new Date(date);
@@ -118,16 +121,13 @@ function getLedgerDirection(type: WalletLedgerType): WalletLedgerDirection {
 async function seedWallets(prisma: PrismaClient, users: UserLite[]) {
   const wallets = users.map((user, index) => {
     const base = 1_500_000 + index * 350_000;
-    const locked = 50_000 + (index % 4) * 25_000;
-
-    const balanceValue =
-      user.email.toLowerCase() !== "giahuy@gmail.com" ? 1000000000 : base;
+    const balanceValue = Math.max(base, 1_000_000_000);
 
     return {
       userId: user.id,
       status: getWalletStatus(index),
       balance: toDecimal(balanceValue),
-      lockedBalance: toDecimal(locked),
+      lockedBalance: toDecimal(0),
       currency: "VND",
     };
   });
@@ -263,42 +263,82 @@ async function seedWithdrawalRequests(
 }
 
 async function seedWalletHolds(prisma: PrismaClient, wallets: WalletLite[]) {
+  await prisma.bid.updateMany({
+    data: {
+      holdId: null,
+    },
+  });
   await prisma.walletHold.deleteMany();
 
   const now = new Date();
-  const bids = await prisma.bid.findMany({
+  const walletByUserId = new Map(wallets.map((wallet) => [wallet.userId, wallet]));
+  const activeHoldTotalByWalletId: ActiveHoldTotalByWalletId = new Map();
+  let holdCount = 0;
+
+  const winningBids = await prisma.bid.findMany({
+    where: {
+      status: BidStatus.WINNING,
+    },
     select: {
       id: true,
       auctionId: true,
       bidderId: true,
+      amount: true,
     },
     orderBy: {
       createdAt: "desc",
     },
-    take: 80,
   });
 
-  const bidsByUser = new Map<string, typeof bids>();
+  for (const bid of winningBids) {
+    const wallet = walletByUserId.get(bid.bidderId);
 
-  for (const bid of bids) {
-    const existing = bidsByUser.get(bid.bidderId) ?? [];
-    existing.push(bid);
-    bidsByUser.set(bid.bidderId, existing);
+    if (!wallet) {
+      continue;
+    }
+
+    const hold = await prisma.walletHold.create({
+      data: {
+        walletId: wallet.id,
+        userId: wallet.userId,
+        type: WalletHoldType.BID,
+        status: WalletHoldStatus.ACTIVE,
+        amount: bid.amount,
+        referenceType: "AUCTION",
+        referenceId: bid.auctionId,
+        reason: `Seed active hold for winning bid ${bid.id}`,
+        expiresAt: addDays(now, 2),
+      },
+    });
+
+    await prisma.bid.update({
+      where: {
+        id: bid.id,
+      },
+      data: {
+        holdId: hold.id,
+      },
+    });
+
+    const previousTotal =
+      activeHoldTotalByWalletId.get(wallet.id) ?? toDecimal(0);
+    activeHoldTotalByWalletId.set(
+      wallet.id,
+      previousTotal.add(new Prisma.Decimal(bid.amount)),
+    );
+    holdCount++;
   }
 
   const data = wallets.flatMap((wallet, walletIndex) =>
     Array.from({ length: 2 }).map((_, holdIndex) => {
-      const type = getHoldType(walletIndex + holdIndex);
+      const type =
+        holdIndex === 0
+          ? WalletHoldType.WITHDRAWAL
+          : getHoldType(walletIndex + holdIndex);
       const status = getHoldStatus(walletIndex + holdIndex);
       const amount = 120_000 + holdIndex * 80_000 + walletIndex * 15_000;
-      const userBids = bidsByUser.get(wallet.userId) ?? [];
-      const linkedBid = userBids[holdIndex % Math.max(userBids.length, 1)];
       const referenceType = type === WalletHoldType.BID ? "BID" : "WITHDRAWAL";
-      const referenceId =
-        type === WalletHoldType.BID
-          ? (linkedBid?.id ??
-            `bid-fallback-${walletIndex + 1}-${holdIndex + 1}`)
-          : `withdrawal-ref-${walletIndex + 1}-${holdIndex + 1}`;
+      const referenceId = `${referenceType.toLowerCase()}-sample-${walletIndex + 1}-${holdIndex + 1}`;
 
       return {
         walletId: wallet.id,
@@ -323,7 +363,31 @@ async function seedWalletHolds(prisma: PrismaClient, wallets: WalletLite[]) {
     });
   }
 
-  return data.length;
+  for (const hold of data) {
+    if (hold.status !== WalletHoldStatus.ACTIVE) {
+      continue;
+    }
+
+    const previousTotal =
+      activeHoldTotalByWalletId.get(hold.walletId) ?? toDecimal(0);
+    activeHoldTotalByWalletId.set(
+      hold.walletId,
+      previousTotal.add(new Prisma.Decimal(hold.amount)),
+    );
+  }
+
+  for (const wallet of wallets) {
+    await prisma.wallet.update({
+      where: {
+        id: wallet.id,
+      },
+      data: {
+        lockedBalance: activeHoldTotalByWalletId.get(wallet.id) ?? toDecimal(0),
+      },
+    });
+  }
+
+  return holdCount + data.length;
 }
 
 async function seedLedgerEntries(prisma: PrismaClient, wallets: WalletLite[]) {

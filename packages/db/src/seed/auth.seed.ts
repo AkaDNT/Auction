@@ -18,7 +18,22 @@ export async function seedRefreshTokens(prisma: PrismaClient) {
     take: 12,
   });
 
-  await prisma.refreshToken.deleteMany();
+  await prisma.refreshToken.deleteMany({
+    where: {
+      OR: [
+        {
+          tokenHash: {
+            startsWith: "seed-active-",
+          },
+        },
+        {
+          tokenHash: {
+            startsWith: "seed-revoked-",
+          },
+        },
+      ],
+    },
+  });
 
   const now = new Date();
 
