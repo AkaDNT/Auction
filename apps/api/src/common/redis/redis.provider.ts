@@ -1,5 +1,6 @@
-import { Provider } from '@nestjs/common';
+import { type Provider } from '@nestjs/common';
 import IORedis from 'ioredis';
+
 import { REDIS_CLIENT } from './redis.constants';
 
 export const redisProvider: Provider = {

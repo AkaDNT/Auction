@@ -68,7 +68,7 @@ export default tseslint.config(
     rules: {
       // ---- Clean code / correctness
       eqeqeq: ['error', 'smart'],
-      curly: ['error', 'all'],
+      curly: 'off',
       'prefer-const': ['error', { destructuring: 'all' }],
       'no-debugger': 'error',
       'no-console': ['warn', { allow: ['warn', 'error'] }],

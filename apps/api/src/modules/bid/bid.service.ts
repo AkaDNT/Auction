@@ -1,12 +1,14 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { AuctionStatus, BidStatus } from '@prisma/client';
-import * as bidRepository from './bid.repository';
-import * as auctionRepository from '../auction/auction.repository';
+import { BidStatus } from '@prisma/client';
 import { ERROR_CODES } from '@repo/shared';
 import { AppException } from 'src/common/errors/app.exception';
+
+import * as auctionRepository from '../auction/auction.repository';
+import * as auctionRealtimePublisher from '../auction-realtime/contracts/auction-realtime.publisher';
+
 import { CreateBidDto } from './dto/create-bid.dto';
 import { ListBidsDto } from './dto/list-bids.dto';
-import * as auctionRealtimePublisher from '../auction-realtime/contracts/auction-realtime.publisher';
+import * as bidRepository from './bid.repository';
 import * as bidTransactionRepository from './bid-transaction.repository';
 
 @Injectable()

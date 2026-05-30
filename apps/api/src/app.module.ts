@@ -1,24 +1,25 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './modules/auth/auth.module';
-import { PrismaModule } from './prisma/prisma.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import path from 'path';
-import { LoggerModule } from 'nestjs-pino';
-import { buildRedisConnection, getTraceId } from '@repo/shared';
-import { APP_FILTER } from '@nestjs/core';
-import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
-import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
-import { AuctionModule } from './modules/auction/auction.module';
-import { AuctionImageModule } from './modules/auction-image/auction-image.module';
-import { BidModule } from './modules/bid/bid.module';
-import { AuctionContentModule } from './modules/auction-content/auction-content.module';
 import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER } from '@nestjs/core';
+import { buildRedisConnection, getTraceId } from '@repo/shared';
+import { LoggerModule } from 'nestjs-pino';
+import path from 'path';
+
+import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
+import { AuctionModule } from './modules/auction/auction.module';
+import { AuctionCategoryModule } from './modules/auction-category/auction-category.module';
+import { AuctionContentModule } from './modules/auction-content/auction-content.module';
+import { AuctionImageModule } from './modules/auction-image/auction-image.module';
 import { AuctionLifecycleModule } from './modules/auction-lifecycle/auction-lifecycle.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { BidModule } from './modules/bid/bid.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { UploadAssetModule } from './modules/upload-asset/upload-asset.module';
 import { WalletModule } from './modules/wallet/wallet.module';
-import { ProfileModule } from './modules/profile/profile.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [

@@ -1,8 +1,8 @@
+import { type INestApplicationContext } from '@nestjs/common';
 import { IoAdapter } from '@nestjs/platform-socket.io';
-import { INestApplicationContext } from '@nestjs/common';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
-import { ServerOptions } from 'socket.io';
+import { type ServerOptions } from 'socket.io';
 
 type RedisClient = ReturnType<typeof createClient>;
 

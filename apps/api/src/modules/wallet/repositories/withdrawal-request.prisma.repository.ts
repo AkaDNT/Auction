@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, WithdrawalRequest, WithdrawalStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+
 import { IWithdrawalRequestRepository } from './withdrawal-request.repository';
 
 @Injectable()
