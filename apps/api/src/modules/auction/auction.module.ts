@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AuctionController } from './auction.controller';
-import { SellerAuctionController } from './seller-auction.controller';
-import { AdminAuctionController } from './admin-auction.controller';
-import { AuctionService } from './auction.service';
-import { AuctionPrismaRepository } from './auction.prisma.repository';
-import { AUCTION_REPOSITORY } from './auction.repository';
+
 import { AuctionCategoryModule } from '../auction-category/auction-category.module';
 import { AuctionLifecycleModule } from '../auction-lifecycle/auction-lifecycle.module';
 import { UploadAssetModule } from '../upload-asset/upload-asset.module';
+
+import { AdminAuctionController } from './admin-auction.controller';
+import { AuctionController } from './auction.controller';
+import { AuctionPrismaRepository } from './auction.prisma.repository';
+import { AUCTION_REPOSITORY } from './auction.repository';
+import { AuctionService } from './auction.service';
+import { AuctionCacheService } from './auction-cache.service';
+import { SellerAuctionController } from './seller-auction.controller';
 
 @Module({
   imports: [AuctionCategoryModule, AuctionLifecycleModule, UploadAssetModule],
@@ -18,6 +21,7 @@ import { UploadAssetModule } from '../upload-asset/upload-asset.module';
   ],
   providers: [
     AuctionService,
+    AuctionCacheService,
     AuctionPrismaRepository,
     {
       provide: AUCTION_REPOSITORY,

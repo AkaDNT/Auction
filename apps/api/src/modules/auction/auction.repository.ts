@@ -1,11 +1,12 @@
-import { Auction, AuctionStatus, Prisma } from '@prisma/client';
+import { type Auction, type AuctionStatus, type Prisma } from '@prisma/client';
+
+import { type CreateAuctionDataDto } from './dto/create-auction-data.dto';
 import {
-  AuctionEndTimeFilter,
-  AuctionPriceRangeFilter,
-  AuctionSortBy,
+  type AuctionEndTimeFilter,
+  type AuctionPriceRangeFilter,
+  type AuctionSortBy,
 } from './dto/list-auction.dto';
-import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
-import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
+import { type UpdateAuctionDataDto } from './dto/update-auction-data.dto';
 
 export const AUCTION_REPOSITORY = Symbol('AUCTION_REPOSITORY');
 

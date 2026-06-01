@@ -1,18 +1,21 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { AuctionStatus, Role, UploadAssetScope } from '@prisma/client';
-import slugify from 'slugify';
-import * as auctionRepository from './auction.repository';
-import * as auctionCategoryRepository from '../auction-category/auction-category.repository';
 import { ERROR_CODES } from '@repo/shared';
+import slugify from 'slugify';
 import { AppException } from 'src/common/errors/app.exception';
-import { CreateAuctionDto } from './dto/create-auction.dto';
-import { ListAuctionDto } from './dto/list-auction.dto';
-import { UpdateAuctionDto } from './dto/update-auction.dto';
+
+import * as auctionCategoryRepository from '../auction-category/auction-category.repository';
 import { AuctionLifecycleService } from '../auction-lifecycle/auction-lifecycle.service';
 import { UploadAssetService } from '../upload-asset/upload-asset.service';
-import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
-import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
+
 import { AuctionThumbnailAssetDto } from './dto/auction-thumbnail-asset.dto';
+import { CreateAuctionDto } from './dto/create-auction.dto';
+import { CreateAuctionDataDto } from './dto/create-auction-data.dto';
+import { ListAuctionDto } from './dto/list-auction.dto';
+import { UpdateAuctionDto } from './dto/update-auction.dto';
+import { UpdateAuctionDataDto } from './dto/update-auction-data.dto';
+import * as auctionRepository from './auction.repository';
+import { AuctionCacheService } from './auction-cache.service';
 
 @Injectable()
 export class AuctionService {
@@ -23,6 +26,7 @@ export class AuctionService {
     private readonly categoryRepo: auctionCategoryRepository.IAuctionCategoryRepository,
     private readonly auctionLifecycleService: AuctionLifecycleService,
     private readonly uploadAssetService: UploadAssetService,
+    private readonly auctionCache: AuctionCacheService,
   ) {}
 
   async create(dto: CreateAuctionDto, sellerId: string) {
@@ -155,14 +159,20 @@ export class AuctionService {
   }
 
   async findFeatured() {
-    const items = await this.auctionRepo.findFeaturedLiveAuctions(2);
+    return this.auctionCache.getOrSet(
+      await this.auctionCache.featuredKey(),
+      10,
+      async () => {
+        const items = await this.auctionRepo.findFeaturedLiveAuctions(2);
 
-    return {
-      items,
-      meta: {
-        total: items.length,
+        return {
+          items,
+          meta: {
+            total: items.length,
+          },
+        };
       },
-    };
+    );
   }
 
   async update(id: string, sellerId: string, dto: UpdateAuctionDto) {
@@ -300,7 +310,6 @@ export class AuctionService {
       startAt: updatedAuction.startAt,
       status: updatedAuction.status,
     });
-
 
     await this.syncAuctionEndJob({
       id: updatedAuction.id,
@@ -504,16 +513,16 @@ export class AuctionService {
   }
 
   private async syncAuctionStartJob(auction: {
-  id: string;
-  startAt: Date | null;
-  status: AuctionStatus;
-}): Promise<void> {
-  await this.auctionLifecycleService.syncStartAuctionJob({
-    auctionId: auction.id,
-    startAt: auction.startAt,
-    shouldSchedule: auction.status === AuctionStatus.UPCOMING,
-  });
-}
+    id: string;
+    startAt: Date | null;
+    status: AuctionStatus;
+  }): Promise<void> {
+    await this.auctionLifecycleService.syncStartAuctionJob({
+      auctionId: auction.id,
+      startAt: auction.startAt,
+      shouldSchedule: auction.status === AuctionStatus.UPCOMING,
+    });
+  }
 
   private async resolveThumbnailInput(
     thumbnailUrl: string | undefined,
